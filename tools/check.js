@@ -5,9 +5,10 @@
 const fs = require('fs'), path = require('path'), vm = require('vm');
 
 const args = process.argv.slice(2);
-const file = args.find(a => !a.startsWith('--') && a !== args[args.indexOf('--out') + 1]);
+const outIdx = args.indexOf('--out');
+const file = args.find((a, i) => !a.startsWith('--') && i !== outIdx + 1);
 const shots = args.includes('--shots');
-const outDir = args.includes('--out') ? args[args.indexOf('--out') + 1] : 'check_out';
+const outDir = outIdx >= 0 ? args[outIdx + 1] : 'check_out';
 if (!file) { console.error('Aufruf: node tools/check.js <datei.html> [--shots] [--out ordner]'); process.exit(2); }
 
 const html = fs.readFileSync(file, 'utf8');
