@@ -1,0 +1,1 @@
+{ "name": "token", "private": true, "scripts": { "check": "node tools/check.js" }, "devDependencies": { "jsdom": "^24.0.0" } }
