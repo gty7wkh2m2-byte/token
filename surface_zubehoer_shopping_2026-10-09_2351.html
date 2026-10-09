@@ -318,7 +318,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var
     <label class="btn"><input type="file" id="importJson" accept="application/json" hidden> ⬆ JSON importieren</label>
     <button class="btn danger ghost" id="btnReset">Zurücksetzen</button>
   </div>
-  <p class="note">Download-Knöpfe funktionieren in der lokal geöffneten Datei. In der claude.ai-Artefakt-Ansicht sind Downloads blockiert: dort <b>JSON kopieren</b> nutzen und in die nächste Nachricht einfügen.</p>
+  <p class="note">Download-Knöpfe: lokal geöffnete Datei speichert direkt; in der claude.ai-Artefakt-Ansicht erscheint eine Bestätigung. Falls Speichern nicht möglich: <b>JSON kopieren</b> und in die nächste Nachricht einfügen.</p>
   <div class="field">
     <label>Übergabe-Prompt für die Preisrecherche (Folgechat oder nächste Nachricht)</label>
     <span class="hint">Einfügen in: neue Nachricht im Chat. Enthält Gerät, Präferenzen, Bedarf mit Status und bereits gewählte Produkte.</span>
@@ -850,11 +850,20 @@ function copyText(t) {
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(() => toast("Kopiert"), fallback); else fallback();
 }
 function download(name, content, type) {
-  try {
-    const blob = new Blob([content], { type }); const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 2000); toast("Download: " + name);
-  } catch (e) { toast("Download blockiert: JSON kopieren nutzen"); }
+  /* 1. claude.ai-Artefakt: Download-Capability (Viewer bestätigt). 2. lokale Datei: Blob-Link. */
+  const viaBlob = () => {
+    try {
+      const blob = new Blob([content], { type }); const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000); toast("Download: " + name);
+    } catch (e) { toast("Download blockiert: JSON kopieren nutzen"); }
+  };
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("downloads").then(dl => {
+      if (!dl) return viaBlob();
+      return dl.save({ filename: name, data: content }).then(() => toast("Gespeichert: " + name), err => toast(err && err.code === "declined" ? "Speichern abgebrochen" : "Speichern nicht möglich: JSON kopieren nutzen"));
+    }).catch(viaBlob);
+  } else viaBlob();
 }
 function buildSelfHtml() {
   /* aktuellen Stand in den EMBEDDED_STATE-Block schreiben, Rest der Datei unverändert */
