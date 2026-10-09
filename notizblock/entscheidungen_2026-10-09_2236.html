@@ -1,12 +1,13 @@
 <title>Notizblock Entscheidungen</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: eine Spalte, nummerierte Abschnitte, Kartenreihen für Optionen, Diagramm oben, Karten darunter, Entscheidungs-JSON am Ende */
+/* Layout: eine Spalte, nummerierte Abschnitte, Kartenreihen je Optionsregister, Editor als Dialog, Entscheidungs-JSON am Ende */
 :root{
   --bg:#f3f5f7; --surface:#ffffff; --surface2:#e9edf1; --fg:#1b2430; --muted:#5b6675; --line:#d3dae2;
   --accent:#1f6f8b; --accent-soft:#dcedf3;
   --green:#2f8f4e; --green-soft:#e3f3e8; --yellow:#b7791f; --yellow-soft:#fbf1dc; --red:#c43c3c; --red-soft:#f9e3e3;
   --purple:#6a4fbf; --purple-soft:#ebe6f8; --blue:#2b63c6; --blue-soft:#e1eafb;
+  --h-kurz:#e07a1f; --h-mittel:#d4a92a; --h-lang:#2b63c6; --h-keiner:#9aa7b5;
   --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
@@ -25,6 +26,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px
 h1{font-size:1.6rem;margin:0 0 4px;text-wrap:balance}
 h2{font-size:1.2rem;margin:0;text-wrap:balance}
 h3{font-size:1rem;margin:0 0 6px}
+h4{font-size:.95rem;margin:14px 0 6px}
 p{margin:0 0 8px;max-width:70ch}
 small,.small{font-size:.82rem;color:var(--muted)}
 .topbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px}
@@ -36,21 +38,26 @@ small,.small{font-size:.82rem;color:var(--muted)}
 .pill.p{background:var(--purple-soft);color:var(--purple);border-color:var(--purple)}
 .pill.b{background:var(--blue-soft);color:var(--blue);border-color:var(--blue)}
 .pill.n{background:var(--surface2);color:var(--muted);border-color:var(--line)}
+td .pill{white-space:normal}
 .legend{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
 section{margin:22px 0 0}
 .sec-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.sec-head .tools{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
 .num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:.9rem;flex:none}
 .box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
 .box.now{border:2px solid var(--red)}
 .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
 .card{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
-.card.g{border-left-color:var(--green)} .card.y{border-left-color:var(--yellow)} .card.r{border-left-color:var(--red)} .card.p{border-left-color:var(--purple)} .card.b{border-left-color:var(--blue)}
+.card.g{border-left-color:var(--green)} .card.y{border-left-color:var(--yellow)} .card.r{border-left-color:var(--red)} .card.p{border-left-color:var(--purple)} .card.b{border-left-color:var(--blue)} .card.n{border-left-color:var(--line)}
 .card.sel{outline:2px solid var(--accent);outline-offset:1px}
+.card.changed .num::after{content:"";position:absolute;right:-2px;top:-2px;width:9px;height:9px;border-radius:50%;background:var(--blue);border:2px solid var(--surface)}
 .card-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.card-head .num{width:26px;height:26px;font-size:.8rem}
+.card-head .num{width:26px;height:26px;font-size:.78rem;position:relative}
 .card-head label{display:flex;align-items:center;gap:6px;margin-left:auto;font-size:.82rem;cursor:pointer}
 .card-head input{width:18px;height:18px;accent-color:var(--accent)}
 .card h3{flex:1 1 auto;min-width:0}
+.card-tools{display:flex;gap:4px;flex-wrap:wrap;margin-top:auto;padding-top:6px;border-top:1px dashed var(--line)}
+.card-tools button{padding:3px 8px;font-size:.76rem;font-weight:500}
 .props{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:.84rem;margin:0}
 .props dt{color:var(--muted);font-weight:500}
 .props dd{margin:0;min-width:0}
@@ -62,6 +69,8 @@ figcaption{font-size:.78rem;color:var(--muted);margin-top:2px}
 .scroll{overflow-x:auto}
 .rec{font-size:.85rem;background:var(--accent-soft);border-left:4px solid var(--accent);padding:8px 10px;border-radius:6px;margin-top:10px}
 .rec b{color:var(--accent)}
+.deleted{margin-top:10px;font-size:.82rem;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.deleted button{padding:2px 8px;font-size:.74rem}
 /* Mockups */
 .mk{position:relative;width:100%;aspect-ratio:16/10;max-width:100%;background:var(--surface2);border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:.6rem;color:var(--muted)}
 .mk > div{position:absolute;border-radius:3px}
@@ -72,78 +81,89 @@ figcaption{font-size:.78rem;color:var(--muted);margin-top:2px}
 .mk .tab{background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center}
 .mk .tab i{display:block;width:12%;height:4px;background:var(--line);border-radius:2px}
 .mk .tab i.on{background:var(--accent)}
-.mk .lbl{position:absolute;left:4px;top:3px;font-size:.58rem;color:var(--muted)}
+.mk .lbl{position:absolute;left:4px;top:3px;font-size:.58rem;color:var(--muted);white-space:nowrap}
 .mk .ln{position:absolute;left:6%;right:6%;height:4px;background:var(--line);border-radius:2px}
+.mk .ln.k{background:var(--h-kurz)} .mk .ln.m{background:var(--h-mittel)} .mk .ln.l{background:var(--h-lang)}
 .mk .k{position:absolute;background:var(--surface);border:1px solid var(--line)}
 .mk .node{position:absolute;border-radius:999px;background:var(--surface);border:1.5px solid var(--accent)}
 .mk .node.c{background:var(--accent);border-color:var(--accent)}
+.mk .cell{position:absolute;background:var(--surface);border:1px solid var(--line);border-radius:2px}
+.mk .dot{position:absolute;width:6px;height:6px;border-radius:50%}
+.mk .chip{position:absolute;height:9px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.mk .chip.g{border-color:var(--green);background:var(--green-soft)} .mk .chip.y{border-color:var(--yellow);background:var(--yellow-soft)} .mk .chip.r{border-color:var(--red);background:var(--red-soft)} .mk .chip.p{border-color:var(--purple);background:var(--purple-soft)}
+.mk .txt{position:absolute;font-size:.55rem;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mk .sheet{position:absolute;background:var(--surface);border:1px solid var(--line);border-radius:8px 8px 0 0;box-shadow:0 -4px 14px rgba(0,0,0,.12)}
 .sw{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .sw span{display:inline-block;width:36px;height:18px;border-radius:4px;border:1px solid var(--line)}
-/* Copybox */
+/* Copybox, Buttons, Formulare */
 .copy{border:2px solid var(--blue);border-radius:10px;background:var(--surface);overflow:hidden}
 .copy-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;background:var(--blue-soft);color:var(--blue);font-weight:600;font-size:.85rem}
-.copy-head button{margin-left:auto}
+.copy-head .sp{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
 .copy pre{margin:0;max-height:340px;overflow:auto;padding:12px;font-family:var(--mono);font-size:.78rem;line-height:1.4;white-space:pre-wrap;word-break:break-word}
 button{font:inherit;font-weight:600;font-size:.84rem;border-radius:8px;padding:7px 12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
 button.b{background:var(--blue);border-color:var(--blue);color:#fff}
-button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-textarea,input[type=text]{font:inherit;width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--surface);color:var(--fg)}
+button.gr{background:var(--green);border-color:var(--green);color:#fff}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+textarea,input[type=text],select{font:inherit;width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--surface);color:var(--fg)}
 .steps{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
 .step{border:1px solid var(--line);border-left:5px solid var(--green);border-radius:8px;padding:10px;background:var(--surface);display:flex;gap:10px;align-items:flex-start}
 .step .num{background:var(--green)}
 .step.wait{border-left-color:var(--yellow)} .step.wait .num{background:var(--yellow)}
-.alt{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
-.alt:first-of-type{border-top:0}
-.alt input{width:18px;height:18px;margin-top:3px;accent-color:var(--accent)}
-.alt b{display:block}
 table{border-collapse:collapse;width:100%;font-size:.85rem}
 th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 th{color:var(--muted);font-weight:600}
-td .pill{white-space:normal}
-table{table-layout:auto}
-.box > table{width:100%;max-width:100%}
-.box > table td:last-child{width:46%}
-.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
 .toast.on{opacity:1}
 @media (prefers-reduced-motion: reduce){.toast{transition:none}}
 .hint{font-size:.82rem;color:var(--muted)}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);padding:0;width:min(640px,calc(100vw - 24px));max-height:calc(100vh - 24px)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog form{display:flex;flex-direction:column;max-height:calc(100vh - 24px)}
+.dlg-head{padding:12px 16px;border-bottom:1px solid var(--line);font-weight:700;display:flex;align-items:center;gap:8px}
+.dlg-body{padding:12px 16px;overflow:auto;display:grid;gap:10px}
+.dlg-body label{display:grid;gap:3px;font-size:.82rem;font-weight:600;color:var(--muted)}
+.dlg-body label.inl{grid-template-columns:auto 1fr;align-items:center}
+.dlg-foot{padding:10px 16px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.two{grid-template-columns:1fr}}
+.alt-prev{display:flex;gap:10px;align-items:flex-start;border-left:5px solid var(--h-mittel);padding-left:10px}
+.alt-prev.kurz{border-left-color:var(--h-kurz)} .alt-prev.lang{border-left-color:var(--h-lang)} .alt-prev.keiner{border-left-color:var(--h-keiner)}
 </style>
 
 <div class="wrap">
   <header class="topbar">
     <div>
       <h1>Notizblock Entscheidungen</h1>
-      <div class="small">Phase 0 · Stand 09.10.2026 22:36 (Europe/Berlin) · Datei <span style="font-family:var(--mono)">notizblock/entscheidungen_2026-10-09_2236.html</span> · Branch <span style="font-family:var(--mono)">claude/epic-lamport-gdityd</span></div>
+      <div class="small">Phase 0b · V2 bearbeitbar · Stand 09.10.2026 23:12 (Europe/Berlin) · Datei <span style="font-family:var(--mono)">notizblock/entscheidungen_2026-10-09_2236.html</span> · Branch <span style="font-family:var(--mono)">claude/epic-lamport-gdityd</span></div>
     </div>
     <div class="meta">
-      <span class="pill b">Empfehlungen vorbelegt, Auswahl änderbar</span>
-      <span class="pill n">Auswahl wird lokal im Browser gemerkt</span>
+      <span class="pill b">Empfehlungen vorbelegt, alles änderbar</span>
+      <span class="pill n" id="changecount">0 Änderungen gegenüber Original</span>
     </div>
   </header>
 
   <div class="box">
     <b>Ablauf:</b>
     <div class="steps" style="margin-top:8px">
-      <div class="step"><span class="num">1</span><div><b>Architekturkarte prüfen</b><br><span class="small">Abschnitt 1: Ist-Stand aller Instrumente, Ebenen E1–E6</span></div></div>
-      <div class="step"><span class="num">2</span><div><b>Optionen wählen</b><br><span class="small">Abschnitte 2–4: KI-Anbindung, Outlook, Ablage; Mehrfachwahl wo sinnvoll</span></div></div>
-      <div class="step"><span class="num">3</span><div><b>Layout wählen</b><br><span class="small">Abschnitt 5: sechs Vorschauen plus Fristenfarben und Fokus-Darstellung</span></div></div>
-      <div class="step"><span class="num">4</span><div><b>Alt-Projekte bestätigen</b><br><span class="small">Abschnitt 6: Kandidaten ankreuzen, weitere eintragen</span></div></div>
-      <div class="step wait"><span class="num">5</span><div><b>JSON kopieren und im Chat einfügen</b><br><span class="small">Abschnitt 7: Phase 1 (Bau) startet mit diesem Stand</span></div></div>
+      <div class="step"><span class="num">1</span><div><b>Architekturkarte prüfen und ergänzen</b><br><span class="small">Abschnitt 1: Instrumente je Ebene anlegen, Status ändern, löschen</span></div></div>
+      <div class="step"><span class="num">2</span><div><b>Optionen wählen oder umbauen</b><br><span class="small">Abschnitte 2–4: jede Karte bearbeiten, löschen, neue anlegen, Reihenfolge</span></div></div>
+      <div class="step"><span class="num">3</span><div><b>Layout und Ansichten</b><br><span class="small">Abschnitt 5: Grundlayout, Farben, Fokus, Eingabe, alle 12 Ansichten als Vorschau</span></div></div>
+      <div class="step"><span class="num">4</span><div><b>Alt-Projekte bestätigen</b><br><span class="small">Abschnitt 6: Kandidaten bearbeiten, weitere anlegen</span></div></div>
+      <div class="step wait"><span class="num">5</span><div><b>JSON kopieren und im Chat einfügen</b><br><span class="small">Abschnitt 7: Phase 1 übernimmt Auswahl und alle Änderungen ins Backend des Werkzeugs</span></div></div>
     </div>
     <div class="legend">
       <span class="pill g">grün: funktioniert / empfohlen</span>
       <span class="pill y">gelb: unter Bedingung / Option</span>
       <span class="pill r">rot: nicht möglich / Klärung</span>
       <span class="pill p">lila: Phase 2–3</span>
-      <span class="pill b">blau: kopieren / Auswahl</span>
+      <span class="pill b">blau: kopieren / Auswahl / geändert</span>
       <span class="pill n">grau: neutral / nicht benötigt</span>
     </div>
-    <div class="hint" style="margin-top:6px">Belegstufen: <b>VERIFIZIERT</b> = Toolprüfung oder offizielle Dokumentation · <b>WAHRSCHEINLICH</b> = mehrere übereinstimmende Quellen · <b>UNSICHER</b> = keine eindeutige Quelle, Test nötig.</div>
+    <div class="hint" style="margin-top:6px">Belegstufen: <b>VERIFIZIERT</b> = Toolprüfung oder offizielle Dokumentation · <b>WAHRSCHEINLICH</b> = mehrere übereinstimmende Quellen · <b>UNSICHER</b> = keine eindeutige Quelle, Test nötig. Jede Karte: <b>Bearbeiten</b>, <b>Löschen</b> (wiederherstellbar), <b>↑ ↓</b> Reihenfolge; je Abschnitt <b>+ Neu</b>. Arbeitsstand bleibt im Browser; Original jederzeit wiederherstellbar.</div>
   </div>
 
-  <!-- 1 ARCHITEKTURKARTE -->
   <section id="arch">
-    <div class="sec-head"><span class="num">1</span><h2>Architekturkarte: Ist-Stand und Ebenen</h2></div>
+    <div class="sec-head"><span class="num">1</span><h2>Architekturkarte: Ist-Stand und Ebenen</h2><div class="tools"><button data-add="arch">+ Instrument</button></div></div>
     <div class="box">
       <p class="small">Jedes Instrument wurde am 09.10.2026 per Toolabfrage geprüft (Repos, Umgebungen, Routinen, Zapier-Apps, Skills, Plugins, Artefakt-Fähigkeiten, lokale Toolchain). Pfeile zeigen den Datenfluss im Soll-Zustand.</p>
       <div class="scroll"><figure id="archfig"></figure></div>
@@ -154,85 +174,61 @@ table{table-layout:auto}
         <span class="pill r">fehlt / abgelehnt</span>
       </div>
       <div class="scroll" style="margin-top:10px"><table style="min-width:640px">
-        <thead><tr><th>Ebene</th><th>Inhalt</th><th>Instrumente (Status)</th><th>Phase</th></tr></thead>
+        <thead><tr><th>Ebene</th><th>Inhalt</th><th>Instrumente (klicken = bearbeiten)</th><th>Phase</th></tr></thead>
         <tbody id="archtable"></tbody>
       </table></div>
+      <div class="deleted" id="del-arch"></div>
     </div>
   </section>
 
-  <!-- 2 KI -->
-  <section id="ki">
-    <div class="sec-head"><span class="num">2</span><h2>KI-Anbindung: Sortierung, Ideen-Ausarbeitung, Prompt-Flächen</h2><span class="pill b">Mehrfachwahl (Schichtmodell)</span></div>
-    <p class="small">Jede Karte zeigt den Datenfluss: wo der Text hingeht, wer antwortet, wie das Ergebnis zurückkommt. Nachvollziehbarkeit = wie sichtbar jeder Schritt für dich ist.</p>
-    <div class="grid" id="kigrid"></div>
-    <div class="rec"><b>Empfehlung aus Sachlage:</b> A1 + A3 + A5 in V1 (A1 immer vorhanden, A3 im Artefakt, A5 für den Ausbau des Tools). A2 als abschaltbare Option. A6 und A7 in Phase 2, A4 in Phase 3. <b>Aus Verhalten:</b> automatisch vor manuell, daher A3 und A6 bevorzugt, A1 bleibt Sicherheitsnetz.</div>
-  </section>
+  <section id="ki"></section>
+  <section id="outlook"></section>
+  <section id="ablage"></section>
 
-  <!-- 3 OUTLOOK -->
-  <section id="outlook">
-    <div class="sec-head"><span class="num">3</span><h2>Outlook-Kalender: Anbindung</h2><span class="pill b">Mehrfachwahl (Phase 1 + Phase 2)</span></div>
-    <p class="small">Befund: Microsoft Outlook ist in Zapier bereits als App freigeschaltet (32 Aktionen), das Outlook-Konto ist dort noch nicht verbunden. OneDrive ist mit dem hotmail-Konto verbunden, Indiz für ein privates Microsoft-Konto.</p>
-    <div class="grid" id="olgrid"></div>
-    <div class="rec"><b>Empfehlung aus Sachlage:</b> V1 = B1 + B2-Versuch. <b>Phase 1b = B4</b>, ein Schritt durch dich (Outlook-Konto in Zapier verbinden), danach Lesen und Schreiben ohne Azure-Registrierung. Phase 2 = B3 oder B7, sobald https-Hosting steht.</div>
-  </section>
-
-  <!-- 4 ABLAGE -->
-  <section id="ablage">
-    <div class="sec-head"><span class="num">4</span><h2>Ablage und Laufzeit: strukturelle Unterschiede</h2><span class="pill b">Einfachwahl, Ergänzungen möglich</span></div>
-    <p class="small">Gewählt war C2. Die Karten zeigen, was sich strukturell unterscheidet: wo die Datei liegt, wo sie läuft, wo die Daten bleiben, welche Funktionen dadurch möglich oder unmöglich sind.</p>
-    <div class="grid" id="abgrid"></div>
-    <div class="rec"><b>Empfehlung aus Sachlage:</b> C2 jetzt (Repo = Quelle, Artefakt = Laufzeit mit Claude-Zugriff). C3 als Ausweich-Hosting, falls Mikrofon oder Microsoft-Anmeldung im Artefakt scheitern. C4 ab Phase 3 als Backend für Schlüssel, Geräteabgleich und Outlook-Abgleich. C6 als Zusatz auf jeder gehosteten Variante.</div>
-  </section>
-
-  <!-- 5 LAYOUT -->
   <section id="layout">
-    <div class="sec-head"><span class="num">5</span><h2>Layout-Vorschauen V1</h2><span class="pill b">Einfachwahl je Gruppe</span></div>
-    <p class="small">Vorschauen sind schematisch: Blöcke stehen für Bereiche, nicht für fertige Gestaltung. Alle Varianten enthalten dieselben neun Ansichten, Unterschied ist die Navigation und die Aufteilung.</p>
-    <h3 style="margin-top:8px">5a Grundlayout</h3>
-    <div class="grid" id="lygrid"></div>
-    <h3 style="margin-top:16px">5b Fristenfarben (kurz / mittel / lang / keiner)</h3>
-    <div class="grid" id="frgrid"></div>
-    <h3 style="margin-top:16px">5c Mindmap-Fokus</h3>
-    <div class="grid" id="fogrid"></div>
-    <h3 style="margin-top:16px">5d Eingabefeld</h3>
-    <div class="grid" id="eingrid"></div>
-    <div class="rec"><b>Empfehlung aus Sachlage:</b> L2 (untere Tab-Leiste mobil, Seitenleiste ab Tablet) + F1 + M1 + E1. <b>Aus Verhalten:</b> mehr Sichtbarkeit vor weniger, daher L3 (drei Spalten) als Desktop-Alternative innerhalb von L2 umschaltbar.</div>
+    <div class="sec-head"><span class="num">5</span><h2>Layout und Ansichten V1</h2></div>
+    <p class="small">Vorschauen sind schematisch: Blöcke stehen für Bereiche, nicht für fertige Gestaltung. Horizontfarben in den Mockups: orange = kurz, gelb = mittel, blau = lang.</p>
+    <div id="sec-layout"></div>
+    <div id="sec-fristen"></div>
+    <div id="sec-fokus"></div>
+    <div id="sec-eingabe"></div>
+    <div id="sec-ansichten"></div>
+    <div class="rec"><b>Empfehlung aus Sachlage:</b> L2 (untere Tab-Leiste mobil, Seitenleiste ab Tablet) + F1 + M1 + E1, alle 12 Ansichten in V1. <b>Aus Verhalten:</b> mehr Sichtbarkeit vor weniger, daher L3 (drei Spalten) als Desktop-Alternative innerhalb von L2 umschaltbar.</div>
   </section>
 
-  <!-- 6 ALT-PROJEKTE -->
-  <section id="alt">
-    <div class="sec-head"><span class="num">6</span><h2>Alt-Projekte: Kandidaten bestätigen</h2></div>
-    <div class="box">
-      <p class="small">Aus deinen Routinen und Präferenzen abgeleitet. Bestätigte Projekte werden in V1 als Projekt-Knoten mit Status „wartet“ und Vorlage (Name, Stand, letzter Schritt, Horizont, nächster Schritt) angelegt.</p>
-      <div id="altlist"></div>
-      <label for="altmore" style="display:block;margin-top:10px;font-weight:600;font-size:.88rem">Weitere Projekte (eine Zeile je Projekt: Name, Stand, Horizont)</label>
-      <textarea id="altmore" rows="3" placeholder="z. B. Projektname, begonnen 2025, Stand: Entwurf, Horizont: mittel"></textarea>
-    </div>
-  </section>
+  <section id="alt"></section>
 
-  <!-- 7 JSON -->
   <section id="json">
-    <div class="sec-head"><span class="num">7</span><h2>Entscheidungs-JSON</h2></div>
+    <div class="sec-head"><span class="num">7</span><h2>Entscheidungs-JSON, Sicherung, Import</h2></div>
     <div class="box now">
-      <p class="small">Einfügeort: <b>Chat, nächste Nachricht</b> (gesamter Inhalt). Das JSON steuert Phase 1 (Bau V1 + Repo-Gerüst). Freitext unten wird mit übernommen.</p>
+      <p class="small">Einfügeort: <b>Chat, nächste Nachricht</b> (gesamter Inhalt der Copybox). Das JSON enthält Auswahl, Anmerkungen und alle Änderungen gegenüber dem Original (geändert, neu, gelöscht). Phase 1 übernimmt es ins Backend des Werkzeugs.</p>
       <label for="notes" style="display:block;font-weight:600;font-size:.88rem;margin-bottom:4px">Anmerkungen zur Auswahl</label>
       <textarea id="notes" rows="2" placeholder="Abweichungen, Wünsche, offene Fragen"></textarea>
       <div class="copy" style="margin-top:10px">
-        <div class="copy-head">Entscheidungs-JSON · Ziel: Chat <button class="b" id="copybtn">Kopieren</button></div>
+        <div class="copy-head">Entscheidungs-JSON · Ziel: Chat <span class="sp"><button class="b" id="copybtn">Kopieren</button></span></div>
         <pre id="jsonout"></pre>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-        <button id="resetbtn">Auf Empfehlung zurücksetzen</button>
+      <h4>Sicherung und Import des Arbeitsstands</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="gr" id="savebtn">Arbeitsstand als Datei speichern</button>
+        <button id="copyfull">Arbeitsstand kopieren (vollständig)</button>
+        <button id="resetbtn">Original wiederherstellen</button>
       </div>
+      <label for="importbox" style="display:block;font-weight:600;font-size:.88rem;margin:10px 0 4px">Import: Arbeitsstand oder Entscheidungs-JSON einfügen</label>
+      <textarea id="importbox" rows="3" placeholder="JSON hier einfügen, dann „Importieren“"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button id="importbtn">Importieren</button><input type="file" id="importfile" accept="application/json" style="width:auto"></div>
+      <h4>Änderungsprotokoll</h4>
+      <div id="log" class="small">keine Änderungen</div>
       <table style="margin-top:12px">
         <thead><tr><th>Kontrollblock</th><th>Status</th></tr></thead>
         <tbody>
           <tr><td>Optionen KI, Outlook, Ablage visuell nebeneinander mit Alternativen</td><td><span class="pill g">erfüllt (Abschnitte 2–4)</span></td></tr>
           <tr><td>Struktureller Unterschied Repo vs. Artefakt vs. gleichwertige Aufbauten</td><td><span class="pill g">erfüllt (Abschnitt 4)</span></td></tr>
-          <tr><td>Instrumentarium von Anfang an mitgedacht</td><td><span class="pill g">erfüllt (Abschnitt 1, Ebenen E1–E6)</span></td></tr>
-          <tr><td>Vorschau je Element entscheiden</td><td><span class="pill g">erfüllt (Abschnitt 5, vier Gruppen)</span></td></tr>
-          <tr><td>Alt-Projekte eingliedern</td><td><span class="pill y">wartet auf Bestätigung (Abschnitt 6)</span></td></tr>
-          <tr><td>Bau V1</td><td><span class="pill y">Phase 1 nach JSON</span></td></tr>
+          <tr><td>Instrumentarium von Anfang an mitgedacht</td><td><span class="pill g">erfüllt (Abschnitt 1)</span></td></tr>
+          <tr><td>Entscheidungen bearbeitbar: ändern, erweitern, löschen</td><td><span class="pill g">erfüllt (alle Abschnitte)</span></td></tr>
+          <tr><td>Vorschau für alle Abschnitte und Ansichten</td><td><span class="pill g">erfüllt (Abschnitt 5e: 12 Ansichten)</span></td></tr>
+          <tr><td>Alt-Projekte eingliedern</td><td><span class="pill y">Bestätigung in Abschnitt 6</span></td></tr>
+          <tr><td>Bau V1 mit Backend</td><td><span class="pill y">Phase 1 läuft</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -240,165 +236,159 @@ table{table-layout:auto}
 </div>
 <div class="toast" id="toast">Kopiert</div>
 
+<dialog id="dlg"><form method="dialog" id="dlgform">
+  <div class="dlg-head"><span id="dlgtitle">Bearbeiten</span></div>
+  <div class="dlg-body" id="dlgbody"></div>
+  <div class="dlg-foot"><button type="button" id="dlgcancel">Abbrechen</button><button type="submit" class="b">Speichern</button></div>
+</form></dialog>
+
+<script id="EMBEDDED_DATA" type="application/json">
+{"dokument":"Notizblock Entscheidungen","version":"V2","stand":"2026-10-09 23:12 Europe/Berlin","datei":"notizblock/entscheidungen_2026-10-09_2236.html","branch":"claude/epic-lamport-gdityd"}
+</script>
 <script>
-/* ---------- Daten ---------- */
-const STAND = "2026-10-09 22:36 Europe/Berlin";
+/* ============ ORIGINALDATEN (Optionsregister) ============ */
+const META = JSON.parse(document.getElementById("EMBEDDED_DATA").textContent);
 const COL = {g:"var(--green)", y:"var(--yellow)", r:"var(--red)", p:"var(--purple)", b:"var(--blue)", n:"var(--muted)"};
+const COLNAME = {g:"grün (funktioniert / empfohlen)", y:"gelb (Bedingung / Option)", r:"rot (nicht möglich / Klärung)", p:"lila (Phase 2–3)", b:"blau", n:"grau (neutral)"};
 
-const ARCH = [
-  {e:"E6 Steuerung", inhalt:"Regeln, Skills, Befehle, Modellrouting", phase:"1", items:[["CLAUDE.md","p"],["Skills notizblock-*","p"],["settings.json Hook","p"],["Präferenzen","g"],["TOKEN_Cockpit","y"]]},
-  {e:"E1 Quelle", inhalt:"Werkzeugdatei, Prompts, Handover, Changelog", phase:"1", items:[["Repo token","g"],["Branch gesetzt","g"],["Git = Versionen","g"],["prompts/","p"],["docs/Handover","p"]]},
-  {e:"E2 Laufzeit", inhalt:"HTML im Browser: lokal, Artefakt, später Pages", phase:"1 / 3", items:[["lokal file://","g"],["Artefakt sample","g"],["Artefakt downloads","g"],["Artefakt db","p"],["Artefakt mcp","p"],["GitHub Pages","p"],["Cloudflare Pages","p"]]},
-  {e:"E3 Intelligenz", inhalt:"Sortierung, Ideen, Prompt-Flächen", phase:"1 / 2", items:[["A1 Copybox","g"],["A3 sample","g"],["A5 Claude Code","g"],["A2 API-Schlüssel","y"],["A6 mcp→Claude Code","p"],["A7 Routine","p"],["A4 Worker","p"]]},
-  {e:"E4 Automation", inhalt:"wiederkehrende Abläufe", phase:"2", items:[["Routinen (3 vorhanden)","g"],["Nutzungslimit 09.10.","r"],["Zapier-Zaps","y"],["SessionStart-Hook","p"]]},
-  {e:"E5 Konnektoren", inhalt:"Kalender, Mail, Diktat, Ablage", phase:"1 / 2", items:[["Google Calendar","g"],["Gmail","g"],["Google Drive","g"],["Wispr Flow","g"],["Whimsical","g"],["Zapier Outlook (Konto fehlt)","y"],["OneDrive (hotmail)","g"],["Cloudflare-Konnektor","y"],["Notion","n"],["Todoist/Dropbox/Mem","n"]]}
-];
 const ARCH_FLOW = [[0,1,"Regeln steuern Bau"],[1,2,"Datei wird geladen"],[2,3,"Eingabe → Vorschlag"],[3,2,"JSON zurück"],[2,5,"ICS / Termine / Mails"],[5,2,"Import"],[4,1,"Commit / Paket"],[2,4,"Inbox-Export"]];
-
-const KI = [
-  {id:"A1",name:"Prompt-Copybox",c:"g",empf:true,phase:"V1",beleg:"VERIFIZIERT",
-   flow:{n:["Tool","Zwischenablage","Claude Chat","Tool"],e:[[0,1,"Prompt + Struktur"],[1,2,"einfügen"],[2,3,"JSON zurück"]]},
-   props:[["Schlüssel/Konto","keiner"],["Nachvollziehbar","maximal, jeder Schritt sichtbar"],["Funktioniert","überall, auch offline erzeugbar"],["Kosten","claude.ai-Nutzung"]],
-   plus:["kein Netzaufruf aus der Datei","Prompt-Vorlage liegt im Repo unter prompts/"],minus:["zwei manuelle Kopierschritte"]},
-  {id:"A2",name:"API-Schlüssel direkt",c:"y",empf:false,phase:"Option",beleg:"WAHRSCHEINLICH",
-   flow:{n:["Tool","Anthropic-API","Tool"],e:[[0,1,"Aufruf mit Schlüssel"],[1,2,"JSON"]]},
-   props:[["Schlüssel/Konto","API-Schlüssel, nur Sitzungsspeicher"],["Nachvollziehbar","Vorschlag sichtbar, Aufruf automatisch"],["Funktioniert","lokal und gehostet, Schlüssel je Sitzung neu"],["Kosten","API-Guthaben, getrennt von claude.ai"]],
-   plus:["automatisch, ohne Artefakt"],minus:["Schlüssel im Browser = Restrisiko","Browser-Direktzugriff erfordert spezielle Kopfzeile, zu testen"]},
-  {id:"A3",name:"Artefakt „Claude fragen“ (sample)",c:"g",empf:true,phase:"V1 (Artefakt)",beleg:"VERIFIZIERT",
-   flow:{n:["Tool als Artefakt","claude.ai","Tool"],e:[[0,1,"sample()"],[1,2,"JSON"]]},
-   props:[["Schlüssel/Konto","dein claude.ai-Konto, Konsent beim ersten Aufruf"],["Nachvollziehbar","Vorschlag sichtbar, Aufruf automatisch"],["Funktioniert","nur wenn als Artefakt geöffnet"],["Kosten","claude.ai-Nutzung"]],
-   plus:["kein Schlüssel","fällt lokal automatisch auf A1 zurück"],minus:["nicht in lokal geöffneter Datei"]},
-  {id:"A4",name:"Cloudflare Worker",c:"p",empf:false,phase:"Phase 3",beleg:"WAHRSCHEINLICH",
-   flow:{n:["Tool","Worker (Schlüssel)","Anthropic-API","Tool"],e:[[0,1,"Anfrage"],[1,2,"Aufruf"],[2,3,"JSON über Worker"]]},
-   props:[["Schlüssel/Konto","Cloudflare-Konto, Konnektor im Konto vorhanden, hier nicht geladen"],["Nachvollziehbar","wie A2, Schlüssel serverseitig"],["Funktioniert","gehostet"],["Kosten","API-Guthaben + Cloudflare Free"]],
-   plus:["Grundlage für Backend: Geräteabgleich (KV/D1), Outlook-Abgleich"],minus:["Deployment nötig (Wrangler), zweite Infrastruktur"]},
-  {id:"A5",name:"Claude Code über Repo",c:"g",empf:true,phase:"V1 (Ausbau)",beleg:"VERIFIZIERT",
-   flow:{n:["Tool","Repo (Inbox / Prompt-Fläche)","Claude Code","Repo","Tool"],e:[[0,1,"Export"],[1,2,"Sitzung liest"],[2,3,"Commit"],[3,4,"neu laden"]]},
-   props:[["Schlüssel/Konto","GitHub, vorhanden"],["Nachvollziehbar","Git-Historie = Protokoll"],["Funktioniert","überall"],["Kosten","claude.ai-Nutzung"]],
-   plus:["einziger Weg, mit dem das Tool sich selbst umbaut","dieser Chat läuft bereits so"],minus:["asynchron, Zwischenschritt über Repo"]},
-  {id:"A6",name:"Artefakt → Claude Code Remote (mcp)",c:"p",empf:false,phase:"Phase 2",beleg:"WAHRSCHEINLICH",
-   flow:{n:["Tool als Artefakt","Claude Code Sitzung","Repo","Artefakt"],e:[[0,1,"create_session mit Prompt-Fläche"],[1,2,"Commit"],[2,3,"Republish"]]},
-   props:[["Schlüssel/Konto","claude.ai-Konto, Konnektor „Claude Code Remote“"],["Nachvollziehbar","Sitzungsprotokoll + Git"],["Funktioniert","nur als Artefakt"],["Kosten","claude.ai-Nutzung"]],
-   plus:["A5 ohne manuelles Kopieren: Knopf im Tool startet Umbau"],minus:["Konnektoraufruf aus Artefakt ungetestet"]},
-  {id:"A7",name:"Routine (zeitgesteuert)",c:"p",empf:false,phase:"Phase 2",beleg:"VERIFIZIERT",
-   flow:{n:["Repo inbox/","Routine täglich","Repo pakete/","Tool"],e:[[0,1,"liest"],[1,2,"Update-Paket JSON"],[2,3,"Import-Knopf"]]},
-   props:[["Schlüssel/Konto","wie A5"],["Nachvollziehbar","Paket + Git"],["Funktioniert","überall"],["Kosten","claude.ai-Nutzung je Lauf; POLYGLOTT-Lauf am 09.10. am Nutzungslimit gescheitert"]],
-   plus:["Muster aus POLYGLOTT übertragbar"],minus:["Kontingent beachten, erst nach Stabilisierung"]}
+const LAYERS = [
+  {id:"E6",e:"E6 Steuerung", inhalt:"Regeln, Skills, Befehle, Modellrouting", phase:"1"},
+  {id:"E1",e:"E1 Quelle", inhalt:"Werkzeugdatei, Prompts, Handover, Changelog", phase:"1"},
+  {id:"E2",e:"E2 Laufzeit", inhalt:"HTML im Browser: lokal, Artefakt, später Pages", phase:"1 / 3"},
+  {id:"E3",e:"E3 Intelligenz", inhalt:"Sortierung, Ideen, Prompt-Flächen", phase:"1 / 2"},
+  {id:"E4",e:"E4 Automation", inhalt:"wiederkehrende Abläufe", phase:"2"},
+  {id:"E5",e:"E5 Konnektoren", inhalt:"Kalender, Mail, Diktat, Ablage", phase:"1 / 2"}
 ];
+const MK = {
+L1:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="side" style="left:2%;top:11%;width:22%;bottom:3%"><span class="lbl">Ansichten</span></div><div class="main" style="left:26%;top:11%;right:2%;bottom:3%"><span class="lbl">Outliner</span><div class="ln" style="top:22%"></div><div class="ln" style="top:34%;left:12%"></div><div class="ln" style="top:46%;left:12%"></div><div class="ln" style="top:58%"></div></div><div class="fab" style="right:5%;bottom:7%;width:14%;height:12%">+</div>`,
+L2:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;right:2%;bottom:16%"><span class="lbl">To-do · nach Horizont</span><div class="k" style="left:4%;top:20%;width:92%;height:16%;border-left:3px solid var(--h-kurz)"></div><div class="k" style="left:4%;top:40%;width:92%;height:16%;border-left:3px solid var(--h-mittel)"></div><div class="k" style="left:4%;top:60%;width:92%;height:16%;border-left:3px solid var(--h-lang)"></div></div><div class="tab" style="left:0;right:0;bottom:0;height:13%"><i class="on"></i><i></i><i></i><i></i><i></i></div><div class="fab" style="right:5%;bottom:17%;width:14%;height:12%">+</div>`,
+L3:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="side" style="left:2%;top:11%;width:26%;bottom:3%"><span class="lbl">Baum</span></div><div class="main" style="left:30%;top:11%;width:34%;bottom:3%"><span class="lbl">Detail</span><div class="ln" style="top:25%"></div><div class="ln" style="top:37%"></div></div><div class="main" style="left:66%;top:11%;right:2%;bottom:3%"><span class="lbl">Mindmap</span><div class="node c" style="left:40%;top:45%;width:20%;height:14%"></div><div class="node" style="left:10%;top:25%;width:16%;height:11%"></div><div class="node" style="left:72%;top:25%;width:16%;height:11%"></div><div class="node" style="left:40%;top:75%;width:16%;height:11%"></div></div>`,
+L4:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;right:2%;bottom:3%"><span class="lbl">Mindmap Fokus</span><div class="node c" style="left:42%;top:42%;width:16%;height:16%"></div><div class="node" style="left:15%;top:20%;width:14%;height:11%"></div><div class="node" style="left:70%;top:20%;width:14%;height:11%"></div><div class="node" style="left:15%;top:70%;width:14%;height:11%"></div><div class="node" style="left:70%;top:70%;width:14%;height:11%"></div></div><div class="side" style="right:4%;top:15%;width:26%;height:40%"><span class="lbl">Knoten-Detail</span></div><div class="fab" style="left:5%;bottom:7%;width:14%;height:12%">+</div>`,
+L5:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;width:30%;bottom:3%;border-top:3px solid var(--h-kurz)"><span class="lbl">kurz</span><div class="k" style="left:6%;top:18%;width:88%;height:14%"></div><div class="k" style="left:6%;top:36%;width:88%;height:14%"></div></div><div class="main" style="left:35%;top:11%;width:30%;bottom:3%;border-top:3px solid var(--h-mittel)"><span class="lbl">mittel</span><div class="k" style="left:6%;top:18%;width:88%;height:14%"></div></div><div class="main" style="left:68%;top:11%;right:2%;bottom:3%;border-top:3px solid var(--h-lang)"><span class="lbl">lang</span><div class="k" style="left:6%;top:18%;width:88%;height:14%"></div><div class="k" style="left:6%;top:36%;width:88%;height:14%"></div><div class="k" style="left:6%;top:54%;width:88%;height:14%"></div></div>`,
+L6:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;width:47%;height:40%"><span class="lbl">Heute</span></div><div class="main" style="left:51%;top:11%;right:2%;height:40%"><span class="lbl">Kalender</span></div><div class="main" style="left:2%;top:54%;width:47%;bottom:3%"><span class="lbl">Ideen</span></div><div class="main" style="left:51%;top:54%;right:2%;bottom:3%"><span class="lbl">Workflow</span></div>`,
+V_outliner:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;right:2%;bottom:3%"><span class="lbl">Outliner · Baum mit Pillen</span><div class="txt" style="left:5%;top:18%;font-weight:600">▾ Gründungsnotiz</div><div class="chip g" style="left:62%;top:19%;width:14%"></div><div class="txt" style="left:12%;top:30%">▾ Ideen</div><div class="chip y" style="left:62%;top:31%;width:14%"></div><div class="txt" style="left:19%;top:42%">☐ Outlook via Zapier</div><div class="chip p" style="left:62%;top:43%;width:14%"></div><div class="dot" style="left:78%;top:44%;background:var(--h-kurz)"></div><div class="txt" style="left:19%;top:54%">☐ Routine Inbox</div><div class="dot" style="left:78%;top:56%;background:var(--h-mittel)"></div><div class="txt" style="left:12%;top:66%">▸ Alt-Projekte (4)</div><div class="txt" style="left:12%;top:78%">▸ Instrumente (14)</div></div>`,
+V_todo:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;right:2%;bottom:3%"><span class="lbl">To-do · Filter offen · Gruppe Horizont</span><div class="txt" style="left:5%;top:17%;color:var(--h-kurz);font-weight:600">KURZ</div><div class="k" style="left:5%;top:26%;width:90%;height:12%;border-left:3px solid var(--h-kurz)"><div class="txt" style="left:6%;top:15%">☐ Zapier: Outlook-Konto verbinden · 12.10.</div></div><div class="txt" style="left:5%;top:42%;color:var(--h-mittel);font-weight:600">MITTEL</div><div class="k" style="left:5%;top:51%;width:90%;height:12%;border-left:3px solid var(--h-mittel)"><div class="txt" style="left:6%;top:15%">☐ Alt-Projekt POLYGLOTT eingliedern</div></div><div class="txt" style="left:5%;top:67%;color:var(--h-lang);font-weight:600">LANG</div><div class="k" style="left:5%;top:76%;width:90%;height:12%;border-left:3px solid var(--h-lang)"><div class="txt" style="left:6%;top:15%">☐ Cloudflare-Backend</div></div></div>`,
+V_kalender:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;right:2%;bottom:3%"><span class="lbl">Kalender · Oktober 2026 · Monat</span>${[0,1,2,3,4,5,6].map(c=>[0,1,2,3].map(r=>`<div class="cell" style="left:${3+c*13.6}%;top:${18+r*19.5}%;width:12.6%;height:18%"></div>`).join('')).join('')}<div class="chip g" style="left:17.5%;top:24%;width:10%"></div><div class="chip y" style="left:44.5%;top:44%;width:10%"></div><div class="chip p" style="left:58%;top:63%;width:10%"></div><div class="dot" style="left:33%;top:45%;background:var(--h-kurz)"></div><div class="txt" style="left:3%;top:90%;font-size:.5rem">ICS-Import · ICS-Export · Outlook-Abgleich</div></div>`,
+V_mindmap:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;right:2%;bottom:3%"><span class="lbl">Mindmap gesamt · Zoom · Tiefe 3</span><div class="node c" style="left:44%;top:44%;width:12%;height:14%"></div>${[0,1,2,3,4,5,6,7].map(i=>{const a=i/8*Math.PI*2;const x=50+Math.cos(a)*30, y=51+Math.sin(a)*32;const col=['g','y','p','g','y','g','p','y'][i];return `<div class="node" style="left:${x-5}%;top:${y-5}%;width:10%;height:10%;border-color:var(--${col==='g'?'h-kurz':col==='y'?'h-mittel':'h-lang'})"></div>`;}).join('')}</div>`,
+V_fokus:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;right:2%;bottom:3%"><span class="lbl">Fokus: Gesamt › Projekte › <b>Notizblock</b></span><div class="node c" style="left:40%;top:40%;width:20%;height:22%"></div>${[0,1,2,3,4,5].map(i=>{const a=i/6*Math.PI*2;const x=50+Math.cos(a)*32, y=51+Math.sin(a)*34;return `<div class="node" style="left:${x-6}%;top:${y-6}%;width:12%;height:12%"></div>`;}).join('')}<div class="k" style="right:3%;bottom:4%;width:20%;height:10%"><div class="txt" style="left:12%;top:12%">Gesamt</div></div></div>`,
+V_ideen:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div>${['roh','ausgearbeitet','geplant','umsetzung','integriert'].map((s,i)=>`<div class="main" style="left:${2+i*19.6}%;top:11%;width:18.6%;bottom:3%"><span class="lbl">${s}</span>${[0,1,2].slice(0,[3,2,1,1,1][i]).map(j=>`<div class="k" style="left:8%;top:${20+j*24}%;width:84%;height:18%"></div>`).join('')}</div>`).join('')}<div class="fab" style="right:5%;bottom:7%;width:14%;height:12%;background:var(--accent)">KI</div>`,
+V_workflow:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;right:2%;height:38%"><span class="lbl">Tool: Notizblock · V1</span>${['Plan','Entscheidung','Bau','Validierung','Auslieferung','Phase 2'].map((s,i)=>`<div class="k" style="left:${3+i*16.2}%;top:35%;width:15%;height:40%;border-top:3px solid var(--${i<3?'green':i===3?'yellow':'line'})"><div class="txt" style="left:8%;top:30%">${s}</div></div>`).join('')}</div><div class="main" style="left:2%;top:52%;right:2%;bottom:3%"><span class="lbl">Tool: POLYGLOTT · Routine · letzter Lauf rot</span>${['Scan','Abgleich','Paket','Import'].map((s,i)=>`<div class="k" style="left:${3+i*24}%;top:35%;width:22%;height:40%;border-top:3px solid var(--${i<2?'green':i===2?'red':'line'})"><div class="txt" style="left:8%;top:30%">${s}</div></div>`).join('')}</div>`,
+V_instrumente:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div>${['E6 Steuerung','E1 Quelle','E2 Laufzeit','E3 Intelligenz','E4 Automation','E5 Konnektoren'].map((e,i)=>`<div class="main" style="left:2%;top:${11+i*14.5}%;right:2%;height:13%"><div class="txt" style="left:2%;top:25%;width:26%;font-weight:600">${e}</div>${[0,1,2,3,4].map(j=>`<div class="chip ${['g','g','y','p','g','y','p','g','n','g'][(i+j)%10]}" style="left:${30+j*13}%;top:28%;width:11%"></div>`).join('')}</div>`).join('')}`,
+V_ausbau:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;width:46%;bottom:3%"><span class="lbl">Prompt-Flächen</span><div class="k" style="left:6%;top:18%;width:88%;height:20%;border-left:3px solid var(--purple)"><div class="txt" style="left:6%;top:20%">Ausbau-Vorlage</div></div><div class="k" style="left:6%;top:44%;width:88%;height:20%;border-left:3px solid var(--purple)"><div class="txt" style="left:6%;top:20%">Outlook via Zapier</div></div><div class="k" style="left:6%;top:70%;width:88%;height:20%;border-left:3px solid var(--purple)"><div class="txt" style="left:6%;top:20%">Mindmap: Ast einklappen</div></div></div><div class="main" style="left:51%;top:11%;right:2%;bottom:3%;border:2px solid var(--blue)"><span class="lbl" style="color:var(--blue)">Bauauftrag · Copybox</span><div class="ln" style="top:25%"></div><div class="ln" style="top:35%"></div><div class="ln" style="top:45%;right:30%"></div><div class="ln" style="top:55%"></div><div class="k" style="right:6%;bottom:6%;width:34%;height:14%;background:var(--blue);border-color:var(--blue)"></div></div>`,
+V_protokoll:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;right:2%;bottom:3%"><span class="lbl">Protokoll · KI-Vorschläge · Rückgängig</span>${[0,1,2,3].map(i=>`<div class="k" style="left:4%;top:${18+i*20}%;width:92%;height:17%;border-left:3px solid var(--${['green','green','yellow','red'][i]})"><div class="txt" style="left:3%;top:15%;width:60%">${['09.10. 23:10 · Sortierung übernommen','09.10. 23:05 · Idee ausgearbeitet','09.10. 22:58 · Vorschlag geändert','09.10. 22:50 · Vorschlag verworfen'][i]}</div><div class="chip" style="right:3%;top:25%;width:16%"></div></div>`).join('')}</div>`,
+V_backend:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="side" style="left:2%;top:11%;width:24%;bottom:3%"><span class="lbl">Backend</span>${['Bauplan','Entscheidungen','Einstellungen','Optionsregister','Anforderungen','Bauaufträge','Protokoll','Export/Import','Regeln'].map((s,i)=>`<div class="txt" style="left:8%;top:${16+i*9}%;${i===3?'font-weight:700;color:var(--accent)':''}">${s}</div>`).join('')}</div><div class="main" style="left:28%;top:11%;right:2%;bottom:3%"><span class="lbl">Optionsregister · KI-Wege · + Neu</span>${[0,1,2,3].map(i=>`<div class="k" style="left:4%;top:${18+i*19}%;width:92%;height:15%"><div class="txt" style="left:3%;top:20%;width:50%">${['A1 Prompt-Copybox','A3 Artefakt sample','A5 Claude Code','A2 API-Schlüssel'][i]}</div><div class="chip ${['g','g','g','y'][i]}" style="left:58%;top:30%;width:10%"></div><div class="chip" style="left:72%;top:30%;width:8%"></div><div class="chip" style="left:82%;top:30%;width:8%"></div><div class="chip r" style="left:92%;top:30%;width:5%"></div></div>`).join('')}</div>`,
+V_eingabe:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;right:2%;bottom:3%;opacity:.5"><div class="ln" style="top:22%"></div><div class="ln" style="top:34%"></div></div><div class="sheet" style="left:0;right:0;bottom:0;height:62%"><div class="txt" style="left:4%;top:6%;font-weight:600">Eingabe · Tastatur oder Sprache</div><div class="k" style="left:4%;top:18%;width:78%;height:22%"><div class="txt" style="left:3%;top:30%;color:var(--muted)">todo: Zapier Outlook verbinden !kurz morgen</div></div><div class="fab" style="right:4%;top:18%;width:12%;height:22%;background:var(--red)">●</div><div class="k" style="left:4%;top:48%;width:92%;height:42%;border-left:3px solid var(--blue)"><div class="txt" style="left:3%;top:8%;font-weight:600">Vorschlag</div><div class="txt" style="left:3%;top:32%">Ziel: Ideen › Outlook · Typ: To-do · kurz · 10.10.</div><div class="chip g" style="left:3%;top:68%;width:22%"></div><div class="chip" style="left:28%;top:68%;width:18%"></div><div class="chip r" style="left:49%;top:68%;width:18%"></div></div></div>`
+};
 
-const OL = [
-  {id:"B1",name:"ICS-Datei (Export / Import)",c:"g",empf:true,phase:"V1",beleg:"VERIFIZIERT",
-   flow:{n:["Outlook",".ics",  "Tool"],e:[[0,1,"exportieren"],[1,2,"importieren"],[2,1,"exportieren"],[1,0,"importieren"]]},
-   props:[["Voraussetzung","keine"],["Lesen / Schreiben","beides, manuell"],["Automatisch","nein"]],
-   plus:["sofort, ohne Konto"],minus:["Handarbeit je Abgleich"]},
-  {id:"B2",name:"Veröffentlichte ICS-URL",c:"y",empf:true,phase:"V1-Versuch",beleg:"UNSICHER",
-   flow:{n:["Outlook „veröffentlichen“","ICS-URL","Tool"],e:[[0,1,"Link"],[1,2,"Abruf im Browser (CORS?)"]]},
-   props:[["Voraussetzung","URL aus Outlook kopieren"],["Lesen / Schreiben","nur lesen"],["Automatisch","ja, beim Öffnen"]],
-   plus:["kein Konto im Tool"],minus:["Browser-Abruf kann an CORS scheitern; dann Umweg über A4 oder Artefakt-mcp"]},
-  {id:"B3",name:"Microsoft Graph + MSAL",c:"y",empf:false,phase:"Phase 2",beleg:"WAHRSCHEINLICH",
-   flow:{n:["Tool (https)","Microsoft-Anmeldung","Graph-API","Outlook"],e:[[0,1,"Login"],[1,2,"Token"],[2,3,"lesen / schreiben"]]},
-   props:[["Voraussetzung","Azure-App-Registrierung (kostenlos, ca. 10 Min) + https-Ursprung, nicht file://"],["Lesen / Schreiben","beides, live"],["Automatisch","ja"]],
-   plus:["echter beidseitiger Abgleich"],minus:["Hosting nötig (C3/C4); im Artefakt-Iframe Popup/Redirect unsicher","eine externe Bibliothek (MSAL) per CDN"]},
-  {id:"B4",name:"Zapier → Outlook",c:"g",empf:true,phase:"Phase 1b",beleg:"VERIFIZIERT (App) · Aktionen ungetestet",
-   flow:{n:["Tool / Chat / Artefakt-mcp","Zapier-Aktion","Outlook"],e:[[0,1,"Termin anlegen / suchen"],[1,2,"API"],[2,0,"Ergebnis"]]},
-   props:[["Voraussetzung","Outlook-Konto in Zapier verbinden (App bereits freigeschaltet, 32 Aktionen)"],["Lesen / Schreiben","beides je Aktion"],["Automatisch","ja"]],
-   plus:["kein Azure, ein Schritt durch dich","sofort aus dem Chat nutzbar, im Artefakt per mcp"],minus:["Zapier-Kontingent (Free-Stufe)","Aktionen bis Kontoverbindung ungetestet"]},
-  {id:"B5",name:"Microsoft-365-Konnektor in claude.ai",c:"y",empf:false,phase:"prüfen",beleg:"UNSICHER",
-   flow:{n:["Artefakt","Konnektor","Outlook"],e:[[0,1,"mcp"],[1,2,"API"]]},
-   props:[["Voraussetzung","Konnektor für dein Konto verfügbar?"],["Lesen / Schreiben","je Konnektor"],["Automatisch","ja"]],
-   plus:["ohne Zapier"],minus:["Verfügbarkeit je Kontotyp unklar"]},
-  {id:"B6",name:"Google Calendar als Brücke",c:"y",empf:false,phase:"Alternative",beleg:"VERIFIZIERT (Konnektor)",
-   flow:{n:["Tool","Google Calendar","Outlook"],e:[[0,1,"Konnektor schreibt"],[1,2,"Outlook abonniert"]]},
-   props:[["Voraussetzung","Google-Kalender in Outlook abonnieren"],["Lesen / Schreiben","Tool ↔ Google beidseitig, Outlook liest"],["Automatisch","ja, verzögert"]],
-   plus:["Google-Konnektor ist bereits geladen"],minus:["nur sinnvoll, wenn Google ohnehin genutzt wird"]},
-  {id:"B7",name:"Cloudflare Worker + Graph-Dienstkonto",c:"p",empf:false,phase:"Phase 3",beleg:"WAHRSCHEINLICH",
-   flow:{n:["Tool","Worker","Graph-API","Outlook"],e:[[0,1,"Anfrage"],[1,2,"App-Token"],[2,3,"Abgleich"]]},
-   props:[["Voraussetzung","Azure-App + Cloudflare"],["Lesen / Schreiben","beides, serverseitig"],["Automatisch","ja, auch ohne offenes Tool"]],
-   plus:["robustester Abgleich, Ökosystem-Backend"],minus:["größter Aufbau"]}
-];
-
-const AB = [
-  {id:"C1",name:"Nur Repo, lokal öffnen",c:"n",empf:false,phase:"Sicherheitsnetz",beleg:"VERIFIZIERT",
-   flow:{n:["Repo","Download","Browser file://","localStorage"],e:[[0,1,"Datei"],[1,2,"öffnen"],[2,3,"Autosave"]]},
-   props:[["https-URL","nein"],["Geräteabgleich","nur Self-Download / Import"],["Mikrofon","ja (Chrome, Edge, Safari)"],["KI direkt","nein, nur A1 / A2"],["Microsoft-Anmeldung (B3)","nein"],["Einrichtung","keine"]]},
-  {id:"C2",name:"Repo + claude.ai-Artefakt",c:"g",empf:true,phase:"gewählt",beleg:"VERIFIZIERT",
-   flow:{n:["Repo (Quelle)","Publish","Artefakt-URL","Claude / db / mcp"],e:[[0,1,"Claude Code"],[1,2,"Laufzeit"],[2,3,"sample, downloads, db, mcp"]]},
-   props:[["https-URL","ja, auf Handy und Desktop"],["Geräteabgleich","mit db-Fähigkeit (Phase 2)"],["Mikrofon","unsicher im Iframe, Test Phase 2"],["KI direkt","ja (A3)"],["Microsoft-Anmeldung (B3)","unsicher"],["Einrichtung","Publish aus Claude Code"]]},
-  {id:"C3",name:"GitHub Pages",c:"y",empf:false,phase:"Ausweich",beleg:"VERIFIZIERT",
-   flow:{n:["Repo-Branch","Pages-Build","https-Seite","localStorage"],e:[[0,1,"Push"],[1,2,"automatisch"],[2,3,"je Gerät"]]},
-   props:[["https-URL","ja, feste Domain"],["Geräteabgleich","nein"],["Mikrofon","ja"],["KI direkt","nein, nur A1 / A2"],["Microsoft-Anmeldung (B3)","ja"],["Einrichtung","Pages aktivieren, ein Klick"]]},
-  {id:"C4",name:"Cloudflare Pages + Worker + KV/D1",c:"p",empf:false,phase:"Phase 3",beleg:"WAHRSCHEINLICH",
-   flow:{n:["Repo","Cloudflare Pages","Worker","KV / D1"],e:[[0,1,"Deploy"],[1,2,"API-Aufrufe"],[2,3,"Daten, Schlüssel"]]},
-   props:[["https-URL","ja"],["Geräteabgleich","ja"],["Mikrofon","ja"],["KI direkt","ja (A4)"],["Microsoft-Anmeldung (B3)","ja, auch B7"],["Einrichtung","Cloudflare-Konto, Wrangler; Konnektor im Konto vorhanden"]]},
-  {id:"C5",name:"Notion als Datenhaltung",c:"r",empf:false,phase:"abgelehnt für Kern",beleg:"VERIFIZIERT",
-   flow:{n:["Notion-Datenbanken","Konnektor","Claude"],e:[[0,1,"API"],[1,2,"lesen / schreiben"]]},
-   props:[["https-URL","ja"],["Geräteabgleich","ja"],["Mikrofon","nur Notion-App"],["KI direkt","über Chat"],["Microsoft-Anmeldung (B3)","nein"],["Einrichtung","Datenbanken anlegen; Mindmap und Kalenderlogik dort begrenzt"]]},
-  {id:"C6",name:"PWA-Zusatz (auf C2 / C3 / C4)",c:"y",empf:true,phase:"Phase 2",beleg:"VERIFIZIERT",
-   flow:{n:["gehostete Seite","Manifest + Service Worker","Startbildschirm-App"],e:[[0,1,"ergänzen"],[1,2,"installieren, offline"]]},
-   props:[["https-URL","wie Basis"],["Geräteabgleich","wie Basis"],["Mikrofon","wie Basis"],["KI direkt","wie Basis"],["Microsoft-Anmeldung (B3)","wie Basis"],["Einrichtung","gering; im Artefakt Service Worker nicht möglich, daher nur C3 / C4"]]}
-];
-
-const ALT = [
-  {id:"polyglott",name:"POLYGLOTT MASTER v2.41 / abrechnung_scans_v8",stand:"HTML-Master mit Update-Paket, tägliche Routine aktiv; Lauf vom 09.10. am Nutzungslimit gescheitert",ein:"Tool-Knoten mit Workflow und Routine-Status",on:true},
-  {id:"usine",name:"USINE DASHBOARDS Cockpit",stand:"HTML-Cockpit mit CMD_AKTUELL.md; Regel-Scan-Routine pausiert",ein:"Tool-Knoten; Regel-Scan-Muster für den Notizblock übernehmen",on:true},
-  {id:"token",name:"TOKEN_Cockpit_v1",stand:"Präferenz- und Regelwerkzeug laut Präferenzen; Stand unbekannt",ein:"Tool-Knoten; Regelupdates dorthin",on:true},
-  {id:"wohnung",name:"Wohnungssuche (Notion Wohnungspool)",stand:"stündliche Routine pausiert, Notion-Datenbank vorhanden",ein:"Projekt-Knoten mit Horizont",on:true}
-];
-
-const LAYOUT = [
-  {id:"L1",name:"Seitenleiste + Hauptfläche",c:"y",empf:false,
-   mk:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="side" style="left:2%;top:11%;width:22%;bottom:3%"><span class="lbl">Ansichten</span></div><div class="main" style="left:26%;top:11%;right:2%;bottom:3%"><span class="lbl">Outliner</span><div class="ln" style="top:22%"></div><div class="ln" style="top:34%;left:12%"></div><div class="ln" style="top:46%;left:12%"></div><div class="ln" style="top:58%"></div></div><div class="fab" style="right:5%;bottom:7%;width:14%;height:12%">+</div>`,
-   text:"Desktop-Muster; mobil klappt die Leiste ein. Eingabe als schwebender Knopf."},
-  {id:"L2",name:"Untere Tab-Leiste, Seitenleiste ab Tablet",c:"g",empf:true,
-   mk:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;right:2%;bottom:16%"><span class="lbl">To-do · gruppiert nach Horizont</span><div class="k" style="left:4%;top:20%;width:92%;height:16%;border-left:3px solid var(--yellow)"></div><div class="k" style="left:4%;top:40%;width:92%;height:16%;border-left:3px solid var(--yellow)"></div><div class="k" style="left:4%;top:60%;width:92%;height:16%;border-left:3px solid var(--blue)"></div></div><div class="tab" style="left:0;right:0;bottom:0;height:13%"><i class="on"></i><i></i><i></i><i></i><i></i></div><div class="fab" style="right:5%;bottom:17%;width:14%;height:12%">+</div>`,
-   text:"Mobil zuerst: fünf Haupttabs unten, weitere im Menü; ab Tablet Seitenleiste wie L1."},
-  {id:"L3",name:"Drei Spalten: Baum · Detail · Mindmap",c:"y",empf:false,
-   mk:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="side" style="left:2%;top:11%;width:26%;bottom:3%"><span class="lbl">Baum</span></div><div class="main" style="left:30%;top:11%;width:34%;bottom:3%"><span class="lbl">Detail</span><div class="ln" style="top:25%"></div><div class="ln" style="top:37%"></div></div><div class="main" style="left:66%;top:11%;right:2%;bottom:3%"><span class="lbl">Mindmap</span><div class="node c" style="left:40%;top:45%;width:20%;height:14%"></div><div class="node" style="left:10%;top:25%;width:16%;height:11%"></div><div class="node" style="left:72%;top:25%;width:16%;height:11%"></div><div class="node" style="left:40%;top:75%;width:16%;height:11%"></div></div>`,
-   text:"Alles gleichzeitig sichtbar; mobil werden die Spalten zu Tabs. Hoher Platzbedarf."},
-  {id:"L4",name:"Mindmap-zentriert mit Seitenpanels",c:"y",empf:false,
-   mk:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;right:2%;bottom:3%"><span class="lbl">Mindmap Fokus</span><div class="node c" style="left:42%;top:42%;width:16%;height:16%"></div><div class="node" style="left:15%;top:20%;width:14%;height:11%"></div><div class="node" style="left:70%;top:20%;width:14%;height:11%"></div><div class="node" style="left:15%;top:70%;width:14%;height:11%"></div><div class="node" style="left:70%;top:70%;width:14%;height:11%"></div></div><div class="side" style="right:4%;top:15%;width:26%;height:40%"><span class="lbl">Knoten-Detail</span></div><div class="fab" style="left:5%;bottom:7%;width:14%;height:12%">+</div>`,
-   text:"Die Mindmap ist die Hauptansicht, Listen sind Overlays. Gut für Übersicht, schwächer für schnelle Listenarbeit."},
-  {id:"L5",name:"Horizont-Spalten (kurz · mittel · lang)",c:"y",empf:false,
-   mk:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;width:30%;bottom:3%;border-top:3px solid var(--yellow)"><span class="lbl">kurz</span><div class="k" style="left:6%;top:18%;width:88%;height:14%"></div><div class="k" style="left:6%;top:36%;width:88%;height:14%"></div></div><div class="main" style="left:35%;top:11%;width:30%;bottom:3%;border-top:3px solid var(--purple)"><span class="lbl">mittel</span><div class="k" style="left:6%;top:18%;width:88%;height:14%"></div></div><div class="main" style="left:68%;top:11%;right:2%;bottom:3%;border-top:3px solid var(--blue)"><span class="lbl">lang</span><div class="k" style="left:6%;top:18%;width:88%;height:14%"></div><div class="k" style="left:6%;top:36%;width:88%;height:14%"></div><div class="k" style="left:6%;top:54%;width:88%;height:14%"></div></div>`,
-   text:"Fristen sind die erste Ordnung; Hierarchie zweitrangig. Als Zusatzansicht in jeder Variante möglich."},
-  {id:"L6",name:"Dashboard-Kacheln",c:"y",empf:false,
-   mk:`<div class="bar" style="left:0;top:0;right:0;height:8%"></div><div class="main" style="left:2%;top:11%;width:47%;height:40%"><span class="lbl">Heute</span></div><div class="main" style="left:51%;top:11%;right:2%;height:40%"><span class="lbl">Kalender</span></div><div class="main" style="left:2%;top:54%;width:47%;bottom:3%"><span class="lbl">Ideen</span></div><div class="main" style="left:51%;top:54%;right:2%;bottom:3%"><span class="lbl">Workflow</span></div>`,
-   text:"Startseite mit Kacheln, jede öffnet die Ansicht. Ein Klick mehr je Aufgabe."}
-];
-const FRISTEN = [
+const ORIGINAL = {
+arch: [
+ ["E6","CLAUDE.md","p"],["E6","Skills notizblock-*","p"],["E6","settings.json Hook","p"],["E6","Präferenzen","g"],["E6","TOKEN_Cockpit","y"],
+ ["E1","Repo token","g"],["E1","Branch gesetzt","g"],["E1","Git = Versionen","g"],["E1","prompts/","p"],["E1","docs/Handover","p"],
+ ["E2","lokal file://","g"],["E2","Artefakt sample","g"],["E2","Artefakt downloads","g"],["E2","Artefakt db","p"],["E2","Artefakt mcp","p"],["E2","GitHub Pages","p"],["E2","Cloudflare Pages","p"],
+ ["E3","A1 Copybox","g"],["E3","A3 sample","g"],["E3","A5 Claude Code","g"],["E3","A2 API-Schlüssel","y"],["E3","A6 mcp→Claude Code","p"],["E3","A7 Routine","p"],["E3","A4 Worker","p"],
+ ["E4","Routinen (3 vorhanden)","g"],["E4","Nutzungslimit 09.10.","r"],["E4","Zapier-Zaps","y"],["E4","SessionStart-Hook","p"],
+ ["E5","Google Calendar","g"],["E5","Gmail","g"],["E5","Google Drive","g"],["E5","Wispr Flow","g"],["E5","Whimsical","g"],["E5","Zapier Outlook (Konto fehlt)","y"],["E5","OneDrive (hotmail)","g"],["E5","Cloudflare-Konnektor","y"],["E5","Notion","n"],["E5","Todoist/Dropbox/Mem","n"]
+].map((a,i)=>({id:"I"+(i+1),layer:a[0],name:a[1],c:a[2]})),
+sections: [
+{id:"ki",num:2,prefix:"A",mode:"multi",title:"KI-Anbindung: Sortierung, Ideen-Ausarbeitung, Prompt-Flächen",intro:"Jede Karte zeigt den Datenfluss: wo der Text hingeht, wer antwortet, wie das Ergebnis zurückkommt. Nachvollziehbarkeit = wie sichtbar jeder Schritt für dich ist.",
+ rec:"<b>Empfehlung aus Sachlage:</b> A1 + A3 + A5 in V1 (A1 immer vorhanden, A3 im Artefakt, A5 für den Ausbau des Tools). A2 als abschaltbare Option. A6 und A7 in Phase 2, A4 in Phase 3. <b>Aus Verhalten:</b> automatisch vor manuell, daher A3 und A6 bevorzugt, A1 bleibt Sicherheitsnetz.",
+ items:[
+  {id:"A1",name:"Prompt-Copybox",c:"g",empf:true,phase:"V1",beleg:"VERIFIZIERT",flow:{n:["Tool","Zwischenablage","Claude Chat","Tool"],e:[[0,1,"Prompt + Struktur"],[1,2,"einfügen"],[2,3,"JSON zurück"]]},props:[["Schlüssel/Konto","keiner"],["Nachvollziehbar","maximal, jeder Schritt sichtbar"],["Funktioniert","überall, auch offline erzeugbar"],["Kosten","claude.ai-Nutzung"]],plus:["kein Netzaufruf aus der Datei","Prompt-Vorlage liegt im Repo unter prompts/"],minus:["zwei manuelle Kopierschritte"]},
+  {id:"A2",name:"API-Schlüssel direkt",c:"y",empf:false,phase:"Option",beleg:"WAHRSCHEINLICH",flow:{n:["Tool","Anthropic-API","Tool"],e:[[0,1,"Aufruf mit Schlüssel"],[1,2,"JSON"]]},props:[["Schlüssel/Konto","API-Schlüssel, nur Sitzungsspeicher"],["Nachvollziehbar","Vorschlag sichtbar, Aufruf automatisch"],["Funktioniert","lokal und gehostet, Schlüssel je Sitzung neu"],["Kosten","API-Guthaben, getrennt von claude.ai"]],plus:["automatisch, ohne Artefakt"],minus:["Schlüssel im Browser = Restrisiko","Browser-Direktzugriff erfordert spezielle Kopfzeile, zu testen"]},
+  {id:"A3",name:"Artefakt „Claude fragen“ (sample)",c:"g",empf:true,phase:"V1 (Artefakt)",beleg:"VERIFIZIERT",flow:{n:["Tool als Artefakt","claude.ai","Tool"],e:[[0,1,"sample()"],[1,2,"JSON"]]},props:[["Schlüssel/Konto","dein claude.ai-Konto, Konsent beim ersten Aufruf"],["Nachvollziehbar","Vorschlag sichtbar, Aufruf automatisch"],["Funktioniert","nur wenn als Artefakt geöffnet"],["Kosten","claude.ai-Nutzung"]],plus:["kein Schlüssel","fällt lokal automatisch auf A1 zurück"],minus:["nicht in lokal geöffneter Datei"]},
+  {id:"A4",name:"Cloudflare Worker",c:"p",empf:false,phase:"Phase 3",beleg:"WAHRSCHEINLICH",flow:{n:["Tool","Worker (Schlüssel)","Anthropic-API","Tool"],e:[[0,1,"Anfrage"],[1,2,"Aufruf"],[2,3,"JSON über Worker"]]},props:[["Schlüssel/Konto","Cloudflare-Konto, Konnektor im Konto vorhanden, hier nicht geladen"],["Nachvollziehbar","wie A2, Schlüssel serverseitig"],["Funktioniert","gehostet"],["Kosten","API-Guthaben + Cloudflare Free"]],plus:["Grundlage für Backend: Geräteabgleich (KV/D1), Outlook-Abgleich"],minus:["Deployment nötig (Wrangler), zweite Infrastruktur"]},
+  {id:"A5",name:"Claude Code über Repo",c:"g",empf:true,phase:"V1 (Ausbau)",beleg:"VERIFIZIERT",flow:{n:["Tool","Repo (Inbox / Prompt-Fläche)","Claude Code","Repo","Tool"],e:[[0,1,"Export"],[1,2,"Sitzung liest"],[2,3,"Commit"],[3,4,"neu laden"]]},props:[["Schlüssel/Konto","GitHub, vorhanden"],["Nachvollziehbar","Git-Historie = Protokoll"],["Funktioniert","überall"],["Kosten","claude.ai-Nutzung"]],plus:["einziger Weg, mit dem das Tool sich selbst umbaut","dieser Chat läuft bereits so"],minus:["asynchron, Zwischenschritt über Repo"]},
+  {id:"A6",name:"Artefakt → Claude Code Remote (mcp)",c:"p",empf:false,phase:"Phase 2",beleg:"WAHRSCHEINLICH",flow:{n:["Tool als Artefakt","Claude Code Sitzung","Repo","Artefakt"],e:[[0,1,"create_session mit Prompt-Fläche"],[1,2,"Commit"],[2,3,"Republish"]]},props:[["Schlüssel/Konto","claude.ai-Konto, Konnektor „Claude Code Remote“"],["Nachvollziehbar","Sitzungsprotokoll + Git"],["Funktioniert","nur als Artefakt"],["Kosten","claude.ai-Nutzung"]],plus:["A5 ohne manuelles Kopieren: Knopf im Tool startet Umbau"],minus:["Konnektoraufruf aus Artefakt ungetestet"]},
+  {id:"A7",name:"Routine (zeitgesteuert)",c:"p",empf:false,phase:"Phase 2",beleg:"VERIFIZIERT",flow:{n:["Repo inbox/","Routine täglich","Repo pakete/","Tool"],e:[[0,1,"liest"],[1,2,"Update-Paket JSON"],[2,3,"Import-Knopf"]]},props:[["Schlüssel/Konto","wie A5"],["Nachvollziehbar","Paket + Git"],["Funktioniert","überall"],["Kosten","claude.ai-Nutzung je Lauf; POLYGLOTT-Lauf am 09.10. am Nutzungslimit gescheitert"]],plus:["Muster aus POLYGLOTT übertragbar"],minus:["Kontingent beachten, erst nach Stabilisierung"]}
+ ]},
+{id:"outlook",num:3,prefix:"B",mode:"multi",title:"Outlook-Kalender: Anbindung",intro:"Befund: Microsoft Outlook ist in Zapier bereits als App freigeschaltet (32 Aktionen), das Outlook-Konto ist dort noch nicht verbunden. OneDrive ist mit dem hotmail-Konto verbunden, Indiz für ein privates Microsoft-Konto.",
+ rec:"<b>Empfehlung aus Sachlage:</b> V1 = B1 + B2-Versuch. <b>Phase 1b = B4</b>, ein Schritt durch dich (Outlook-Konto in Zapier verbinden), danach Lesen und Schreiben ohne Azure-Registrierung. Phase 2 = B3 oder B7, sobald https-Hosting steht.",
+ items:[
+  {id:"B1",name:"ICS-Datei (Export / Import)",c:"g",empf:true,phase:"V1",beleg:"VERIFIZIERT",flow:{n:["Outlook",".ics","Tool"],e:[[0,1,"exportieren"],[1,2,"importieren"],[2,1,"exportieren"],[1,0,"importieren"]]},props:[["Voraussetzung","keine"],["Lesen / Schreiben","beides, manuell"],["Automatisch","nein"]],plus:["sofort, ohne Konto"],minus:["Handarbeit je Abgleich"]},
+  {id:"B2",name:"Veröffentlichte ICS-URL",c:"y",empf:true,phase:"V1-Versuch",beleg:"UNSICHER",flow:{n:["Outlook „veröffentlichen“","ICS-URL","Tool"],e:[[0,1,"Link"],[1,2,"Abruf im Browser (CORS?)"]]},props:[["Voraussetzung","URL aus Outlook kopieren"],["Lesen / Schreiben","nur lesen"],["Automatisch","ja, beim Öffnen"]],plus:["kein Konto im Tool"],minus:["Browser-Abruf kann an CORS scheitern; dann Umweg über A4 oder Artefakt-mcp"]},
+  {id:"B3",name:"Microsoft Graph + MSAL",c:"y",empf:false,phase:"Phase 2",beleg:"WAHRSCHEINLICH",flow:{n:["Tool (https)","Microsoft-Anmeldung","Graph-API","Outlook"],e:[[0,1,"Login"],[1,2,"Token"],[2,3,"lesen / schreiben"]]},props:[["Voraussetzung","Azure-App-Registrierung (kostenlos, ca. 10 Min) + https-Ursprung, nicht file://"],["Lesen / Schreiben","beides, live"],["Automatisch","ja"]],plus:["echter beidseitiger Abgleich"],minus:["Hosting nötig (C3/C4); im Artefakt-Iframe Popup/Redirect unsicher","eine externe Bibliothek (MSAL) per CDN"]},
+  {id:"B4",name:"Zapier → Outlook",c:"g",empf:true,phase:"Phase 1b",beleg:"VERIFIZIERT (App) · Aktionen ungetestet",flow:{n:["Tool / Chat / Artefakt-mcp","Zapier-Aktion","Outlook"],e:[[0,1,"Termin anlegen / suchen"],[1,2,"API"],[2,0,"Ergebnis"]]},props:[["Voraussetzung","Outlook-Konto in Zapier verbinden (App bereits freigeschaltet, 32 Aktionen)"],["Lesen / Schreiben","beides je Aktion"],["Automatisch","ja"]],plus:["kein Azure, ein Schritt durch dich","sofort aus dem Chat nutzbar, im Artefakt per mcp"],minus:["Zapier-Kontingent (Free-Stufe)","Aktionen bis Kontoverbindung ungetestet"]},
+  {id:"B5",name:"Microsoft-365-Konnektor in claude.ai",c:"y",empf:false,phase:"prüfen",beleg:"UNSICHER",flow:{n:["Artefakt","Konnektor","Outlook"],e:[[0,1,"mcp"],[1,2,"API"]]},props:[["Voraussetzung","Konnektor für dein Konto verfügbar?"],["Lesen / Schreiben","je Konnektor"],["Automatisch","ja"]],plus:["ohne Zapier"],minus:["Verfügbarkeit je Kontotyp unklar"]},
+  {id:"B6",name:"Google Calendar als Brücke",c:"y",empf:false,phase:"Alternative",beleg:"VERIFIZIERT (Konnektor)",flow:{n:["Tool","Google Calendar","Outlook"],e:[[0,1,"Konnektor schreibt"],[1,2,"Outlook abonniert"]]},props:[["Voraussetzung","Google-Kalender in Outlook abonnieren"],["Lesen / Schreiben","Tool ↔ Google beidseitig, Outlook liest"],["Automatisch","ja, verzögert"]],plus:["Google-Konnektor ist bereits geladen"],minus:["nur sinnvoll, wenn Google ohnehin genutzt wird"]},
+  {id:"B7",name:"Cloudflare Worker + Graph-Dienstkonto",c:"p",empf:false,phase:"Phase 3",beleg:"WAHRSCHEINLICH",flow:{n:["Tool","Worker","Graph-API","Outlook"],e:[[0,1,"Anfrage"],[1,2,"App-Token"],[2,3,"Abgleich"]]},props:[["Voraussetzung","Azure-App + Cloudflare"],["Lesen / Schreiben","beides, serverseitig"],["Automatisch","ja, auch ohne offenes Tool"]],plus:["robustester Abgleich, Ökosystem-Backend"],minus:["größter Aufbau"]}
+ ]},
+{id:"ablage",num:4,prefix:"C",mode:"single",zusatz:true,title:"Ablage und Laufzeit: strukturelle Unterschiede",intro:"Gewählt war C2. Die Karten zeigen, was sich strukturell unterscheidet: wo die Datei liegt, wo sie läuft, wo die Daten bleiben, welche Funktionen dadurch möglich oder unmöglich sind.",
+ rec:"<b>Empfehlung aus Sachlage:</b> C2 jetzt (Repo = Quelle, Artefakt = Laufzeit mit Claude-Zugriff). C3 als Ausweich-Hosting, falls Mikrofon oder Microsoft-Anmeldung im Artefakt scheitern. C4 ab Phase 3 als Backend für Schlüssel, Geräteabgleich und Outlook-Abgleich. C6 als Zusatz auf jeder gehosteten Variante.",
+ items:[
+  {id:"C1",name:"Nur Repo, lokal öffnen",c:"n",empf:false,phase:"Sicherheitsnetz",beleg:"VERIFIZIERT",flow:{n:["Repo","Download","Browser file://","localStorage"],e:[[0,1,"Datei"],[1,2,"öffnen"],[2,3,"Autosave"]]},props:[["https-URL","nein"],["Geräteabgleich","nur Self-Download / Import"],["Mikrofon","ja (Chrome, Edge, Safari)"],["KI direkt","nein, nur A1 / A2"],["Microsoft-Anmeldung (B3)","nein"],["Einrichtung","keine"]]},
+  {id:"C2",name:"Repo + claude.ai-Artefakt",c:"g",empf:true,phase:"gewählt",beleg:"VERIFIZIERT",flow:{n:["Repo (Quelle)","Publish","Artefakt-URL","Claude / db / mcp"],e:[[0,1,"Claude Code"],[1,2,"Laufzeit"],[2,3,"sample, downloads, db, mcp"]]},props:[["https-URL","ja, auf Handy und Desktop"],["Geräteabgleich","mit db-Fähigkeit (Phase 2)"],["Mikrofon","unsicher im Iframe, Test Phase 2"],["KI direkt","ja (A3)"],["Microsoft-Anmeldung (B3)","unsicher"],["Einrichtung","Publish aus Claude Code"]]},
+  {id:"C3",name:"GitHub Pages",c:"y",empf:false,phase:"Ausweich",beleg:"VERIFIZIERT",flow:{n:["Repo-Branch","Pages-Build","https-Seite","localStorage"],e:[[0,1,"Push"],[1,2,"automatisch"],[2,3,"je Gerät"]]},props:[["https-URL","ja, feste Domain"],["Geräteabgleich","nein"],["Mikrofon","ja"],["KI direkt","nein, nur A1 / A2"],["Microsoft-Anmeldung (B3)","ja"],["Einrichtung","Pages aktivieren, ein Klick"]]},
+  {id:"C4",name:"Cloudflare Pages + Worker + KV/D1",c:"p",empf:false,phase:"Phase 3",beleg:"WAHRSCHEINLICH",flow:{n:["Repo","Cloudflare Pages","Worker","KV / D1"],e:[[0,1,"Deploy"],[1,2,"API-Aufrufe"],[2,3,"Daten, Schlüssel"]]},props:[["https-URL","ja"],["Geräteabgleich","ja"],["Mikrofon","ja"],["KI direkt","ja (A4)"],["Microsoft-Anmeldung (B3)","ja, auch B7"],["Einrichtung","Cloudflare-Konto, Wrangler; Konnektor im Konto vorhanden"]]},
+  {id:"C5",name:"Notion als Datenhaltung",c:"r",empf:false,phase:"abgelehnt für Kern",beleg:"VERIFIZIERT",flow:{n:["Notion-Datenbanken","Konnektor","Claude"],e:[[0,1,"API"],[1,2,"lesen / schreiben"]]},props:[["https-URL","ja"],["Geräteabgleich","ja"],["Mikrofon","nur Notion-App"],["KI direkt","über Chat"],["Microsoft-Anmeldung (B3)","nein"],["Einrichtung","Datenbanken anlegen; Mindmap und Kalenderlogik dort begrenzt"]]},
+  {id:"C6",name:"PWA-Zusatz (auf C2 / C3 / C4)",c:"y",empf:true,phase:"Phase 2",beleg:"VERIFIZIERT",flow:{n:["gehostete Seite","Manifest + Service Worker","Startbildschirm-App"],e:[[0,1,"ergänzen"],[1,2,"installieren, offline"]]},props:[["https-URL","wie Basis"],["Geräteabgleich","wie Basis"],["Mikrofon","wie Basis"],["KI direkt","wie Basis"],["Microsoft-Anmeldung (B3)","wie Basis"],["Einrichtung","gering; im Artefakt Service Worker nicht möglich, daher nur C3 / C4"]]}
+ ]},
+{id:"layout",num:"5a",prefix:"L",mode:"single",title:"Grundlayout",sub:true,items:[
+  {id:"L1",name:"Seitenleiste + Hauptfläche",c:"y",empf:false,mk:"L1",text:"Desktop-Muster; mobil klappt die Leiste ein. Eingabe als schwebender Knopf."},
+  {id:"L2",name:"Untere Tab-Leiste, Seitenleiste ab Tablet",c:"g",empf:true,mk:"L2",text:"Mobil zuerst: fünf Haupttabs unten, weitere im Menü; ab Tablet Seitenleiste wie L1."},
+  {id:"L3",name:"Drei Spalten: Baum · Detail · Mindmap",c:"y",empf:false,mk:"L3",text:"Alles gleichzeitig sichtbar; mobil werden die Spalten zu Tabs. Hoher Platzbedarf."},
+  {id:"L4",name:"Mindmap-zentriert mit Seitenpanels",c:"y",empf:false,mk:"L4",text:"Die Mindmap ist die Hauptansicht, Listen sind Overlays. Gut für Übersicht, schwächer für schnelle Listenarbeit."},
+  {id:"L5",name:"Horizont-Spalten (kurz · mittel · lang)",c:"y",empf:false,mk:"L5",text:"Fristen sind die erste Ordnung; Hierarchie zweitrangig. Als Zusatzansicht in jeder Variante möglich."},
+  {id:"L6",name:"Dashboard-Kacheln",c:"y",empf:false,mk:"L6",text:"Startseite mit Kacheln, jede öffnet die Ansicht. Ein Klick mehr je Aufgabe."}
+ ]},
+{id:"fristen",num:"5b",prefix:"F",mode:"single",title:"Fristenfarben (kurz / mittel / lang / keiner)",sub:true,items:[
   {id:"F1",name:"Orange · Gelb · Blau",c:"g",empf:true,sw:["#e07a1f","#d4a92a","#2b63c6","#9aa7b5"],text:"Warm = nah, kühl = fern. Status-Ampel bleibt getrennt (Ampel hat kein Orange)."},
   {id:"F2",name:"Rot · Lila · Petrol",c:"y",empf:false,sw:["#d14d4d","#7b5cc9","#1f8a8a","#9aa7b5"],text:"Kontrastreicher; Rot kollidiert mit der Status-Ampel „dringend“."},
   {id:"F3",name:"Eine Farbe, drei Stufen",c:"y",empf:false,sw:["#0f4c5c","#2e86a0","#9ccbd8","#c9d2da"],text:"Ruhig, einheitlich; auf kleinen Pillen schwerer unterscheidbar."}
-];
-const FOKUS = [
-  {id:"M1",name:"Radial: Fokus im Zentrum, Ring der Kinder",c:"g",empf:true,svg:focusRadial(),text:"Klick auf einen Knoten setzt ihn ins Zentrum; Elternpfad als Brotkrumen oben; „Gesamt“-Knopf zurück."},
-  {id:"M2",name:"Baum links nach rechts, Fokus hervorgehoben",c:"y",empf:false,svg:focusTree(),text:"Lesbar bei vielen Kindern; Elternkette bleibt links sichtbar; weniger „Mindmap“-Charakter."}
-];
-const EINGABE = [
-  {id:"E1",name:"Schwebender Knopf unten → Eingabeblatt",c:"g",empf:true,text:"Überall erreichbar, öffnet Textfeld + Mikrofon + Vorschlagskarte. Mobil Standard."},
+ ]},
+{id:"fokus",num:"5c",prefix:"M",mode:"single",title:"Mindmap-Fokus",sub:true,items:[
+  {id:"M1",name:"Radial: Fokus im Zentrum, Ring der Kinder",c:"g",empf:true,svg:"radial",text:"Klick auf einen Knoten setzt ihn ins Zentrum; Elternpfad als Brotkrumen oben; „Gesamt“-Knopf zurück."},
+  {id:"M2",name:"Baum links nach rechts, Fokus hervorgehoben",c:"y",empf:false,svg:"tree",text:"Lesbar bei vielen Kindern; Elternkette bleibt links sichtbar; weniger „Mindmap“-Charakter."}
+ ]},
+{id:"eingabe",num:"5d",prefix:"E",mode:"single",title:"Eingabefeld",sub:true,items:[
+  {id:"E1",name:"Schwebender Knopf unten → Eingabeblatt",c:"g",empf:true,mk:"V_eingabe",text:"Überall erreichbar, öffnet Textfeld + Mikrofon + Vorschlagskarte. Mobil Standard."},
   {id:"E2",name:"Feste Eingabezeile oben",c:"y",empf:false,text:"Immer sichtbar, kostet Höhe auf dem Handy."},
   {id:"E3",name:"Eigener Tab „Inbox“",c:"y",empf:false,text:"Sammelt Eingaben, Sortierung in Stapeln; weniger spontan."}
-];
-
-/* ---------- SVG-Helfer ---------- */
-function flowSvg(f, hl){
-  const n=f.n.length, w=Math.max(300, n*118), bw=104, gap=14, y=34, h=f.e.some(e=>e[0]>e[1])?96:70;
+ ]},
+{id:"ansichten",num:"5e",prefix:"V",mode:"multi",selLabel:"in V1",title:"Ansichten-Vorschau: alle 12 Bereiche des Werkzeugs",sub:true,intro:"Jede Ansicht als schematische Vorschau mit Beispielinhalt. Schalter „in V1“ bestimmt, ob die Ansicht in Version 1 gebaut wird.",items:[
+  {id:"V1",name:"Outliner (Hierarchie)",c:"g",empf:true,mk:"V_outliner",text:"Baum mit Ein-/Ausklappen, Drag-and-drop, Inline-Bearbeitung; Pillen für Typ, Status, Horizontpunkt."},
+  {id:"V2",name:"To-do",c:"g",empf:true,mk:"V_todo",text:"Filter offen/aktiv/erledigt, Gruppierung nach Horizont oder Bereich, Fälligkeit, Abhaken."},
+  {id:"V3",name:"Kalender",c:"g",empf:true,mk:"V_kalender",text:"Monat/Woche/Tag, Termine und fällige To-dos, Drag auf anderen Tag, ICS-Import/-Export, ICS-URL-Abruf."},
+  {id:"V4",name:"Mindmap gesamt",c:"g",empf:true,mk:"V_mindmap",text:"Radiales Layout, Zoom und Verschieben, Rand = Horizont, Tiefe wählbar, Klick auf Knoten öffnet Fokus."},
+  {id:"V5",name:"Mindmap Fokus",c:"g",empf:true,mk:"V_fokus",text:"Gewählter Knoten im Zentrum, nur Teilbaum, Elternpfad als Brotkrumen, „Gesamt“ zurück."},
+  {id:"V6",name:"Ideen",c:"g",empf:true,mk:"V_ideen",text:"Kanban roh → ausgearbeitet → geplant → umsetzung → integriert; „Ausarbeiten“ erzeugt KI-Vorschlag mit Prüfkarte."},
+  {id:"V7",name:"Workflow",c:"g",empf:true,mk:"V_workflow",text:"Pipeline je Tool-Knoten mit Schrittstatus, Routine-Status als Pille, Gesamtfluss des Ökosystems."},
+  {id:"V8",name:"Instrumente",c:"g",empf:true,mk:"V_instrumente",text:"Architekturkarte E1–E6 aus Instrument-Knoten, Status-Ampel, Nutzung, nächster Schritt, Freischalt-Anleitungen."},
+  {id:"V9",name:"Ausbau (Prompt-Flächen)",c:"g",empf:true,mk:"V_ausbau",text:"Jede Fläche „Als Bauauftrag exportieren“ → vollständiger Claude-Code-Prompt als Copybox; Phase 2 direkt starten."},
+  {id:"V10",name:"Protokoll",c:"g",empf:true,mk:"V_protokoll",text:"Alle KI-Vorschläge und Änderungen mit Vorher/Nachher, Rückgängig je Eintrag."},
+  {id:"V11",name:"Backend",c:"g",empf:true,mk:"V_backend",text:"Bauplan, Entscheidungen, Einstellungen, Optionsregister (anlegen, bearbeiten, löschen), Anforderungen, Bauaufträge, Protokoll, Export/Import, Regeln."},
+  {id:"V12",name:"Eingabeblatt",c:"g",empf:true,mk:"V_eingabe",text:"Schwebender Knopf öffnet Textfeld mit Mikrofon; Vorschlagskarte mit Ziel, Typ, Horizont, Datum; Übernehmen / Ändern / Verwerfen."}
+ ]},
+{id:"alt",num:6,prefix:"P",mode:"multi",selLabel:"bestätigt",title:"Alt-Projekte: Kandidaten bestätigen",intro:"Aus deinen Routinen und Präferenzen abgeleitet. Bestätigte Projekte werden in V1 als Projekt-Knoten mit Status „wartet“ und Vorlage (Name, Stand, letzter Schritt, Horizont, nächster Schritt) angelegt.",alt:true,items:[
+  {id:"P1",name:"POLYGLOTT MASTER v2.41 / abrechnung_scans_v8",c:"g",empf:true,stand:"HTML-Master mit Update-Paket, tägliche Routine aktiv; Lauf vom 09.10. am Nutzungslimit gescheitert",ein:"Tool-Knoten mit Workflow und Routine-Status",horizont:"kurz",next:"Routine-Kontingent prüfen, Tool-Knoten anlegen"},
+  {id:"P2",name:"USINE DASHBOARDS Cockpit",c:"g",empf:true,stand:"HTML-Cockpit mit CMD_AKTUELL.md; Regel-Scan-Routine pausiert",ein:"Tool-Knoten; Regel-Scan-Muster für den Notizblock übernehmen",horizont:"mittel",next:"Cockpit-Stand sichten, Regel-Scan-Muster übertragen"},
+  {id:"P3",name:"TOKEN_Cockpit_v1",c:"y",empf:true,stand:"Präferenz- und Regelwerkzeug laut Präferenzen; Stand unbekannt",ein:"Tool-Knoten; Regelupdates dorthin",horizont:"mittel",next:"Datei liefern, Stand feststellen"},
+  {id:"P4",name:"Wohnungssuche (Notion Wohnungspool)",c:"y",empf:true,stand:"stündliche Routine pausiert, Notion-Datenbank vorhanden",ein:"Projekt-Knoten mit Horizont",horizont:"lang",next:"entscheiden: fortführen oder archivieren"}
+ ]}
+]};
+</script>
+<script>
+/* ============ SVG-Helfer ============ */
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function flowSvg(f){
+  if(!f||!f.n||!f.n.length) return "";
+  const n=f.n.length, bw=104, gap=14, w=Math.max(300, n*(bw+gap)+6), y=34, h=(f.e||[]).some(e=>e[0]>e[1])?96:70;
   const xs=f.n.map((_,i)=>10+i*(bw+gap));
   let s=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Datenfluss" style="color:var(--fg)" font-family="var(--font)" font-size="11"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="currentColor"/></marker></defs>`;
-  f.n.forEach((t,i)=>{const h1=t.length>18; s+=`<rect x="${xs[i]}" y="${y-16}" width="${bw}" height="32" rx="6" fill="var(--surface2)" stroke="${i===0||i===n-1?'var(--accent)':'currentColor'}" stroke-width="1"/>`;
-    if(h1){const a=t.slice(0,t.lastIndexOf(' ',18)>0?t.lastIndexOf(' ',18):18), b=t.slice(a.length).trim(); s+=`<text x="${xs[i]+bw/2}" y="${y-2}" text-anchor="middle" fill="currentColor">${esc(a)}</text><text x="${xs[i]+bw/2}" y="${y+10}" text-anchor="middle" fill="currentColor">${esc(b)}</text>`;}
+  f.n.forEach((t,i)=>{t=String(t); const h1=t.length>18; s+=`<rect x="${xs[i]}" y="${y-16}" width="${bw}" height="32" rx="6" fill="var(--surface2)" stroke="${i===0||i===n-1?'var(--accent)':'currentColor'}" stroke-width="1"/>`;
+    if(h1){const cut=t.lastIndexOf(' ',18)>0?t.lastIndexOf(' ',18):18; const a=t.slice(0,cut), b=t.slice(cut).trim(); s+=`<text x="${xs[i]+bw/2}" y="${y-2}" text-anchor="middle" fill="currentColor">${esc(a)}</text><text x="${xs[i]+bw/2}" y="${y+10}" text-anchor="middle" fill="currentColor">${esc(b)}</text>`;}
     else s+=`<text x="${xs[i]+bw/2}" y="${y+4}" text-anchor="middle" fill="currentColor">${esc(t)}</text>`;});
-  f.e.forEach(e=>{const [a,b,l]=e; if(b>a){const x1=xs[a]+bw, x2=xs[b]; if(b===a+1){s+=`<line x1="${x1}" y1="${y}" x2="${x2-1}" y2="${y}" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/><text x="${(x1+x2)/2}" y="${y-20}" text-anchor="middle" fill="var(--muted)" font-size="9.5">${esc(l)}</text>`;}
+  (f.e||[]).forEach(e=>{const a=+e[0], b=+e[1], l=e[2]||""; if(isNaN(a)||isNaN(b)||!xs[a]&&xs[a]!==0||!xs[b]&&xs[b]!==0) return;
+    if(b>a){const x1=xs[a]+bw, x2=xs[b]; if(b===a+1){s+=`<line x1="${x1}" y1="${y}" x2="${x2-1}" y2="${y}" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/><text x="${(x1+x2)/2}" y="${y-20}" text-anchor="middle" fill="var(--muted)" font-size="9.5">${esc(l)}</text>`;}
       else{const ym=y-28; s+=`<path d="M${x1-bw/2} ${y-16} C ${x1-bw/2} ${ym}, ${x2+bw/2} ${ym}, ${x2+bw/2} ${y-17}" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/><text x="${(x1+x2)/2}" y="${ym-2}" text-anchor="middle" fill="var(--muted)" font-size="9.5">${esc(l)}</text>`;}}
-    else{const x1=xs[a]+bw/2, x2=xs[b]+bw/2, yb=y+16, ym=y+44; s+=`<path d="M${x1} ${yb} C ${x1} ${ym}, ${x2} ${ym}, ${x2} ${yb+1}" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#ar)"/><text x="${(x1+x2)/2}" y="${ym+2}" text-anchor="middle" fill="var(--accent)" font-size="9.5">${esc(l)}</text>`;}});
+    else if(b<a){const x1=xs[a]+bw/2, x2=xs[b]+bw/2, yb=y+16, ym=y+44; s+=`<path d="M${x1} ${yb} C ${x1} ${ym}, ${x2} ${ym}, ${x2} ${yb+1}" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#ar)"/><text x="${(x1+x2)/2}" y="${ym+2}" text-anchor="middle" fill="var(--accent)" font-size="9.5">${esc(l)}</text>`;}});
   return s+`</svg>`;
 }
-function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function focusRadial(){
   let s=`<svg viewBox="0 0 300 150" role="img" aria-label="Radiale Fokus-Mindmap" style="color:var(--fg)" font-size="10" font-family="var(--font)">`;
   s+=`<text x="8" y="14" fill="var(--muted)">Gesamt › Projekte › <tspan fill="var(--accent)" font-weight="600">Notizblock</tspan></text>`;
   const cx=150, cy=88, r=48; s+=`<circle cx="${cx}" cy="${cy}" r="58" fill="none" stroke="var(--accent)" stroke-dasharray="3 3" opacity=".5"/>`;
-  for(let i=0;i<6;i++){const a=i/6*Math.PI*2, x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r; s+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="currentColor" opacity=".5"/><circle cx="${x}" cy="${y}" r="9" fill="var(--surface2)" stroke="${['var(--yellow)','var(--blue)','var(--yellow)','var(--purple)','var(--blue)','var(--yellow)'][i]}" stroke-width="2"/>`;}
+  for(let i=0;i<6;i++){const a=i/6*Math.PI*2, x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r; s+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="currentColor" opacity=".5"/><circle cx="${x}" cy="${y}" r="9" fill="var(--surface2)" stroke="${['var(--h-kurz)','var(--h-lang)','var(--h-mittel)','var(--h-lang)','var(--h-kurz)','var(--h-mittel)'][i]}" stroke-width="2"/>`;}
   s+=`<circle cx="${cx}" cy="${cy}" r="20" fill="var(--accent)"/><text x="${cx}" y="${cy+4}" text-anchor="middle" fill="#fff" font-weight="600">Fokus</text>`;
   s+=`<rect x="222" y="124" width="70" height="20" rx="5" fill="var(--surface2)" stroke="currentColor"/><text x="257" y="138" text-anchor="middle" fill="currentColor">Gesamt</text></svg>`; return s;
 }
@@ -408,94 +398,198 @@ function focusTree(){
   s+=`<rect x="78" y="64" width="54" height="22" rx="5" fill="var(--surface2)" stroke="currentColor"/><text x="105" y="79" text-anchor="middle" fill="currentColor">Projekte</text>`;
   s+=`<rect x="148" y="60" width="62" height="30" rx="6" fill="var(--accent)"/><text x="179" y="79" text-anchor="middle" fill="#fff" font-weight="600">Fokus</text>`;
   s+=`<line x1="62" y1="75" x2="78" y2="75" stroke="currentColor"/><line x1="132" y1="75" x2="148" y2="75" stroke="currentColor"/>`;
-  [20,50,80,110,130].forEach((y,i)=>{s+=`<path d="M210 75 C 230 75, 230 ${y+8}, 248 ${y+8}" fill="none" stroke="currentColor" opacity=".6"/><rect x="248" y="${y}" width="44" height="16" rx="4" fill="var(--surface2)" stroke="${['var(--yellow)','var(--blue)','var(--purple)','var(--yellow)','var(--blue)'][i]}" stroke-width="1.5"/>`;});
+  [20,50,80,110,130].forEach((y,i)=>{s+=`<path d="M210 75 C 230 75, 230 ${y+8}, 248 ${y+8}" fill="none" stroke="currentColor" opacity=".6"/><rect x="248" y="${y}" width="44" height="16" rx="4" fill="var(--surface2)" stroke="${['var(--h-kurz)','var(--h-lang)','var(--h-mittel)','var(--h-kurz)','var(--h-lang)'][i]}" stroke-width="1.5"/>`;});
   return s+`</svg>`;
 }
-function archSvg(){
-  const W=980, rowH=74, pad=12, left=170, H=ARCH.length*rowH+20;
+function archSvg(items){
+  const W=980, rowH=74, pad=12, left=170, H=LAYERS.length*rowH+20;
   let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Architekturkarte: sechs Ebenen mit Instrumenten und Datenfluss" style="color:var(--fg)" font-family="var(--font)" font-size="11.5"><defs><marker id="ar2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="currentColor"/></marker></defs>`;
-  ARCH.forEach((r,i)=>{const y=10+i*rowH; s+=`<rect x="4" y="${y}" width="${W-8}" height="${rowH-8}" rx="8" fill="var(--surface2)" stroke="var(--line)"/><text x="${pad+4}" y="${y+22}" font-weight="700" fill="currentColor">${esc(r.e)}</text><text x="${pad+4}" y="${y+40}" fill="var(--muted)" font-size="10">${esc(r.inhalt)}</text><text x="${pad+4}" y="${y+56}" fill="var(--muted)" font-size="10">Phase ${esc(r.phase)}</text>`;
-    let x=left; r.items.forEach(([t,c])=>{const w=t.length*6.2+18; if(x+w>W-70){x=left;} s+=`<rect x="${x}" y="${y+18}" width="${w}" height="24" rx="12" fill="var(--surface)" stroke="${COL[c]}" stroke-width="1.6"/><circle cx="${x+11}" cy="${y+30}" r="4" fill="${COL[c]}"/><text x="${x+20}" y="${y+34}" fill="currentColor" font-size="10.5">${esc(t)}</text>`; x+=w+8;});});
-  // flow arrows at right margin
-  const rx=W-40; ARCH_FLOW.forEach(([a,b,l],k)=>{const ya=10+a*rowH+(rowH-8)/2, yb=10+b*rowH+(rowH-8)/2, dx=rx-(k%4)*7, up=b<a; s+=`<path d="M${dx} ${ya} L${dx} ${yb+(up?6:-6)}" fill="none" stroke="${up?'var(--accent)':'currentColor'}" stroke-width="1.2" ${up?'stroke-dasharray="4 3"':''} marker-end="url(#ar2)"/>`;});
+  LAYERS.forEach((r,i)=>{const y=10+i*rowH; s+=`<rect x="4" y="${y}" width="${W-8}" height="${rowH-8}" rx="8" fill="var(--surface2)" stroke="var(--line)"/><text x="${pad+4}" y="${y+22}" font-weight="700" fill="currentColor">${esc(r.e)}</text><text x="${pad+4}" y="${y+40}" fill="var(--muted)" font-size="10">${esc(r.inhalt)}</text><text x="${pad+4}" y="${y+56}" fill="var(--muted)" font-size="10">Phase ${esc(r.phase)}</text>`;
+    let x=left, row=0; items.filter(it=>it.layer===r.id).forEach(it=>{const t=it.name, w=t.length*6.2+18; if(x+w>W-70){x=left;row++;} const yy=y+18+(row%2)*0; s+=`<rect x="${x}" y="${yy}" width="${w}" height="24" rx="12" fill="var(--surface)" stroke="${COL[it.c]||COL.n}" stroke-width="1.6"/><circle cx="${x+11}" cy="${yy+12}" r="4" fill="${COL[it.c]||COL.n}"/><text x="${x+20}" y="${yy+16}" fill="currentColor" font-size="10.5">${esc(t)}</text>`; x+=w+8;});});
+  const rx=W-40; ARCH_FLOW.forEach(([a,b],k)=>{const ya=10+a*rowH+(rowH-8)/2, yb=10+b*rowH+(rowH-8)/2, dx=rx-(k%4)*7, up=b<a; s+=`<path d="M${dx} ${ya} L${dx} ${yb+(up?6:-6)}" fill="none" stroke="${up?'var(--accent)':'currentColor'}" stroke-width="1.2" ${up?'stroke-dasharray="4 3"':''} marker-end="url(#ar2)"/>`;});
   s+=`<text x="${W-8}" y="${H-4}" text-anchor="end" fill="var(--muted)" font-size="9.5">durchgezogen: Hinweg · gestrichelt: Rückweg (Ergebnis, Import, Commit)</text>`;
   return s+`</svg>`;
 }
 
-/* ---------- Rendering ---------- */
-const sel = {ki:[],outlook:[],ablage:"",layout:"",fristen:"",fokus:"",eingabe:"",alt:[]};
-const DEF = ()=>({ki:KI.filter(o=>o.empf).map(o=>o.id), outlook:OL.filter(o=>o.empf).map(o=>o.id), ablage:"C2", ablageZusatz:["C6"], layout:"L2", fristen:"F1", fokus:"M1", eingabe:"E1", alt:ALT.filter(a=>a.on).map(a=>a.id)});
-let state = DEF();
-try{const saved=localStorage.getItem("nb_entscheidungen_2236"); if(saved){const p=JSON.parse(saved); state=Object.assign(DEF(),p.state||{}); document.getElementById("altmore").value=p.altmore||""; document.getElementById("notes").value=p.notes||"";}}catch(e){}
+/* ============ Zustand ============ */
+const KEY="nb_entscheidungen_v2";
+const clone=o=>JSON.parse(JSON.stringify(o));
+function defaultState(){
+  const st={sel:{}, reg:{}, arch:clone(ORIGINAL.arch), deleted:{arch:[]}, log:[], notes:"", zusatz:[]};
+  ORIGINAL.sections.forEach(s=>{st.reg[s.id]=clone(s.items); st.deleted[s.id]=[]; st.sel[s.id]= s.mode==="multi" ? s.items.filter(i=>i.empf).map(i=>i.id) : (s.items.find(i=>i.empf)||{}).id||""; if(s.zusatz) st.zusatz=s.items.filter(i=>i.empf&&i.id!==st.sel[s.id]).map(i=>i.id);});
+  return st;
+}
+let state=defaultState();
+try{const raw=localStorage.getItem(KEY); if(raw){const p=JSON.parse(raw); state=Object.assign(defaultState(), p); ORIGINAL.sections.forEach(s=>{if(!state.reg[s.id]) state.reg[s.id]=clone(s.items); if(!state.deleted[s.id]) state.deleted[s.id]=[];}); if(!state.deleted.arch) state.deleted.arch=[];}}catch(e){}
+let saveTimer=null;
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+window.addEventListener("pagehide", save);
+function logChange(txt){ state.log.unshift(new Date().toLocaleString("de-DE")+" · "+txt); state.log=state.log.slice(0,200); }
+function secDef(id){return ORIGINAL.sections.find(s=>s.id===id)}
+function origItem(sec,id){ if(sec==="arch") return ORIGINAL.arch.find(i=>i.id===id); const s=secDef(sec); return s&&s.items.find(i=>i.id===id); }
+function itemChanged(sec,it){ const o=origItem(sec,it.id); return !o || JSON.stringify(o)!==JSON.stringify(it); }
 
-function pillC(c){return {g:"g",y:"y",r:"r",p:"p",b:"b",n:"n"}[c]||"n"}
-function phaseLabel(o){return `<span class="pill ${o.c==='r'?'r':o.phase.startsWith('Phase')?'p':o.c}">${esc(o.phase)}</span>`}
-function card(o, group, multi){
-  const checked = multi ? state[group].includes(o.id) : state[group]===o.id;
-  const zus = group==="ablage" && state.ablageZusatz.includes(o.id);
-  return `<article class="card ${pillC(o.c)} ${checked||zus?'sel':''}" data-id="${o.id}">
-    <div class="card-head"><span class="num" style="background:${COL[o.c]}">${o.id}</span><h3>${esc(o.name)}</h3>
-      <label><input type="${multi?'checkbox':'radio'}" name="${group}" value="${o.id}" ${checked?'checked':''} id="${group}-${o.id}"> ${multi?'wählen':'wählen'}</label>
-      ${group==="ablage"&&o.id!=="C2"&&o.c!=="r"?`<label><input type="checkbox" name="ablageZusatz" value="${o.id}" ${zus?'checked':''} id="ablageZusatz-${o.id}"> als Ergänzung</label>`:''}
+/* ============ Rendering ============ */
+function pillC(c){return COL[c]?c:"n"}
+function phasePill(o){ if(!o.phase) return ""; const c=o.c==="r"?"r":String(o.phase).startsWith("Phase")?"p":pillC(o.c); return `<span class="pill ${c}">${esc(o.phase)}</span>`; }
+function toolsHtml(sec,id){ return `<div class="card-tools"><button data-edit="${sec}:${id}">Bearbeiten</button><button data-del="${sec}:${id}">Löschen</button><button data-up="${sec}:${id}" title="nach oben">↑</button><button data-down="${sec}:${id}" title="nach unten">↓</button></div>`; }
+function card(s,o){
+  const multi=s.mode==="multi", checked= multi ? state.sel[s.id].includes(o.id) : state.sel[s.id]===o.id, zus=s.zusatz&&state.zusatz.includes(o.id);
+  const body = o.flow?`<figure>${flowSvg(o.flow)}<figcaption>Datenfluss ${esc(o.id)}</figcaption></figure>`
+    : o.mk&&MK[o.mk]?`<div class="mk">${MK[o.mk]}</div>`
+    : o.svg==="radial"?`<figure>${focusRadial()}</figure>` : o.svg==="tree"?`<figure>${focusTree()}</figure>`
+    : o.sw?`<div class="sw">${o.sw.map((c,i)=>`<span style="background:${esc(c)}" title="${['kurz','mittel','lang','keiner'][i]||''}"></span>`).join('')}<small>kurz · mittel · lang · keiner</small></div>`
+    : s.alt?`<div class="alt-prev ${esc(o.horizont||'mittel')}"><div><div class="small">Stand: ${esc(o.stand)}</div><div class="small">Eingliederung: ${esc(o.ein)}</div><div class="small">Horizont: <b>${esc(o.horizont||"mittel")}</b> · nächster Schritt: ${esc(o.next||"")}</div></div></div>` : "";
+  return `<article class="card ${pillC(o.c)} ${checked||zus?'sel':''} ${itemChanged(s.id,o)?'changed':''}" data-id="${esc(o.id)}">
+    <div class="card-head"><span class="num" style="background:${COL[o.c]||COL.n}">${esc(o.id)}</span><h3>${esc(o.name)}</h3>
+      <label><input type="${multi?'checkbox':'radio'}" name="${s.id}" value="${esc(o.id)}" ${checked?'checked':''} id="${s.id}-${esc(o.id)}"> ${esc(s.selLabel||"wählen")}</label>
+      ${s.zusatz&&o.c!=="r"?`<label><input type="checkbox" name="zusatz" value="${esc(o.id)}" ${zus?'checked':''} id="zusatz-${esc(o.id)}"> als Ergänzung</label>`:''}
     </div>
-    <div class="meta">${o.empf?'<span class="pill g">Empfehlung</span>':''}${phaseLabel(o)}<span class="pill n">${esc(o.beleg)}</span></div>
-    ${o.flow?`<figure>${flowSvg(o.flow)}<figcaption>Datenfluss ${o.id}</figcaption></figure>`:''}
-    <dl class="props">${o.props.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
-    ${o.plus?`<ul>${o.plus.map(t=>`<li style="color:var(--green)">+ ${esc(t)}</li>`).join('')}${(o.minus||[]).map(t=>`<li style="color:var(--red)">− ${esc(t)}</li>`).join('')}</ul>`:''}
+    <div class="meta">${o.empf?'<span class="pill g">Empfehlung</span>':''}${phasePill(o)}${o.beleg?`<span class="pill n">${esc(o.beleg)}</span>`:''}${itemChanged(s.id,o)?'<span class="pill b">geändert</span>':''}</div>
+    ${body}
+    ${o.props&&o.props.length?`<dl class="props">${o.props.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`:''}
+    ${(o.plus&&o.plus.length)||(o.minus&&o.minus.length)?`<ul>${(o.plus||[]).map(t=>`<li style="color:var(--green)">+ ${esc(t)}</li>`).join('')}${(o.minus||[]).map(t=>`<li style="color:var(--red)">− ${esc(t)}</li>`).join('')}</ul>`:''}
+    ${o.text?`<p class="small" style="margin:0">${esc(o.text)}</p>`:''}
+    ${toolsHtml(s.id,o.id)}
   </article>`;
 }
-function simpleCard(o, group, body){
-  const checked = state[group]===o.id;
-  return `<article class="card ${pillC(o.c)} ${checked?'sel':''}" data-id="${o.id}"><div class="card-head"><span class="num" style="background:${COL[o.c]}">${o.id}</span><h3>${esc(o.name)}</h3><label><input type="radio" name="${group}" value="${o.id}" ${checked?'checked':''} id="${group}-${o.id}"> wählen</label></div>
-  <div class="meta">${o.empf?'<span class="pill g">Empfehlung</span>':''}</div>${body}<p class="small" style="margin:0">${esc(o.text)}</p></article>`;
+function sectionHtml(s){
+  const items=state.reg[s.id], del=state.deleted[s.id]||[];
+  const head = s.sub ? `<div class="sec-head"><h3 style="margin:14px 0 0">${esc(s.num)} ${esc(s.title)}</h3><span class="pill b">${s.mode==="multi"?"Mehrfachwahl":"Einfachwahl"}</span><div class="tools"><button data-add="${s.id}">+ Neu</button></div></div>`
+    : `<div class="sec-head"><span class="num">${esc(s.num)}</span><h2>${esc(s.title)}</h2><span class="pill b">${s.mode==="multi"?"Mehrfachwahl":"Einfachwahl"}${s.zusatz?", Ergänzungen möglich":""}</span><div class="tools"><button data-add="${s.id}">+ Neu</button></div></div>`;
+  return `${head}${s.intro?`<p class="small">${esc(s.intro)}</p>`:''}<div class="grid">${items.map(o=>card(s,o)).join('')}</div>${del.length?`<div class="deleted">Gelöscht: ${del.map(d=>`<span class="pill n">${esc(d.id)} ${esc(d.name)}</span><button data-restore="${s.id}:${esc(d.id)}">wiederherstellen</button>`).join('')}</div>`:''}${s.rec?`<div class="rec">${s.rec}</div>`:''}`;
 }
 function render(){
-  document.getElementById("archfig").innerHTML = archSvg()+`<figcaption>Sechs Ebenen des Ökosystems. Jede Pille ist ein geprüftes Instrument, die Farbe sein Status. Pfeile am rechten Rand: Hinweg durchgezogen, Rückweg gestrichelt.</figcaption>`;
-  document.getElementById("archtable").innerHTML = ARCH.map(r=>`<tr><td><b>${esc(r.e)}</b></td><td>${esc(r.inhalt)}</td><td>${r.items.map(([t,c])=>`<span class="pill ${pillC(c)}" style="margin:2px 2px 2px 0">${esc(t)}</span>`).join('')}</td><td>${esc(r.phase)}</td></tr>`).join('');
-  document.getElementById("kigrid").innerHTML = KI.map(o=>card(o,"ki",true)).join('');
-  document.getElementById("olgrid").innerHTML = OL.map(o=>card(o,"outlook",true)).join('');
-  document.getElementById("abgrid").innerHTML = AB.map(o=>card(o,"ablage",false)).join('');
-  document.getElementById("lygrid").innerHTML = LAYOUT.map(o=>simpleCard(o,"layout",`<div class="mk">${o.mk}</div>`)).join('');
-  document.getElementById("frgrid").innerHTML = FRISTEN.map(o=>simpleCard(o,"fristen",`<div class="sw">${o.sw.map((c,i)=>`<span style="background:${c}" title="${['kurz','mittel','lang','keiner'][i]}"></span>`).join('')}<small>kurz · mittel · lang · keiner</small></div>`)).join('');
-  document.getElementById("fogrid").innerHTML = FOKUS.map(o=>simpleCard(o,"fokus",`<figure>${o.svg}</figure>`)).join('');
-  document.getElementById("eingrid").innerHTML = EINGABE.map(o=>simpleCard(o,"eingabe","")).join('');
-  document.getElementById("altlist").innerHTML = ALT.map(a=>`<label class="alt"><input type="checkbox" name="alt" value="${a.id}" ${state.alt.includes(a.id)?'checked':''} id="alt-${a.id}"><span><b>${esc(a.name)}</b><span class="small">Stand: ${esc(a.stand)}</span><br><span class="small">Eingliederung: ${esc(a.ein)}</span></span></label>`).join('');
+  document.getElementById("archfig").innerHTML = archSvg(state.arch)+`<figcaption>Sechs Ebenen des Ökosystems. Jede Pille ist ein geprüftes Instrument, die Farbe sein Status. Pfeile am rechten Rand: Hinweg durchgezogen, Rückweg gestrichelt.</figcaption>`;
+  document.getElementById("archtable").innerHTML = LAYERS.map(r=>`<tr><td><b>${esc(r.e)}</b></td><td>${esc(r.inhalt)}</td><td>${state.arch.filter(i=>i.layer===r.id).map(i=>`<button class="pill ${pillC(i.c)}" style="margin:2px 2px 2px 0;cursor:pointer" data-edit="arch:${esc(i.id)}">${esc(i.name)}${itemChanged("arch",i)?" ·":""}</button>`).join('')}</td><td>${esc(r.phase)}</td></tr>`).join('');
+  const da=state.deleted.arch||[]; document.getElementById("del-arch").innerHTML = da.length?`Gelöscht: ${da.map(d=>`<span class="pill n">${esc(d.name)}</span><button data-restore="arch:${esc(d.id)}">wiederherstellen</button>`).join('')}`:"";
+  ORIGINAL.sections.forEach(s=>{ const host=document.getElementById(s.sub?"sec-"+s.id:s.id); if(host) host.innerHTML=sectionHtml(s); });
+  document.getElementById("notes").value=state.notes||"";
   updateJson();
 }
-function readState(){
-  const q=(n)=>[...document.querySelectorAll(`input[name="${n}"]:checked`)].map(i=>i.value);
-  state.ki=q("ki"); state.outlook=q("outlook"); state.ablage=q("ablage")[0]||""; state.ablageZusatz=q("ablageZusatz");
-  state.layout=q("layout")[0]||""; state.fristen=q("fristen")[0]||""; state.fokus=q("fokus")[0]||""; state.eingabe=q("eingabe")[0]||""; state.alt=q("alt");
-  document.querySelectorAll(".card").forEach(c=>{const id=c.dataset.id; const on=[...state.ki,...state.outlook,state.ablage,...state.ablageZusatz,state.layout,state.fristen,state.fokus,state.eingabe].includes(id); c.classList.toggle("sel",on);});
-}
-function buildJson(){
-  const name=id=>{const all=[...KI,...OL,...AB,...LAYOUT,...FRISTEN,...FOKUS,...EINGABE]; const o=all.find(x=>x.id===id); return o?`${id} ${o.name}`:id;};
-  const altmore=document.getElementById("altmore").value.split("\n").map(s=>s.trim()).filter(Boolean);
-  return {
-    dokument:"Notizblock Entscheidungen Phase 0", version:"V1", stand:STAND, datei:"notizblock/entscheidungen_2026-10-09_2236.html",
-    entscheidungen:{
-      ki_anbindung: state.ki.map(name),
-      outlook: state.outlook.map(name),
-      ablage: name(state.ablage),
-      ablage_ergaenzungen: state.ablageZusatz.map(name),
-      layout: name(state.layout), fristenfarben: name(state.fristen), mindmap_fokus: name(state.fokus), eingabefeld: name(state.eingabe)
-    },
-    alt_projekte:{ bestaetigt: state.alt.map(id=>ALT.find(a=>a.id===id).name), weitere: altmore },
-    anmerkungen: document.getElementById("notes").value.trim(),
-    protokoll:{ vorschau_runde:"O1 gewählt (Entscheidung je Element, 09.10.2026)", instrumentarium_zuerst:"ja", naechste_phase:"Phase 1: Bau V1 + Repo-Gerüst" }
-  };
-}
-function updateJson(){ document.getElementById("jsonout").textContent = JSON.stringify(buildJson(), null, 2); save(); }
-function save(){ try{ localStorage.setItem("nb_entscheidungen_2236", JSON.stringify({state, altmore:document.getElementById("altmore").value, notes:document.getElementById("notes").value})); }catch(e){} }
-function toast(t){const el=document.getElementById("toast"); el.textContent=t; el.classList.add("on"); setTimeout(()=>el.classList.remove("on"),1400);}
 
-document.addEventListener("change", e=>{ if(e.target.matches("input")){ readState(); updateJson(); } });
-document.addEventListener("input", e=>{ if(e.target.matches("textarea")){ updateJson(); } });
-document.getElementById("copybtn").addEventListener("click", ()=>{
-  const txt=document.getElementById("jsonout").textContent;
-  const fb=()=>{const r=document.createRange(); r.selectNodeContents(document.getElementById("jsonout")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast("Text markiert, jetzt kopieren");};
-  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(()=>toast("JSON kopiert"), fb); } else fb();
+/* ============ Auswahl lesen ============ */
+function readSel(){
+  ORIGINAL.sections.forEach(s=>{ const q=[...document.querySelectorAll(`input[name="${s.id}"]:checked`)].map(i=>i.value); state.sel[s.id]= s.mode==="multi"? q : (q[0]||""); });
+  state.zusatz=[...document.querySelectorAll('input[name="zusatz"]:checked')].map(i=>i.value);
+  document.querySelectorAll(".card").forEach(c=>{const id=c.dataset.id; const on=Object.values(state.sel).some(v=>Array.isArray(v)?v.includes(id):v===id)||state.zusatz.includes(id); c.classList.toggle("sel",on);});
+}
+
+/* ============ JSON ============ */
+function nameOf(sec,id){ const it=(state.reg[sec]||[]).find(i=>i.id===id); return it?`${id} ${it.name}`:id; }
+function diff(){
+  const out={};
+  ORIGINAL.sections.forEach(s=>{ const cur=state.reg[s.id]; const ge=cur.filter(i=>origItem(s.id,i.id)&&itemChanged(s.id,i)); const neu=cur.filter(i=>!origItem(s.id,i.id)); const gel=(state.deleted[s.id]||[]).map(d=>d.id); if(ge.length||neu.length||gel.length) out[s.id]={geaendert:ge, neu:neu, geloescht:gel}; });
+  const ag=state.arch.filter(i=>origItem("arch",i.id)&&itemChanged("arch",i)), an=state.arch.filter(i=>!origItem("arch",i.id)), ad=(state.deleted.arch||[]).map(d=>d.id);
+  if(ag.length||an.length||ad.length) out.arch={geaendert:ag, neu:an, geloescht:ad};
+  return out;
+}
+function countChanges(){ const d=diff(); let n=0; Object.values(d).forEach(x=>n+=x.geaendert.length+x.neu.length+x.geloescht.length); return n; }
+function buildJson(){
+  const e={}; ORIGINAL.sections.forEach(s=>{ const v=state.sel[s.id]; e[s.id]= Array.isArray(v)? v.map(id=>nameOf(s.id,id)) : nameOf(s.id,v); });
+  e.ablage_ergaenzungen=state.zusatz.map(id=>nameOf("ablage",id));
+  return { dokument:META.dokument, version:META.version, stand:META.stand, datei:META.datei, entscheidungen:e,
+    alt_projekte:{ bestaetigt: state.sel.alt.map(id=>{const it=state.reg.alt.find(i=>i.id===id); return it?{name:it.name,horizont:it.horizont,stand:it.stand,naechster_schritt:it.next}:id;}) },
+    aenderungen: diff(), anmerkungen: state.notes||"",
+    protokoll:{ plan_freigabe:"Plan V4 genehmigt 09.10.2026, Plan-Freigabe = Baufreigabe", backend_quelle:"O2 Tool kanonisch, Repo-Markdown als Spiegel", naechste_phase:"Phase 1: Bau V1 + Repo-Gerüst + Backend" } };
+}
+function updateJson(){
+  document.getElementById("jsonout").textContent = JSON.stringify(buildJson(), null, 2);
+  const n=countChanges(); const cc=document.getElementById("changecount"); cc.textContent = n+" Änderung"+(n===1?"":"en")+" gegenüber Original"; cc.className="pill "+(n?"b":"n");
+  document.getElementById("log").innerHTML = state.log.length? state.log.slice(0,30).map(l=>`<div>${esc(l)}</div>`).join('') : "keine Änderungen";
+  save();
+}
+function toast(t){const el=document.getElementById("toast"); el.textContent=t; el.classList.add("on"); setTimeout(()=>el.classList.remove("on"),1500);}
+function copyText(txt, el){
+  const fb=()=>{ if(el){const r=document.createRange(); r.selectNodeContents(el); const s=getSelection(); s.removeAllRanges(); s.addRange(r);} toast("Text markiert, jetzt kopieren"); };
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(()=>toast("Kopiert"), fb); } else fb();
+}
+
+/* ============ Editor ============ */
+const FIELDS = {
+  std:[["name","Name","text"],["c","Status-Farbe","color"],["empf","Empfehlung","check"],["phase","Phase","text"],["beleg","Belegstufe","text"],["text","Beschreibung","area"],["props","Eigenschaften (eine je Zeile: Schlüssel: Wert)","area"],["plus","Plus (eine je Zeile)","area"],["minus","Minus (eine je Zeile)","area"],["flown","Datenfluss: Stationen (eine je Zeile)","area"],["flowe","Datenfluss: Pfeile (eine je Zeile: von>nach Beschriftung, Nummern ab 0)","area"]],
+  simple:[["name","Name","text"],["c","Status-Farbe","color"],["empf","Empfehlung","check"],["text","Beschreibung","area"]],
+  fristen:[["name","Name","text"],["c","Status-Farbe","color"],["empf","Empfehlung","check"],["sw","Farben kurz, mittel, lang, keiner (Hex, eine je Zeile)","area"],["text","Beschreibung","area"]],
+  alt:[["name","Name","text"],["c","Status-Farbe","color"],["empf","Empfehlung","check"],["stand","Stand","area"],["ein","Eingliederung","area"],["horizont","Horizont","horizont"],["next","Nächster Schritt","text"]],
+  arch:[["name","Name","text"],["layer","Ebene","layer"],["c","Status","color"]]
+};
+function fieldsFor(sec){ const s=secDef(sec); if(sec==="arch") return FIELDS.arch; if(s.alt) return FIELDS.alt; if(s.id==="fristen") return FIELDS.fristen; if(["layout","fokus","eingabe","ansichten"].includes(s.id)) return FIELDS.simple; return FIELDS.std; }
+let editing=null;
+function openEditor(sec,id){
+  const list= sec==="arch"? state.arch : state.reg[sec];
+  let it = id ? list.find(i=>i.id===id) : null;
+  const isNew=!it;
+  if(isNew){ const s=secDef(sec); const prefix= sec==="arch"?"I":s.prefix; let n=1; const all=[...list,...(state.deleted[sec]||[])]; while(all.find(i=>i.id===prefix+n)) n++; it={id:prefix+n,name:"",c:"y",empf:false}; if(sec==="arch") it.layer="E1"; if(s&&s.alt) it.horizont="mittel"; }
+  editing={sec,id:it.id,isNew};
+  document.getElementById("dlgtitle").textContent=(isNew?"Neu anlegen: ":"Bearbeiten: ")+it.id;
+  const f=fieldsFor(sec); const v=k=>{ if(k==="props") return (it.props||[]).map(p=>p[0]+": "+p[1]).join("\n"); if(k==="plus"||k==="minus"||k==="sw") return (it[k]||[]).join("\n"); if(k==="flown") return (it.flow&&it.flow.n||[]).join("\n"); if(k==="flowe") return (it.flow&&it.flow.e||[]).map(e=>e[0]+">"+e[1]+" "+(e[2]||"")).join("\n"); return it[k]==null?"":it[k]; };
+  document.getElementById("dlgbody").innerHTML = f.map(([k,l,t])=>{
+    if(t==="text") return `<label>${l}<input type="text" name="${k}" value="${esc(v(k))}"></label>`;
+    if(t==="area") return `<label>${l}<textarea name="${k}" rows="${k==="text"||k==="stand"||k==="ein"?2:3}">${esc(v(k))}</textarea></label>`;
+    if(t==="check") return `<label class="inl"><input type="checkbox" name="${k}" ${it[k]?'checked':''}> ${l}</label>`;
+    if(t==="color") return `<label>${l}<select name="${k}">${Object.keys(COLNAME).map(c=>`<option value="${c}" ${it.c===c?'selected':''}>${COLNAME[c]}</option>`).join('')}</select></label>`;
+    if(t==="horizont") return `<label>${l}<select name="${k}">${["kurz","mittel","lang","keiner"].map(h=>`<option ${it.horizont===h?'selected':''}>${h}</option>`).join('')}</select></label>`;
+    if(t==="layer") return `<label>${l}<select name="${k}">${LAYERS.map(L=>`<option value="${L.id}" ${it.layer===L.id?'selected':''}>${esc(L.e)}</option>`).join('')}</select></label>`;
+    return "";
+  }).join('');
+  document.getElementById("dlg").showModal();
+}
+function saveEditor(){
+  const fd=new FormData(document.getElementById("dlgform")); const {sec,id,isNew}=editing; const list= sec==="arch"? state.arch : state.reg[sec];
+  let it=list.find(i=>i.id===id); if(!it){ it={id}; list.push(it); }
+  const before=JSON.stringify(it);
+  fieldsFor(sec).forEach(([k,,t])=>{ const raw=fd.get(k); if(t==="check"){ it[k]=fd.has(k); return; } const s=(raw==null?"":String(raw));
+    if(k==="props"){ it.props=s.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const i=l.indexOf(":"); return i>0?[l.slice(0,i).trim(),l.slice(i+1).trim()]:[l,""];}); }
+    else if(k==="plus"||k==="minus"||k==="sw"){ it[k]=s.split("\n").map(l=>l.trim()).filter(Boolean); }
+    else if(k==="flown"){ it.flow=it.flow||{n:[],e:[]}; it.flow.n=s.split("\n").map(l=>l.trim()).filter(Boolean); }
+    else if(k==="flowe"){ it.flow=it.flow||{n:[],e:[]}; it.flow.e=s.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.match(/^(\d+)\s*>\s*(\d+)\s*(.*)$/); return m?[+m[1],+m[2],m[3]||""]:null;}).filter(Boolean); if(!it.flow.n.length) delete it.flow; }
+    else it[k]=s.trim(); });
+  if(it.flow&&!it.flow.n.length) delete it.flow;
+  if(JSON.stringify(it)!==before) logChange((isNew?"neu angelegt ":"bearbeitet ")+sec+" "+it.id+" · "+it.name);
+  editing=null; render();
+}
+function delItem(sec,id){ const list= sec==="arch"? state.arch : state.reg[sec]; const i=list.findIndex(x=>x.id===id); if(i<0) return; const [it]=list.splice(i,1); (state.deleted[sec]=state.deleted[sec]||[]).push(it);
+  if(sec!=="arch"){ const s=secDef(sec); if(s.mode==="multi") state.sel[sec]=state.sel[sec].filter(x=>x!==id); else if(state.sel[sec]===id) state.sel[sec]=""; state.zusatz=state.zusatz.filter(x=>x!==id); }
+  logChange("gelöscht "+sec+" "+id+" · "+it.name); render(); }
+function restoreItem(sec,id){ const d=state.deleted[sec]||[]; const i=d.findIndex(x=>x.id===id); if(i<0) return; const [it]=d.splice(i,1); (sec==="arch"?state.arch:state.reg[sec]).push(it); logChange("wiederhergestellt "+sec+" "+id); render(); }
+function moveItem(sec,id,dir){ const list= sec==="arch"? state.arch : state.reg[sec]; const i=list.findIndex(x=>x.id===id); const j=i+dir; if(i<0||j<0||j>=list.length) return; [list[i],list[j]]=[list[j],list[i]]; logChange("verschoben "+sec+" "+id); render(); }
+
+/* ============ Import / Export ============ */
+async function saveFile(){
+  const txt=JSON.stringify({_arbeitsstand:true, meta:META, state}, null, 2); const name="notizblock_entscheidungen_arbeitsstand_"+stamp()+".json";
+  try{ const dl = window.claude&&window.claude.use ? await window.claude.use("downloads") : null; if(dl){ await dl.save({filename:name, data:txt}); toast("Gespeichert"); return; } }catch(e){}
+  try{ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([txt],{type:"application/json"})); a.download=name; document.body.appendChild(a); a.click(); a.remove(); toast("Download gestartet"); }catch(e){ copyText(txt); }
+}
+function stamp(){ const d=new Date(); const p=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`; }
+function importText(txt){
+  let p; try{ p=JSON.parse(txt); }catch(e){ toast("Kein gültiges JSON"); return; }
+  if(p._arbeitsstand&&p.state){ state=Object.assign(defaultState(), p.state); logChange("Arbeitsstand importiert"); render(); toast("Arbeitsstand übernommen"); return; }
+  if(p.entscheidungen){ ORIGINAL.sections.forEach(s=>{ const v=p.entscheidungen[s.id]; if(v==null) return; const ids=(Array.isArray(v)?v:[v]).map(x=>String(x).split(" ")[0]); state.sel[s.id]= s.mode==="multi"? ids : (ids[0]||""); });
+    if(p.entscheidungen.ablage_ergaenzungen) state.zusatz=p.entscheidungen.ablage_ergaenzungen.map(x=>String(x).split(" ")[0]);
+    if(p.aenderungen){ Object.entries(p.aenderungen).forEach(([sec,d])=>{ const list= sec==="arch"? state.arch : state.reg[sec]; if(!list) return; (d.geaendert||[]).concat(d.neu||[]).forEach(it=>{ const i=list.findIndex(x=>x.id===it.id); if(i>=0) list[i]=it; else list.push(it); }); (d.geloescht||[]).forEach(id=>{ const i=list.findIndex(x=>x.id===id); if(i>=0){ const [it]=list.splice(i,1); (state.deleted[sec]=state.deleted[sec]||[]).push(it);} }); }); }
+    if(p.anmerkungen) state.notes=p.anmerkungen; logChange("Entscheidungs-JSON importiert"); render(); toast("Entscheidungen übernommen"); return; }
+  toast("Unbekanntes Format");
+}
+
+/* ============ Ereignisse ============ */
+document.addEventListener("click", e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  if(b.dataset.edit){ const [sec,id]=b.dataset.edit.split(":"); openEditor(sec,id); }
+  else if(b.dataset.add){ openEditor(b.dataset.add,null); }
+  else if(b.dataset.del){ const [sec,id]=b.dataset.del.split(":"); delItem(sec,id); }
+  else if(b.dataset.restore){ const [sec,id]=b.dataset.restore.split(":"); restoreItem(sec,id); }
+  else if(b.dataset.up){ const [sec,id]=b.dataset.up.split(":"); moveItem(sec,id,-1); }
+  else if(b.dataset.down){ const [sec,id]=b.dataset.down.split(":"); moveItem(sec,id,1); }
 });
-document.getElementById("resetbtn").addEventListener("click", ()=>{ state=DEF(); document.getElementById("altmore").value=""; document.getElementById("notes").value=""; render(); toast("Empfehlung wiederhergestellt"); });
+document.addEventListener("change", e=>{ if(e.target.matches("input[type=checkbox],input[type=radio]") && !e.target.closest("dialog")){ readSel(); updateJson(); } });
+document.getElementById("notes").addEventListener("input", e=>{ state.notes=e.target.value; updateJson(); });
+document.getElementById("dlgform").addEventListener("submit", e=>{ e.preventDefault(); saveEditor(); document.getElementById("dlg").close(); });
+document.getElementById("dlgcancel").addEventListener("click", ()=>{ editing=null; document.getElementById("dlg").close(); });
+document.getElementById("copybtn").addEventListener("click", ()=>copyText(document.getElementById("jsonout").textContent, document.getElementById("jsonout")));
+document.getElementById("copyfull").addEventListener("click", ()=>copyText(JSON.stringify({_arbeitsstand:true, meta:META, state}, null, 2)));
+document.getElementById("savebtn").addEventListener("click", saveFile);
+document.getElementById("resetbtn").addEventListener("click", ()=>{ state=defaultState(); logChange("Original wiederhergestellt"); render(); toast("Original wiederhergestellt"); });
+document.getElementById("importbtn").addEventListener("click", ()=>importText(document.getElementById("importbox").value));
+document.getElementById("importfile").addEventListener("change", e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>importText(String(r.result)); r.readAsText(f); });
 render();
 </script>
