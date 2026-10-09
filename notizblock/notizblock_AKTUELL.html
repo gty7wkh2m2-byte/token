@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Notizblock</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout L2: Kopfzeile, Hauptfläche, untere Tab-Leiste mobil, Seitenleiste ab 900px; schwebender Eingabeknopf (E1); Fristenfarben F1 */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --surface2:#e9edf1; --fg:#1b2430; --muted:#5b6675; --line:#d3dae2;
+  --accent:#1f6f8b; --accent-soft:#dcedf3;
+  --green:#2f8f4e; --green-soft:#e3f3e8; --yellow:#b7791f; --yellow-soft:#fbf1dc; --red:#c43c3c; --red-soft:#f9e3e3;
+  --purple:#6a4fbf; --purple-soft:#ebe6f8; --blue:#2b63c6; --blue-soft:#e1eafb;
+  --h-kurz:#e07a1f; --h-mittel:#d4a92a; --h-lang:#2b63c6; --h-keiner:#9aa7b5;
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --nav-h:56px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#121820; --surface:#1a222c; --surface2:#222c37; --fg:#e6ebf0; --muted:#9aa7b5; --line:#2b3642;
+  --accent:#5fb3cf; --accent-soft:#1d3a46;
+  --green:#4cc273; --green-soft:#1c3526; --yellow:#e2a93b; --yellow-soft:#3a2f17; --red:#ea6a6a; --red-soft:#3d2020;
+  --purple:#9d8be6; --purple-soft:#2a2340; --blue:#6c9ff0; --blue-soft:#1c2a45; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#121820; --surface:#1a222c; --surface2:#222c37; --fg:#e6ebf0; --muted:#9aa7b5; --line:#2b3642;
+  --accent:#5fb3cf; --accent-soft:#1d3a46;
+  --green:#4cc273; --green-soft:#1c3526; --yellow:#e2a93b; --yellow-soft:#3a2f17; --red:#ea6a6a; --red-soft:#3d2020;
+  --purple:#9d8be6; --purple-soft:#2a2340; --blue:#6c9ff0; --blue-soft:#1c2a45; color-scheme:dark }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.45}
+#app{display:grid;grid-template-rows:auto 1fr;height:100%;min-height:0}
+header.top{display:flex;align-items:center;gap:8px;padding:8px 16px;padding-top:calc(8px + env(safe-area-inset-top,0px));border-bottom:1px solid var(--line);background:var(--surface);flex-wrap:wrap}
+header.top h1{font-size:1.05rem;margin:0;display:flex;align-items:center;gap:8px}
+header.top .sp{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.shell{display:grid;grid-template-columns:1fr;min-height:0;height:100%}
+nav#nav{display:flex;gap:2px;overflow-x:auto;background:var(--surface);border-top:1px solid var(--line);padding:4px 6px;padding-bottom:calc(4px + env(safe-area-inset-bottom,0px));position:fixed;left:0;right:0;bottom:0;z-index:20;scrollbar-width:none}
+nav#nav::-webkit-scrollbar{display:none}
+nav#nav button{flex:0 0 auto;border:0;background:transparent;color:var(--muted);font-size:.72rem;font-weight:600;padding:6px 10px;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:64px;cursor:pointer}
+nav#nav button .ic{font-size:1.05rem;line-height:1}
+nav#nav button.on{color:var(--accent);background:var(--accent-soft)}
+main#main{overflow:auto;padding:12px 16px calc(var(--nav-h) + 84px + env(safe-area-inset-bottom,0px));min-width:0}
+aside#side{display:none}
+@media (min-width:900px){
+  .shell{grid-template-columns:200px 1fr}
+  nav#nav{position:static;flex-direction:column;border-top:0;border-right:1px solid var(--line);padding:10px 8px;overflow-y:auto}
+  nav#nav button{flex-direction:row;justify-content:flex-start;font-size:.86rem;min-width:0;width:100%;gap:8px}
+  main#main{padding-bottom:110px}
+}
+@media (min-width:1200px){
+  .shell.split{grid-template-columns:200px 320px 1fr}
+  .shell.split aside#side{display:block;overflow:auto;border-right:1px solid var(--line);padding:12px;background:var(--surface);min-width:0}
+}
+h2{font-size:1.15rem;margin:0 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+h2 .sp{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+h3{font-size:.98rem;margin:12px 0 6px}
+p{margin:0 0 8px;max-width:72ch}
+small,.small{font-size:.8rem;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:1px 9px;font-size:.74rem;font-weight:600;border:1px solid transparent;white-space:nowrap;line-height:1.5}
+.pill.g{background:var(--green-soft);color:var(--green);border-color:var(--green)}
+.pill.y{background:var(--yellow-soft);color:var(--yellow);border-color:var(--yellow)}
+.pill.r{background:var(--red-soft);color:var(--red);border-color:var(--red)}
+.pill.p{background:var(--purple-soft);color:var(--purple);border-color:var(--purple)}
+.pill.b{background:var(--blue-soft);color:var(--blue);border-color:var(--blue)}
+.pill.n{background:var(--surface2);color:var(--muted);border-color:var(--line)}
+.hdot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.08)}
+.h-kurz{background:var(--h-kurz)} .h-mittel{background:var(--h-mittel)} .h-lang{background:var(--h-lang)} .h-keiner{background:var(--h-keiner)}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px;align-items:center}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;min-width:0}
+.box+.box{margin-top:10px}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:10px;padding:10px;min-width:0;display:flex;flex-direction:column;gap:6px}
+.card.g{border-left-color:var(--green)} .card.y{border-left-color:var(--yellow)} .card.r{border-left-color:var(--red)} .card.p{border-left-color:var(--purple)} .card.b{border-left-color:var(--blue)}
+.card.kurz{border-left-color:var(--h-kurz)} .card.mittel{border-left-color:var(--h-mittel)} .card.lang{border-left-color:var(--h-lang)} .card.keiner{border-left-color:var(--h-keiner)}
+.card h4{margin:0;font-size:.95rem}
+.card .t{display:flex;gap:4px;flex-wrap:wrap;margin-top:auto;padding-top:4px}
+button{font:inherit;font-weight:600;font-size:.82rem;border-radius:8px;padding:6px 10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+button.b{background:var(--blue);border-color:var(--blue);color:#fff}
+button.gr{background:var(--green);border-color:var(--green);color:#fff}
+button.ac{background:var(--accent);border-color:var(--accent);color:#fff}
+button.sm{padding:2px 7px;font-size:.74rem;font-weight:500}
+button.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=text],input[type=date],input[type=datetime-local],input[type=number],input[type=url],input[type=password],textarea,select{font:inherit;width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--surface);color:var(--fg);min-width:0}
+textarea{resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row.tight{gap:4px}
+.fld{display:grid;gap:3px;font-size:.8rem;font-weight:600;color:var(--muted)}
+.fld.inl{grid-template-columns:auto 1fr;align-items:center}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:520px){.two{grid-template-columns:1fr}}
+/* Outliner */
+.tree{list-style:none;margin:0;padding:0}
+.tree li{margin:0}
+.nrow{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:8px;border:1px solid transparent;min-width:0}
+.nrow:hover{background:var(--surface2)}
+.nrow.drag-over{border-color:var(--accent);background:var(--accent-soft)}
+.nrow .tg{width:22px;height:22px;border:0;background:transparent;color:var(--muted);padding:0;font-size:.8rem;flex:none;cursor:pointer}
+.nrow .ty{font-size:.9rem;flex:none;width:18px;text-align:center}
+.nrow .ttl{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.nrow .ttl.done{text-decoration:line-through;color:var(--muted)}
+.nrow .qa{display:none;gap:2px;flex:none}
+.nrow:hover .qa,.nrow:focus-within .qa{display:flex}
+.nrow .qa button{padding:1px 6px;font-size:.72rem;font-weight:500}
+.tree ul{list-style:none;margin:0;padding-left:18px;border-left:1px dashed var(--line)}
+/* Listen */
+.item{display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--line);border-left:5px solid var(--line);border-radius:8px;background:var(--surface);margin-bottom:6px;min-width:0}
+.item.kurz{border-left-color:var(--h-kurz)} .item.mittel{border-left-color:var(--h-mittel)} .item.lang{border-left-color:var(--h-lang)} .item.keiner{border-left-color:var(--h-keiner)}
+.item input[type=checkbox]{width:18px;height:18px;margin-top:2px;accent-color:var(--green);flex:none}
+.item .ttl{flex:1 1 auto;min-width:0;cursor:pointer}
+.item .ttl.done{text-decoration:line-through;color:var(--muted)}
+.item .meta{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.grp{font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:12px 0 6px;display:flex;align-items:center;gap:6px}
+/* Kalender */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal .dh{font-size:.72rem;color:var(--muted);text-align:center;padding:2px 0}
+.cal .day{background:var(--surface);border:1px solid var(--line);border-radius:6px;min-height:74px;padding:3px;font-size:.72rem;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cal .day.other{opacity:.45}
+.cal .day.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.cal .day.drag-over{background:var(--accent-soft)}
+.cal .dn{font-weight:600;color:var(--muted)}
+.chip{display:block;font-size:.68rem;padding:1px 5px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;border-left-width:4px}
+.chip.kurz{border-left-color:var(--h-kurz)} .chip.mittel{border-left-color:var(--h-mittel)} .chip.lang{border-left-color:var(--h-lang)} .chip.keiner{border-left-color:var(--h-keiner)}
+.chip.done{text-decoration:line-through;opacity:.6}
+@media (max-width:600px){.cal .day{min-height:54px}.chip{font-size:.6rem;padding:0 3px}}
+/* Mindmap */
+.mmwrap{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;height:min(70vh,640px);touch-action:none}
+.mmwrap svg{width:100%;height:100%;display:block;cursor:grab}
+.mmwrap svg.dragging{cursor:grabbing}
+.mmtools{position:absolute;top:8px;left:8px;display:flex;gap:4px;flex-wrap:wrap;z-index:2}
+.crumbs{font-size:.8rem;color:var(--muted);margin-bottom:6px;display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.crumbs button{padding:1px 7px;font-size:.76rem}
+/* Kanban */
+.kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:10px;overflow-x:auto;padding-bottom:6px}
+.kcol{background:var(--surface2);border-radius:10px;padding:8px;min-width:0}
+.kcol h4{margin:0 0 6px;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.kcard{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:8px;padding:8px;margin-bottom:6px;font-size:.88rem}
+.kcard.kurz{border-left-color:var(--h-kurz)} .kcard.mittel{border-left-color:var(--h-mittel)} .kcard.lang{border-left-color:var(--h-lang)} .kcard.keiner{border-left-color:var(--h-keiner)}
+/* Workflow */
+.pipe{display:flex;gap:6px;overflow-x:auto;padding:4px 0}
+.pstep{flex:0 0 auto;min-width:120px;border:1px solid var(--line);border-top:4px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--surface);font-size:.82rem;cursor:pointer}
+.pstep.erledigt{border-top-color:var(--green)} .pstep.aktiv{border-top-color:var(--yellow)} .pstep.offen{border-top-color:var(--line)} .pstep.blockiert{border-top-color:var(--red)}
+/* Copybox */
+.copy{border:2px solid var(--blue);border-radius:10px;background:var(--surface);overflow:hidden;margin:8px 0}
+.copy-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 10px;background:var(--blue-soft);color:var(--blue);font-weight:600;font-size:.82rem}
+.copy-head .sp{margin-left:auto;display:flex;gap:6px}
+.copy pre{margin:0;max-height:300px;overflow:auto;padding:10px;font-family:var(--mono);font-size:.76rem;line-height:1.4;white-space:pre-wrap;word-break:break-word}
+.file{display:inline-flex;align-items:center;gap:6px;background:var(--green-soft);color:var(--green);border:1px solid var(--green);border-radius:999px;padding:4px 12px;font-weight:600;font-size:.82rem;cursor:pointer}
+/* FAB + Sheet */
+#fab{position:fixed;right:18px;bottom:calc(var(--nav-h) + 18px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;border:0;font-size:1.6rem;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:25;cursor:pointer}
+@media (min-width:900px){#fab{bottom:24px}}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);border-radius:14px 14px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.25);padding:12px 16px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));max-height:85vh;overflow:auto}
+@media (min-width:900px){#sheet{left:auto;right:24px;bottom:24px;width:560px;border-radius:14px;border:1px solid var(--line)}}
+#sheet h3{margin:0 0 8px;display:flex;align-items:center;gap:8px}
+#sheet h3 .sp{margin-left:auto;display:flex;gap:6px}
+.mic{border-radius:50%;width:38px;height:38px;padding:0;font-size:1.1rem;flex:none}
+.mic.on{background:var(--red);border-color:var(--red);color:#fff;animation:pulse 1.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(196,60,60,.5)}100%{box-shadow:0 0 0 12px rgba(196,60,60,0)}}
+@media (prefers-reduced-motion: reduce){.mic.on{animation:none}}
+.prop{border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:8px;padding:8px;margin-top:8px;background:var(--surface);display:grid;gap:6px}
+.prop .f{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px}
+.prop .f label{font-size:.72rem;color:var(--muted);display:grid;gap:2px}
+/* Dialog */
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);padding:0;width:min(640px,calc(100vw - 24px));max-height:calc(100vh - 24px)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog form{display:flex;flex-direction:column;max-height:calc(100vh - 24px)}
+.dlg-head{padding:10px 14px;border-bottom:1px solid var(--line);font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dlg-head .sp{margin-left:auto;display:flex;gap:6px}
+.dlg-body{padding:12px 14px;overflow:auto;display:grid;gap:10px}
+.dlg-foot{padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+/* Backend */
+.subnav{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.subnav button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:.84rem}
+th,td{text-align:left;padding:5px 7px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.scroll{overflow-x:auto}
+.steps{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.step{border:1px solid var(--line);border-left:5px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);display:flex;gap:8px;align-items:flex-start;font-size:.86rem}
+.step.erledigt{border-left-color:var(--green)} .step.aktiv{border-left-color:var(--yellow)} .step.offen{border-left-color:var(--purple)} .step.blockiert{border-left-color:var(--red)}
+.num{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:.78rem;flex:none}
+.toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + 16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:.84rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion: reduce){.toast{transition:none}}
+.log{font-size:.84rem}
+.log div{padding:6px 0;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.log .t{color:var(--muted);font-family:var(--mono);font-size:.72rem;flex:none}
+.empty{color:var(--muted);font-size:.86rem;padding:10px;border:1px dashed var(--line);border-radius:8px}
+.srch{max-width:260px}
+@media (max-width:600px){#srcpill,#kipill{display:none}.srch{max-width:150px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <h1><span>Notizblock</span> <span class="pill n" id="verpill">V1</span></h1>
+    <span class="pill n" id="srcpill" title="Herkunft der Daten">Herkunft: …</span>
+    <span class="pill n" id="kipill" title="KI-Weg">KI: …</span>
+    <div class="sp">
+      <input type="text" id="search" class="srch" placeholder="Suchen …" aria-label="Suchen">
+      <button class="mic" id="micglobal" title="Diktat in das zuletzt gewählte Feld" aria-label="Diktat">🎤</button>
+      <button id="btn-save" class="ghost" title="Datei mit Zeitstempel speichern">⬇ Datei</button>
+    </div>
+  </header>
+  <div class="shell" id="shell">
+    <nav id="nav" aria-label="Ansichten"></nav>
+    <aside id="side"></aside>
+    <main id="main"><div id="view"></div></main>
+  </div>
+</div>
+<button id="fab" title="Eingabe (Tastatur oder Sprache)" aria-label="Eingabe">+</button>
+<div id="sheet" hidden>
+  <h3>Eingabe <span class="pill n" id="sheetmode">Tastatur oder Sprache</span><span class="sp"><button class="sm ghost" id="sheetclose">Schließen</button></span></h3>
+  <div class="row" style="align-items:flex-start">
+    <textarea id="inbox" rows="3" placeholder="z. B. todo: Zapier Outlook verbinden !kurz morgen · idee: … · termin: 14.10. 10:00 Arzt · #Projekte …" style="flex:1 1 200px"></textarea>
+    <button class="mic" data-mic="inbox" title="Sprache" aria-label="Sprache">🎤</button>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <button class="b" id="btn-sort">Sortieren (lokal)</button>
+    <button class="ac" id="btn-ki">KI-Vorschlag</button>
+    <button id="btn-inbox">Direkt in Inbox</button>
+    <span class="small">Präfixe: todo: idee: termin: notiz: projekt: prompt: · #Bereich · !kurz !mittel !lang · Datum: heute, morgen, Freitag, 14.10., 10:00</span>
+  </div>
+  <div id="kibox" hidden></div>
+  <div id="proposals"></div>
+</div>
+<dialog id="dlg"><form method="dialog" id="dlgform"><div class="dlg-head"><span id="dlgtitle">Bearbeiten</span><span class="sp" id="dlgextra"></span></div><div class="dlg-body" id="dlgbody"></div><div class="dlg-foot" id="dlgfoot"><button type="button" id="dlgcancel">Abbrechen</button><button type="submit" class="b">Speichern</button></div></form></dialog>
+<div class="toast" id="toast"></div>
+<script id="EMBEDDED_DATA" type="application/json">{"schema":1,"empty":true}</script>
+<script>
+/* ===================== KONSTANTEN ===================== */
+const TOOL_VERSION="1.0.0", SCHEMA=1, KEY="nb_tool_v1", UIKEY="nb_tool_ui";
+const TYPES={bereich:"▣",notiz:"✎",todo:"☐",idee:"✦",projekt:"◆",prompt:"⌘",termin:"◷",tool:"⚙",instrument:"⚒"};
+const TYPENAME={bereich:"Bereich",notiz:"Notiz",todo:"To-do",idee:"Idee",projekt:"Projekt",prompt:"Prompt-Fläche",termin:"Termin",tool:"Tool",instrument:"Instrument"};
+const HORIZ=["kurz","mittel","lang","keiner"], STATUS=["offen","aktiv","wartet","erledigt","verworfen"], STUFEN=["roh","ausgearbeitet","geplant","umsetzung","integriert"];
+const STATC={offen:"n",aktiv:"y",wartet:"p",erledigt:"g",verworfen:"r",blockiert:"r"};
+const VIEWS=[["outliner","Outliner","☰"],["todo","To-do","☑"],["kalender","Kalender","▦"],["mindmap","Mindmap","✺"],["ideen","Ideen","✦"],["workflow","Workflow","⇶"],["instrumente","Instrumente","⚒"],["ausbau","Ausbau","⌘"],["protokoll","Protokoll","≡"],["backend","Backend","⚙"]];
+const CAP={sample:null,downloads:null,checked:false};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const uid=()=>"n"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const now=()=>new Date().toISOString();
+const pad=n=>String(n).padStart(2,"0");
+const stamp=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`};
+const fmtD=iso=>iso?new Date(iso+(iso.length===10?"T00:00":"")).toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"}):"";
+const fmtDT=iso=>iso?new Date(iso).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}):"";
+const dkey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+/* ===================== STARTINHALT ===================== */
+const PROMPT1=`mach mir ein notizblock das hierarchien, todo-listen und kalender kann und in dem ich überall mit sprachsteuerung schreiben kann und wo ich auch ein eingabefeeld habe wo ich automatisch neues in die vorhandene struktur sortieren lassen kann, das ganze soll auch die notizen nicht nur nebeneinander zeigen können sondern auch diese in einer mindmap zeigen können, eine gesamtmindmap für alles und kleinere anklcikbare mindmaps die hervorgehoben im zentrum stehen die die mindmaps für einzelne themen in den fokus rücken (nützlich wenn die gesamte mindmap zu groß wird
+
+mach diese notiz in besagtes notizfeld, ich will im notizfeld einen bereich für ideen haben die du automatisiert, aber n acvollziehbar und von mir getseurt zu ideen machenkann und um das tool mit leben zu füllen.
+
+ich habe bereits solche projekte begonnen und nie zu ende gebrahct und möchte diese hier alle nach und nach integrieren um langfristig ein Ökosystem aufzubauen. Ich möchte dabei visuell unterscheiden können zwischen kurzer, Mittel- und langer Frist. Ich möchte einen Kalender integriert haben, der verbunden ist mit To-do-Listen und Mindmap und im Hintergrund mit meinem Outlook-Kalender. Ich möchte das Tool im Tool selbst weiter ausbauen und bearbeiten können, sodass darin enthaltene Flächen als Prompts behandelt werden. Der gesamte Workflow von Anfang bis Ende muss immer sichtbar sein für das Tool selbst und auch für die im Tool geplanten Tools.`;
+const PROMPT2=`Der erste Schritt wäre, die hiesige Struktur überhaupt sinnvoll zu nutzen: Repositories, Skills, Befehle, Prompts, Plugins, Konnektoren, im Prinzip die gesamte Architektur und das gesamte Instrumentarium auch Online-Quellen wie Cloudflare oder GitHub. Denk diese von Anfang an mit.`;
+const PROMPT3=`Wieso baust du weiter? Wo habe ich drauf gedrückt? Und was waren die Optionen? Zeig noch mal den Plan. Ich möchte auch generell den Bauplan immer aktuell im Tool haben, in einem extra Fenster namens Backend und möchte daran arbeiten können.`;
+const PROMPT4=`Künftig: nach Plan-Freigabe erst „go“ je Phase abwarten (Regelvorschlag unten). -> nein
+
+will notizblock entscheidungen bearbeiten können und für alle abschnitte vorschau.
+
+beim bau will ich notizblock als bakcend zum ändern von den jeweiligen einstellungen, erweitern und löschen von optionen`;
+
+const AUSBAU_VORLAGE=`Du arbeitest im Repository gty7wkh2m2-byte/token auf Branch claude/epic-lamport-gdityd an der Werkzeugdatei notizblock/notizblock_AKTUELL.html (Version {{version}}, Stand {{stand}}).
+
+REGELN (CLAUDE.md): eine HTML-Datei, alles inline, keine externen Abhängigkeiten außer Google Fonts; EMBEDDED_DATA-Block, localStorage-Autosave, Self-Download, JSON-Export; additiv-only (Entferntes im Changelog listen); Validierung vor Auslieferung: node scripts/validate.mjs → 0 Fehler, Screenshots mobil und Desktop; danach Commit + Push + Artefakt-Republish; Rückschreibpflicht: Bauplan-Status im Backend aktualisieren (Update-Paket notizblock/pakete/bauplan_JJJJ-MM-TT_HHMM.json) und docs/BAUPLAN_AKTUELL.md exportieren.
+
+ZUSTAND DES WERKZEUGS: {{zustand}}
+
+BAUAUFTRAG ({{id}} · {{titel}}):
+{{text}}
+
+ERGEBNIS: geänderte Datei, Changelog-Eintrag, Update-Paket, kurzer Bericht mit Kontrollblock (jede Anforderung erfüllt oder offen mit Grund).`;
+
+const INBOX_PROMPT=`Du sortierst neue Einträge in eine bestehende Notizstruktur. Antworte NUR mit JSON (keine Erklärung außerhalb).
+
+STRUKTUR (id · Titel · Typ, max. Tiefe 3):
+{{outline}}
+
+EINGABE:
+{{input}}
+
+REGELN: Je Eintrag ein Objekt. parentId muss eine id aus der Struktur sein (oder "inbox" wenn unklar). type aus: notiz, todo, idee, termin, projekt, prompt. horizont aus: kurz (bis 2 Wochen), mittel (bis 3 Monate), lang (länger), keiner. faellig als JJJJ-MM-TT oder null. begruendung: ein Satz, warum dieses Ziel.
+
+FORMAT: {"vorschlaege":[{"title":"...","body":"...","type":"todo","parentId":"...","horizont":"kurz","faellig":null,"begruendung":"..."}]}`;
+
+const IDEE_PROMPT=`Du arbeitest eine Rohidee zu einem umsetzbaren Vorhaben aus. Antworte NUR mit JSON.
+
+IDEE: {{title}}
+BESCHREIBUNG: {{body}}
+KONTEXT (Struktur, Tiefe 2):
+{{outline}}
+
+FORMAT: {"problem":"...","ansatz":"...","horizont":"kurz|mittel|lang","schritte":[{"title":"...","type":"todo","horizont":"kurz","faellig":null}],"verknuepfungen":["id aus Struktur"],"offene_fragen":["..."]}`;
+
+function buildSeed(){
+  const N=[]; const add=(o)=>{N.push(Object.assign({id:uid(),parentId:null,order:N.length,title:"",body:"",type:"notiz",horizont:"keiner",status:"offen",faellig:null,start:null,ende:null,tags:[],links:[],quelle:"seed",erstellt:now(),geaendert:now()},o)); return N[N.length-1];};
+  const gn=add({title:"Gründungsnotiz",type:"bereich",body:"Deine Prompts wortgetreu, Ausgangspunkt des Werkzeugs."});
+  add({parentId:gn.id,title:"Prompt 1 (09.10.2026): Notizblock-Wunsch",body:PROMPT1,tags:["prompt","seed"]});
+  add({parentId:gn.id,title:"Prompt 2 (09.10.2026): Instrumentarium zuerst",body:PROMPT2,tags:["prompt","seed"]});
+  add({parentId:gn.id,title:"Prompt 3 (09.10.2026): Plan zeigen, Backend-Fenster",body:PROMPT3,tags:["prompt","seed"]});
+  add({parentId:gn.id,title:"Prompt 4 (09.10.2026): kein go je Phase, Entscheidungen bearbeitbar, Backend",body:PROMPT4,tags:["prompt","seed"]});
+  const inbox=add({title:"Inbox",type:"bereich",body:"Unsortierte Eingaben landen hier, wenn die Sortierung kein Ziel findet.",tags:["inbox"]}); inbox.id="inbox";
+  const ideen=add({title:"Ideen",type:"bereich",body:"Rohideen → ausgearbeitet → geplant → umsetzung → integriert. „Ausarbeiten“ erzeugt einen KI-Vorschlag, den du prüfst."});
+  [["Outlook via Zapier anbinden","Outlook-Konto in Zapier verbinden (App bereits freigeschaltet, 32 Aktionen), dann Knopf „Termin nach Outlook“.","kurz","roh"],
+   ["Routine für Inbox-Sortierung","Tägliche Claude-Code-Routine liest notizblock/inbox/, schreibt Update-Paket nach notizblock/pakete/. Nutzungslimit beachten.","mittel","roh"],
+   ["Geräteabgleich über Artefakt-db","Artefakt-Fähigkeit db: Stand auf Handy und Desktop gleich, ohne eigenen Server.","mittel","roh"],
+   ["PWA auf gehosteter Seite","Manifest + Service Worker auf GitHub Pages oder Cloudflare Pages, Startbildschirm-App, offline.","lang","roh"],
+   ["Prompt-Fläche direkt ausführen (A6)","Aus dem Artefakt eine Claude-Code-Sitzung mit dem Bauauftrag starten (Konnektor Claude Code Remote).","mittel","roh"],
+   ["Cloudflare-Backend","Worker mit Schlüssel, KV/D1 für Daten, serverseitiger Outlook-Abgleich.","lang","roh"],
+   ["Gmail als Inbox-Quelle","Markierte Mails werden zu Einträgen (Betreff, Absender, Frist).","mittel","roh"],
+   ["Wispr-Flow-Notizen als Inbox-Quelle","Diktate und Meeting-Notizen aus Wispr Flow in die Inbox übernehmen.","mittel","roh"],
+   ["Whimsical-Export der Mindmap","Gliederung als Markdown nach Whimsical, dort Mindmap weiterbearbeiten.","lang","roh"],
+   ["Alt-Projekte eingliedern","Jedes Alt-Projekt als Tool- oder Projekt-Knoten mit Workflow, Stand und nächstem Schritt.","kurz","geplant"]
+  ].forEach(([t,b,h,s])=>add({parentId:ideen.id,title:t,body:b,type:"idee",horizont:h,stufe:s}));
+  const proj=add({title:"Projekte",type:"bereich"});
+  const nb=add({parentId:proj.id,title:"Notizblock",type:"tool",horizont:"kurz",status:"aktiv",version:TOOL_VERSION,repoPfad:"notizblock/notizblock_AKTUELL.html",body:"Dieses Werkzeug. Workflow von Plan bis Ausbau; Bauplan im Backend.",
+    workflow:[{t:"Plan V1–V4",s:"erledigt"},{t:"Phase 0 Entscheidungsdatei",s:"erledigt"},{t:"Phase 0b bearbeitbar + Vorschauen",s:"erledigt"},{t:"Phase 1 Bau V1 + Repo-Gerüst + Backend",s:"aktiv"},{t:"Phase 2 Validierung",s:"offen"},{t:"Phase 3 Auslieferung (Push, Artefakt)",s:"offen"},{t:"Phase 1b Outlook via Zapier",s:"offen"},{t:"Phase 4 Ausbau (Routine, db, A6, PWA, Cloudflare)",s:"offen"}]});
+  add({parentId:nb.id,title:"Phase 1b: Outlook-Konto in Zapier verbinden",type:"todo",horizont:"kurz",faellig:"2026-10-12",body:"Zapier › Verbindungen › Microsoft Outlook › Konto taata@hotmail.de verbinden. Danach im Chat: „Zapier-Outlook-Aktion prüfen“."});
+  add({parentId:nb.id,title:"Mikrofon im Artefakt testen",type:"todo",horizont:"kurz",body:"Artefakt öffnen, Eingabeblatt, Mikrofon drücken. Ergebnis ins Protokoll (UNSICHER laut Bauplan)."});
+  const alt=add({title:"Alt-Projekte",type:"bereich",body:"Begonnene Projekte, nach und nach eingegliedert. Vorlage je Projekt: Name, Stand, letzter Schritt, Horizont, nächster Schritt."});
+  [["POLYGLOTT MASTER v2.41 / abrechnung_scans_v8","HTML-Master mit Update-Paket, tägliche Routine aktiv; Lauf vom 09.10. am Nutzungslimit gescheitert.","kurz","Routine-Kontingent prüfen, Tool-Knoten anlegen","tool"],
+   ["USINE DASHBOARDS Cockpit","HTML-Cockpit mit CMD_AKTUELL.md; Regel-Scan-Routine pausiert.","mittel","Cockpit-Stand sichten, Regel-Scan-Muster übertragen","tool"],
+   ["TOKEN_Cockpit_v1","Präferenz- und Regelwerkzeug; Stand unbekannt (fehlt, bitte liefern).","mittel","Datei liefern, Stand feststellen","tool"],
+   ["Wohnungssuche (Notion Wohnungspool)","Stündliche Routine pausiert, Notion-Datenbank vorhanden.","lang","entscheiden: fortführen oder archivieren","projekt"]
+  ].forEach(([t,b,h,n,ty])=>add({parentId:alt.id,title:t,body:b+"\n\nNächster Schritt: "+n,type:ty,horizont:h,status:"wartet",workflow:ty==="tool"?[{t:"Stand sichten",s:"offen"},{t:"Eingliedern",s:"offen"}]:undefined}));
+  add({parentId:alt.id,title:"Weitere Alt-Projekte (fehlt, bitte liefern)",type:"notiz",body:"Name, Stand, letzter Schritt, Horizont, nächster Schritt je Projekt."});
+  const ins=add({title:"Instrumente",type:"bereich",body:"Alle Mittel des Ökosystems je Ebene. Status: verbunden / vorhanden / Phase 2–3 / fehlt."});
+  const layers=[["E6","E6 Steuerung","Regeln, Skills, Befehle, Modellrouting"],["E1","E1 Quelle","Werkzeugdatei, Prompts, Handover, Changelog"],["E2","E2 Laufzeit","HTML im Browser: lokal, Artefakt, später Pages"],["E3","E3 Intelligenz","Sortierung, Ideen, Prompt-Flächen"],["E4","E4 Automation","wiederkehrende Abläufe"],["E5","E5 Konnektoren","Kalender, Mail, Diktat, Ablage"]];
+  const L={}; layers.forEach(([id,t,b])=>{L[id]=add({parentId:ins.id,title:t,type:"bereich",body:b,ebene:id});});
+  [["E6","CLAUDE.md","p","Repo","Projektregeln; wird in Phase 1b angelegt"],["E6","Skills notizblock-build / -inbox / -handover","p","Skill","Phase 1b"],["E6","settings.json SessionStart-Hook","p","Befehl","Phase 1b"],["E6","Präferenzen (claude.ai)","g","Regel","gelten in allen Chats"],["E6","TOKEN_Cockpit","y","Tool","Stand unbekannt"],
+   ["E1","Repo gty7wkh2m2-byte/token","g","Repo","Quelle der Wahrheit"],["E1","Branch claude/epic-lamport-gdityd","g","Repo",""],["E1","prompts/ (Vorlagen)","p","Prompt","Phase 1b"],["E1","docs/BAUPLAN_AKTUELL.md","g","Doku","Spiegel des Backends"],
+   ["E2","lokal file://","g","Laufzeit","Mikrofon ja, KI nur A1/A2"],["E2","Artefakt: sample (Claude fragen)","g","Laufzeit","nur im Artefakt"],["E2","Artefakt: downloads","g","Laufzeit",""],["E2","Artefakt: db (Geräteabgleich)","p","Laufzeit","Phase 2"],["E2","Artefakt: mcp (Konnektoren)","p","Laufzeit","Phase 2"],["E2","GitHub Pages","p","Hosting","Ausweich"],["E2","Cloudflare Pages","p","Hosting","Phase 3"],
+   ["E3","A1 Prompt-Copybox","g","KI-Weg","immer"],["E3","A3 Artefakt sample","g","KI-Weg","im Artefakt"],["E3","A5 Claude Code über Repo","g","KI-Weg","Ausbau"],["E3","A2 API-Schlüssel","y","KI-Weg","Option, Sitzungsspeicher"],["E3","A6 Artefakt → Claude Code Remote","p","KI-Weg","Phase 2"],["E3","A7 Routine","p","KI-Weg","Phase 2, Nutzungslimit beachten"],["E3","A4 Cloudflare Worker","p","KI-Weg","Phase 3"],
+   ["E4","Routinen (3 vorhanden: POLYGLOTT aktiv, USINE und Wohnungssuche pausiert)","g","Routine","POLYGLOTT-Lauf 09.10. am Nutzungslimit gescheitert"],["E4","Zapier-Zaps","y","Automation","Outlook-App freigeschaltet, Konto fehlt"],["E4","SessionStart-Hook","p","Automation","Phase 1b"],
+   ["E5","Google Calendar","g","Konnektor","geladen"],["E5","Gmail","g","Konnektor","geladen"],["E5","Google Drive","g","Konnektor","geladen"],["E5","Wispr Flow","g","Konnektor","Diktat systemweit"],["E5","Whimsical","g","Konnektor","Mindmap-Export"],["E5","Zapier → Microsoft Outlook","y","Konnektor","Konto in Zapier verbinden"],["E5","OneDrive (taata@hotmail.de)","g","Konnektor","in Zapier verbunden"],["E5","Cloudflare Developer Platform","y","Konnektor","im Konto, in Sitzung nicht geladen"],["E5","Notion","n","Konnektor","nicht Kern"],["E5","Todoist / Dropbox / Mem","n","Konnektor","bei Bedarf"]
+  ].forEach(([e,t,c,k,n])=>add({parentId:L[e].id,title:t,type:"instrument",ebene:e,kategorie:k,statusC:c,naechsterSchritt:n,body:n}));
+  const pf=add({title:"Prompt-Flächen",type:"bereich",body:"Jeder Knoten vom Typ Prompt-Fläche wird im Ausbau zu einem vollständigen Bauauftrag für Claude Code."});
+  add({parentId:pf.id,title:"Ausbau-Vorlage",type:"prompt",body:"Beschreibe hier die gewünschte Änderung am Werkzeug (Ansicht, Verhalten, Daten). „Als Bauauftrag exportieren“ ergänzt Zustand, Regeln und Validierungspflicht automatisch.",horizont:"keiner"});
+  add({parentId:pf.id,title:"Knopf „Termin nach Outlook“ (Zapier)",type:"prompt",body:"Im Kalender und im Termin-Editor einen Knopf „Nach Outlook“ ergänzen, der im Artefakt die Zapier-Aktion „Microsoft Outlook: Create Event“ über die mcp-Fähigkeit aufruft; lokal stattdessen eine Copybox mit dem Aufruf für den Chat erzeugen. Protokolleintrag je Aufruf.",horizont:"kurz"});
+  return {schema:SCHEMA,toolVersion:TOOL_VERSION,erstellt:now(),geaendert:now(),nodes:N,log:[],deleted:[],
+    settings:{layout:"L2",split:false,fristen:"F1",fokus:"M1",eingabe:"E1",ki:{A1:true,A2:false,A3:true,A5:true},icsUrl:"",zapierAktion:"Microsoft Outlook: Create Event",sprache:"de-DE",autosaveMs:1000,theme:"auto",mindmapTiefe:3,views:VIEWS.map(v=>v[0])},
+    register:{
+      ki:[["A1","Prompt-Copybox","g","V1","VERIFIZIERT"],["A2","API-Schlüssel direkt","y","Option","WAHRSCHEINLICH"],["A3","Artefakt sample (Claude fragen)","g","V1 (Artefakt)","VERIFIZIERT"],["A4","Cloudflare Worker","p","Phase 3","WAHRSCHEINLICH"],["A5","Claude Code über Repo","g","V1 (Ausbau)","VERIFIZIERT"],["A6","Artefakt → Claude Code Remote (mcp)","p","Phase 2","WAHRSCHEINLICH"],["A7","Routine (zeitgesteuert)","p","Phase 2","VERIFIZIERT"]].map(r=>({id:r[0],name:r[1],c:r[2],phase:r[3],beleg:r[4],aktiv:["A1","A3","A5"].includes(r[0])})),
+      outlook:[["B1","ICS-Datei Export/Import","g","V1","VERIFIZIERT"],["B2","Veröffentlichte ICS-URL","y","V1-Versuch","UNSICHER"],["B3","Microsoft Graph + MSAL","y","Phase 2","WAHRSCHEINLICH"],["B4","Zapier → Outlook","g","Phase 1b","VERIFIZIERT (App)"],["B5","Microsoft-365-Konnektor","y","prüfen","UNSICHER"],["B6","Google Calendar als Brücke","y","Alternative","VERIFIZIERT"],["B7","Cloudflare Worker + Graph","p","Phase 3","WAHRSCHEINLICH"]].map(r=>({id:r[0],name:r[1],c:r[2],phase:r[3],beleg:r[4],aktiv:["B1","B2","B4"].includes(r[0])})),
+      ablage:[["C1","Nur Repo, lokal","n","Sicherheitsnetz"],["C2","Repo + claude.ai-Artefakt","g","gewählt"],["C3","GitHub Pages","y","Ausweich"],["C4","Cloudflare Pages + Worker + KV/D1","p","Phase 3"],["C5","Notion","r","abgelehnt"],["C6","PWA-Zusatz","y","Phase 2"]].map(r=>({id:r[0],name:r[1],c:r[2],phase:r[3],aktiv:["C2","C6"].includes(r[0])})),
+      layout:[["L1","Seitenleiste + Hauptfläche"],["L2","Untere Tab-Leiste, Seitenleiste ab Tablet"],["L3","Drei Spalten: Baum · Detail · Mindmap"],["L4","Mindmap-zentriert"],["L5","Horizont-Spalten"],["L6","Dashboard-Kacheln"]].map(r=>({id:r[0],name:r[1],c:r[0]==="L2"?"g":"y",aktiv:r[0]==="L2"})),
+      fristen:[{id:"F1",name:"Orange · Gelb · Blau",c:"g",sw:["#e07a1f","#d4a92a","#2b63c6","#9aa7b5"],aktiv:true},{id:"F2",name:"Rot · Lila · Petrol",c:"y",sw:["#d14d4d","#7b5cc9","#1f8a8a","#9aa7b5"],aktiv:false},{id:"F3",name:"Eine Farbe, drei Stufen",c:"y",sw:["#0f4c5c","#2e86a0","#9ccbd8","#c9d2da"],aktiv:false}],
+      fokus:[{id:"M1",name:"Radial: Fokus im Zentrum",c:"g",aktiv:true},{id:"M2",name:"Baum links nach rechts",c:"y",aktiv:false}],
+      eingabe:[{id:"E1",name:"Schwebender Knopf → Eingabeblatt",c:"g",aktiv:true},{id:"E2",name:"Feste Eingabezeile oben",c:"y",aktiv:false},{id:"E3",name:"Eigener Tab Inbox",c:"y",aktiv:false}],
+      typen:Object.keys(TYPES).map(k=>({id:k,name:TYPENAME[k],c:"g",aktiv:true})),
+      horizonte:[{id:"kurz",name:"kurz (bis 2 Wochen)",c:"g",aktiv:true},{id:"mittel",name:"mittel (bis 3 Monate)",c:"g",aktiv:true},{id:"lang",name:"lang (länger)",c:"g",aktiv:true},{id:"keiner",name:"keiner",c:"n",aktiv:true}],
+      status:STATUS.map(s=>({id:s,name:s,c:STATC[s],aktiv:true})),
+      stufen:STUFEN.map(s=>({id:s,name:s,c:"g",aktiv:true}))
+    },
+    registerDeleted:{},
+    bauplan:{
+      phasen:[
+        {id:"P0",name:"Plan V1–V4",inhalt:"Architektur, Inventar, Optionen, Backend-Anforderung",ergebnis:"docs/BAUPLAN_AKTUELL.md",status:"erledigt"},
+        {id:"P0a",name:"Phase 0: Entscheidungsdatei",inhalt:"Architekturkarte, Optionen A/B/C, Layoutvorschauen, Alt-Projekte, JSON",ergebnis:"notizblock/entscheidungen_2026-10-09_2236.html · Artefakt",status:"erledigt"},
+        {id:"P0b",name:"Phase 0b: Entscheidungen bearbeitbar, Vorschau aller Ansichten",inhalt:"Optionsregister mit Bearbeiten/Löschen/Neu, 12 Ansichten-Mockups, Export/Import",ergebnis:"gleiche Datei, Artefakt V2",status:"erledigt"},
+        {id:"P1",name:"Phase 1: Bau V1 + Repo-Gerüst + Backend",inhalt:"Werkzeugdatei mit 10 Ansichten, Eingabeblatt, Sprache, Backend; CLAUDE.md, Skills, Hook, Prompts, Scripts, Docs",ergebnis:"notizblock/notizblock_AKTUELL.html + Repo-Struktur",status:"aktiv"},
+        {id:"P1b",name:"Phase 1b: Outlook-Schnellweg (Zapier)",inhalt:"Outlook-Konto in Zapier verbinden (durch dich), Aktion prüfen, Knopf „Termin nach Outlook“",ergebnis:"Zapier-Aktion verifiziert",status:"offen"},
+        {id:"P2",name:"Phase 2: Validierung",inhalt:"Syntax, Headless-Smoke, Screenshots mobil/desktop hell/dunkel, Interaktion, Autosave, 0 Fehler",ergebnis:"Prüfbericht",status:"offen"},
+        {id:"P3",name:"Phase 3: Auslieferung",inhalt:"Commit + Push, Artefakt (sample, downloads), Link",ergebnis:"Link + Datei",status:"offen"},
+        {id:"P4",name:"Phase 4: Ausbau",inhalt:"Routine Inbox, db-Abgleich, A6, PWA, B3/B7, Cloudflare, Alt-Projekte",ergebnis:"V2, V3 …",status:"offen"}
+      ],
+      entscheidungen:[
+        {id:"E1",titel:"Ablage",wert:"C2 Repo + Artefakt (+ C6 PWA Phase 2)",stand:"09.10.2026"},
+        {id:"E2",titel:"Vorschau-Runden",wert:"je Element entscheiden, protokollieren",stand:"09.10.2026"},
+        {id:"E3",titel:"KI-Anbindung",wert:"A1 + A3 + A5 (Vorbelegung, Empfehlung)",stand:"09.10.2026"},
+        {id:"E4",titel:"Outlook",wert:"B1 + B2 (V1), B4 Phase 1b (Vorbelegung)",stand:"09.10.2026"},
+        {id:"E5",titel:"Layout",wert:"L2 + F1 + M1 + E1 (Vorbelegung)",stand:"09.10.2026"},
+        {id:"E6",titel:"Instrumentarium zuerst",wert:"ja, Instrumente als Knoten",stand:"09.10.2026"},
+        {id:"E7",titel:"Alt-Projekte",wert:"4 Kandidaten vorbelegt, Bestätigung offen",stand:"09.10.2026"},
+        {id:"E8",titel:"Plan-Freigabe = Baufreigabe",wert:"kein go je Phase; Gegenvorschlag verworfen",stand:"09.10.2026"},
+        {id:"E9",titel:"Entscheidungsdatei bearbeitbar",wert:"ja (Phase 0b)",stand:"09.10.2026"},
+        {id:"E10",titel:"Vorschau für alle Abschnitte",wert:"12 Ansichten-Mockups",stand:"09.10.2026"},
+        {id:"E11",titel:"Backend = Einstellungen und Optionen",wert:"ändern, erweitern, löschen im Tool",stand:"09.10.2026"},
+        {id:"E12",titel:"Backend-Quelle",wert:"O2 Tool kanonisch, Repo-Markdown als Spiegel",stand:"09.10.2026"}
+      ],
+      anforderungen:[[1,"Hierarchien","Outliner","erledigt"],[2,"To-do-Listen","To-do","erledigt"],[3,"Kalender","Kalender, ICS","erledigt"],[4,"Sprachsteuerung überall","Web Speech API, Mikrofon je Feld","erledigt"],[5,"Eingabefeld mit Auto-Sortierung","Eingabeblatt, Heuristik + KI","erledigt"],[6,"Mindmap gesamt","Mindmap","erledigt"],[7,"Fokus-Mindmaps hervorgehoben","Mindmap Fokus","erledigt"],[8,"Prompt als Notiz im Tool","Gründungsnotiz","erledigt"],[9,"Ideenbereich KI-gestützt, nachvollziehbar","Ideen + Protokoll","erledigt"],[10,"Alt-Projekte, Ökosystem","Alt-Projekte, Workflow","aktiv"],[11,"Kurz/Mittel/Lang visuell","Fristenfarben überall","erledigt"],[12,"Kalender ↔ To-do ↔ Mindmap","eine Datenstruktur","erledigt"],[13,"Outlook im Hintergrund","B1/B2 V1, B4 Phase 1b","aktiv"],[14,"Tool im Tool ausbauen, Flächen als Prompts","Ausbau, Bauaufträge","erledigt"],[15,"Workflow sichtbar für Tool und geplante Tools","Workflow","erledigt"],[16,"Optionen visuell","Entscheidungsdatei","erledigt"],[17,"Vorschau je Element entscheiden","Entscheidungsdatei 5e","erledigt"],[18,"Repo + Artefakt","Phase 3","aktiv"],[19,"Instrumentarium von Anfang an","Instrumente, Backend","erledigt"],[20,"Backend-Fenster mit Bauplan, bearbeitbar","Backend › Bauplan","erledigt"],[21,"Kein go je Phase","E8","erledigt"],[22,"Entscheidungsdatei bearbeitbar","Phase 0b","erledigt"],[23,"Vorschau für alle Abschnitte","Phase 0b 5e","erledigt"],[24,"Backend: Einstellungen ändern, Optionen erweitern und löschen","Backend › Einstellungen, Optionsregister","erledigt"]].map(r=>({nr:r[0],text:r[1],abdeckung:r[2],status:r[3]})),
+      offene:[{text:"Alt-Projekte bestätigen und ergänzen",status:"offen"},{text:"Outlook-Kontotyp (Indiz hotmail → privat)",status:"offen"},{text:"Mikrofon im Artefakt-Iframe testen (UNSICHER)",status:"offen"},{text:"ICS-URL-Abruf im Browser (CORS) testen",status:"offen"},{text:"Zapier-Outlook-Aktionen nach Kontoverbindung prüfen",status:"offen"},{text:"Routinen erst nach Prüfung des Nutzungskontingents (POLYGLOTT-Lauf 09.10. gescheitert)",status:"offen"}],
+      bauauftraege:[],
+      regeln:"# CLAUDE.md (Spiegel)\n\n- Eine HTML-Datei, alles inline, keine Abhängigkeiten außer Google Fonts.\n- EMBEDDED_DATA, localStorage-Autosave, Self-Download mit Zeitstempel, JSON-Export/-Import, Update-Paket-Import.\n- Additiv-only: nichts still entfernen, Entferntes im Changelog.\n- Dateinamen: Repo ohne Zeitstempel (Git = Versionen), Downloads notizblock_JJJJ-MM-TT_HHMM.html (Europe/Berlin).\n- Validierung vor Auslieferung: node scripts/validate.mjs → 0 Fehler; Screenshots mobil + Desktop.\n- Rückschreibpflicht: jeder Bauauftrag aktualisiert Bauplan-Status (Update-Paket) und docs/BAUPLAN_AKTUELL.md.\n- Modellrouting: Architektur Fable/Opus + Extended Thinking, Bau Sonnet, Doku Haiku; kein Wechsel mitten im Chat.",
+      changelog:[{v:"1.0.0",d:"2026-10-09",t:"V1: zehn Ansichten, Eingabeblatt mit Heuristik und KI-Weg (A1/A3), Sprache, Fristen, Seed, Backend mit Bauplan/Einstellungen/Optionsregister/Bauaufträgen, Export/Import, ICS."}]
+    }};
+}
+
+/* ===================== ZUSTAND ===================== */
+let D=null, SRC="";
+function load(){
+  let emb=null; try{ emb=JSON.parse($("#EMBEDDED_DATA").textContent); }catch(e){}
+  let ls=null; try{ const raw=localStorage.getItem(KEY); if(raw) ls=JSON.parse(raw); }catch(e){}
+  if(ls && ls.schema===SCHEMA && (!emb||emb.empty||!emb.geaendert||ls.geaendert>=emb.geaendert)){ D=ls; SRC="Browser-Speicher, zuletzt "+fmtDT(ls.geaendert); }
+  else if(emb && !emb.empty){ D=emb; SRC="eingebettet in Datei, Stand "+fmtDT(emb.geaendert); }
+  else { D=buildSeed(); SRC="Startinhalt (Seed) "+fmtDT(D.erstellt); }
+  D.settings=Object.assign(buildSeed().settings, D.settings||{}); D.deleted=D.deleted||[]; D.registerDeleted=D.registerDeleted||{}; D.bauplan.bauauftraege=D.bauplan.bauauftraege||[];
+}
+let saveT=null;
+function save(immediate){ D.geaendert=now(); const w=()=>{ try{ localStorage.setItem(KEY, JSON.stringify(D)); }catch(e){ toast("Speichern im Browser nicht möglich"); } }; if(immediate){ clearTimeout(saveT); w(); } else { clearTimeout(saveT); saveT=setTimeout(w, Math.min(D.settings.autosaveMs||1000,1000)); } updateHeader(); }
+window.addEventListener("pagehide", ()=>save(true));
+let UI={view:"outliner",collapsed:{},focus:null,mmDepth:null,cal:{mode:"monat",date:dkey(new Date())},todoFilter:"offen",todoGroup:"horizont",backendTab:"bauplan",regSec:"ki",lastField:null,search:""};
+try{ const u=JSON.parse(localStorage.getItem(UIKEY)||"null"); if(u) UI=Object.assign(UI,u); }catch(e){}
+function saveUI(){ try{ localStorage.setItem(UIKEY, JSON.stringify(UI)); }catch(e){} }
+
+/* ===================== KNOTEN ===================== */
+const byId=id=>D.nodes.find(n=>n.id===id);
+const alive=n=>n && !n.geloescht;
+const kids=id=>D.nodes.filter(n=>n.parentId===id && !n.geloescht).sort((a,b)=>(a.order||0)-(b.order||0));
+const roots=()=>kids(null);
+function path(id){ const p=[]; let n=byId(id); while(n){ p.unshift(n); n=n.parentId?byId(n.parentId):null; } return p; }
+function desc(id){ const out=[]; const walk=i=>kids(i).forEach(k=>{out.push(k); walk(k.id);}); walk(id); return out; }
+function topArea(n){ const p=path(n.id); return p[0]; }
+function addNode(o,opts={}){ const n=Object.assign({id:uid(),parentId:null,order:0,title:"",body:"",type:"notiz",horizont:"keiner",status:"offen",faellig:null,start:null,ende:null,tags:[],links:[],quelle:"manuell",erstellt:now(),geaendert:now()},o); n.order=kids(n.parentId).length; D.nodes.push(n); log("Knoten angelegt",n.title,{type:"create",id:n.id},opts.quelle||n.quelle); save(); return n; }
+function updNode(id,patch,aktion="Knoten geändert"){ const n=byId(id); if(!n) return; const before=JSON.parse(JSON.stringify(n)); Object.assign(n,patch,{geaendert:now()}); log(aktion,n.title,{type:"update",id,before}); save(); return n; }
+function delNode(id){ const n=byId(id); if(!n) return; const ids=[id,...desc(id).map(x=>x.id)]; ids.forEach(i=>{byId(i).geloescht=true;}); log("Knoten gelöscht",n.title+(ids.length>1?` (+${ids.length-1} Unterpunkte)`:""),{type:"delete",ids}); save(); }
+function moveNode(id,newParent,index){ const n=byId(id); if(!n||id===newParent) return; if(newParent&&path(newParent).some(p=>p.id===id)) { toast("Nicht in eigenen Unterpunkt verschieben"); return; } const before={parentId:n.parentId,order:n.order}; n.parentId=newParent||null; const sib=kids(n.parentId).filter(k=>k.id!==id); if(index==null||index>sib.length) index=sib.length; sib.splice(index,0,n); sib.forEach((k,i)=>k.order=i); n.geaendert=now(); log("Knoten verschoben",n.title,{type:"update",id,before}); save(); }
+function shift(id,dir){ const n=byId(id); const sib=kids(n.parentId); const i=sib.findIndex(k=>k.id===id), j=i+dir; if(j<0||j>=sib.length) return; [sib[i].order,sib[j].order]=[sib[j].order,sib[i].order]; save(); render(); }
+function indent(id){ const n=byId(id); const sib=kids(n.parentId); const i=sib.findIndex(k=>k.id===id); if(i<=0) return; moveNode(id,sib[i-1].id); render(); }
+function outdent(id){ const n=byId(id); if(!n.parentId) return; const p=byId(n.parentId); const sib=kids(p.parentId); moveNode(id,p.parentId,sib.findIndex(k=>k.id===p.id)+1); render(); }
+function outline(depth=3,maxLines=160){ const lines=[]; const walk=(pid,d)=>{ if(d>depth) return; kids(pid).forEach(k=>{ if(lines.length<maxLines) lines.push("  ".repeat(d-1)+`${k.id} · ${k.title} · ${k.type}`); walk(k.id,d+1); }); }; walk(null,1); return lines.join("\n"); }
+
+/* ===================== PROTOKOLL / RÜCKGÄNGIG ===================== */
+function log(aktion,text,undo,quelle){ D.log.unshift({t:now(),aktion,text:String(text||"").slice(0,200),undo:undo||null,quelle:quelle||"manuell"}); if(D.log.length>500) D.log.length=500; }
+function undoEntry(i){ const e=D.log[i]; if(!e||!e.undo) return; const u=e.undo;
+  if(u.type==="create"){ const n=byId(u.id); if(n) n.geloescht=true; }
+  else if(u.type==="update"){ const n=byId(u.id); if(n) Object.assign(n,u.before); }
+  else if(u.type==="delete"){ u.ids.forEach(id=>{ const n=byId(id); if(n) delete n.geloescht; }); }
+  else if(u.type==="bulkcreate"){ u.ids.forEach(id=>{ const n=byId(id); if(n) n.geloescht=true; }); }
+  else if(u.type==="restoreData"){ Object.assign(D,u.data); }
+  e.undo=null; e.rueckgaengig=true; log("Rückgängig",e.aktion+": "+e.text); save(); render(); toast("Rückgängig gemacht"); }
+
+/* ===================== HILFEN ===================== */
+function toast(t){const el=$("#toast"); el.textContent=t; el.classList.add("on"); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("on"),1800);}
+function copyText(txt,el){ const fb=()=>{ if(el){const r=document.createRange(); r.selectNodeContents(el); const s=getSelection(); s.removeAllRanges(); s.addRange(r);} toast("Text markiert, jetzt kopieren"); }; if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(()=>toast("Kopiert"),fb); else fb(); }
+async function download(name,data,mime="text/plain"){
+  try{ if(CAP.downloads){ await CAP.downloads.save({filename:name,data}); toast("Gespeichert: "+name); return; } }catch(e){}
+  try{ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([data],{type:mime})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},500); toast("Download: "+name); }catch(e){ copyText(data); }
+}
+function buildHtml(){ const root=document.documentElement.cloneNode(true); const v=root.querySelector("#view"); if(v) v.innerHTML=""; const s=root.querySelector("#side"); if(s) s.innerHTML=""; const nav=root.querySelector("#nav"); if(nav) nav.innerHTML=""; root.querySelectorAll("dialog").forEach(d=>d.removeAttribute("open")); const sh=root.querySelector("#sheet"); if(sh){ sh.setAttribute("hidden",""); sh.querySelector("#proposals").innerHTML=""; sh.querySelector("#kibox").innerHTML=""; } const ed=root.querySelector("#EMBEDDED_DATA"); ed.textContent=JSON.stringify(D).replace(/<\//g,"<\\/"); return "<!doctype html>\n"+root.outerHTML; }
+function copybox(title,txt,id){ const i=id||("cb"+Math.random().toString(36).slice(2,7)); return `<div class="copy"><div class="copy-head">${esc(title)}<span class="sp"><button class="b sm" data-copy="${i}">Kopieren</button></span></div><pre id="${i}">${esc(txt)}</pre></div>`; }
+
+/* ===================== SPRACHE ===================== */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null;
+let rec=null, recTarget=null, recBtn=null;
+function startMic(target,btn){ if(!SR){ toast("Spracherkennung in diesem Browser nicht verfügbar (Chrome, Edge, Safari nutzen) · Wispr Flow funktioniert in jedem Feld"); return; } if(rec){ stopMic(); return; }
+  rec=new SR(); rec.lang=D.settings.sprache||"de-DE"; rec.continuous=true; rec.interimResults=true; recTarget=target; recBtn=btn; btn.classList.add("on"); const base=target.value; let fin="";
+  rec.onresult=e=>{ let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const r=e.results[i]; if(r.isFinal) fin+=applyVoiceCmd(r[0].transcript); else interim+=r[0].transcript; } target.value=(base+(base&&!base.endsWith("\n")?" ":"")+fin+interim).replace(/ {2,}/g," "); target.dispatchEvent(new Event("input")); };
+  rec.onerror=e=>{ toast("Mikrofon: "+e.error); stopMic(); }; rec.onend=()=>{ if(rec){ try{rec.start();}catch(e){ stopMic(); } } };
+  try{ rec.start(); toast("Zuhören … (nochmal drücken zum Beenden)"); }catch(e){ toast("Mikrofon nicht gestartet"); stopMic(); } }
+function stopMic(){ if(rec){ const r=rec; rec=null; try{ r.onend=null; r.stop(); }catch(e){} } if(recBtn) recBtn.classList.remove("on"); recBtn=null; recTarget=null; }
+function applyVoiceCmd(t){ let s=t; s=s.replace(/\b(neuer punkt|neue zeile|nächster punkt)\b/gi,"\n"); s=s.replace(/\bunterpunkt\b/gi,"\n  - "); s=s.replace(/\bkomma\b/gi,","); s=s.replace(/\bpunkt\b(?=\s*$)/i,"."); if(/\bfertig\b\s*$/i.test(s)){ s=s.replace(/\bfertig\b\s*$/i,""); setTimeout(()=>{ stopMic(); if(recTarget===null && $("#inbox").value.trim()) $("#btn-sort").click(); },50); } return s; }
+document.addEventListener("focusin",e=>{ if(e.target.matches("textarea,input[type=text]")) UI.lastField=e.target; });
+</script>
+<script>
+/* ===================== RENDER-DISPATCH ===================== */
+function hdot(h){ return `<span class="hdot h-${esc(h||"keiner")}" title="Horizont: ${esc(h||"keiner")}"></span>`; }
+function spill(s){ return `<span class="pill ${STATC[s]||"n"}">${esc(s)}</span>`; }
+function updateHeader(){ $("#verpill").textContent="V"+(D.toolVersion||TOOL_VERSION); $("#srcpill").textContent="Herkunft: "+SRC; const k=[]; if(D.settings.ki.A1) k.push("A1 Copybox"); if(D.settings.ki.A3) k.push(CAP.sample?"A3 Claude fragen ✓":"A3 (nur im Artefakt)"); if(D.settings.ki.A2) k.push("A2 API"); if(D.settings.ki.A5) k.push("A5 Claude Code"); $("#kipill").textContent="KI: "+(k.join(" · ")||"aus"); $("#kipill").className="pill "+(CAP.sample?"g":"n"); }
+function renderNav(){ const views=VIEWS.filter(v=>(D.settings.views||[]).includes(v[0])); $("#nav").innerHTML=views.map(v=>`<button data-view="${v[0]}" class="${UI.view===v[0]?'on':''}"><span class="ic">${v[2]}</span><span>${v[1]}</span></button>`).join(""); }
+function render(){ renderNav(); $("#shell").classList.toggle("split",!!D.settings.split); const v=$("#view"); const R={outliner:vOutliner,todo:vTodo,kalender:vKalender,mindmap:vMindmap,ideen:vIdeen,workflow:vWorkflow,instrumente:vInstrumente,ausbau:vAusbau,protokoll:vProtokoll,backend:vBackend}; v.innerHTML=(R[UI.view]||vOutliner)(); if(D.settings.split){ $("#side").innerHTML=`<h3 style="margin-top:0">Baum</h3>${treeHtml(null,true)}`; } if(UI.view==="mindmap") mountMindmap(); updateHeader(); saveUI(); }
+function go(view){ UI.view=view; render(); $("#main").scrollTop=0; }
+const legendH=()=>`<div class="legend"><span class="small">Horizont:</span>${HORIZ.map(h=>`<span class="pill n">${hdot(h)}${h}</span>`).join("")}<span class="small">· Status:</span>${STATUS.map(s=>spill(s)).join("")}</div>`;
+
+/* ===================== OUTLINER ===================== */
+function treeHtml(pid,compact){ const ks=kids(pid).filter(k=>!UI.search||matches(k)); if(!ks.length) return pid===null?`<div class="empty">Keine Einträge. Eingabe über den Knopf unten rechts.</div>`:""; return `<ul class="tree">${ks.map(k=>{ const ch=kids(k.id); const col=UI.collapsed[k.id]; return `<li><div class="nrow" draggable="true" data-id="${k.id}"><button class="tg" data-tg="${k.id}" aria-label="${col?'ausklappen':'einklappen'}">${ch.length?(col?"▸":"▾"):"·"}</button><span class="ty" title="${TYPENAME[k.type]||k.type}">${TYPES[k.type]||"•"}</span><span class="ttl ${k.status==='erledigt'?'done':''}" data-open="${k.id}">${esc(k.title)||"<i>ohne Titel</i>"}</span>${hdot(k.horizont)}${k.faellig?`<span class="pill n">${fmtD(k.faellig)}</span>`:""}${k.status!=="offen"?spill(k.status):""}${ch.length?`<span class="small">${ch.length}</span>`:""}${compact?"":`<span class="qa"><button data-addchild="${k.id}" title="Unterpunkt">+</button><button data-up="${k.id}" title="hoch">↑</button><button data-down="${k.id}" title="runter">↓</button><button data-out="${k.id}" title="ausrücken">⇤</button><button data-in="${k.id}" title="einrücken">⇥</button></span>`}</div>${ch.length&&!col?treeHtml(k.id,compact):""}</li>`; }).join("")}</ul>`; }
+function matches(n){ const q=UI.search.toLowerCase(); const self=(n.title+" "+(n.body||"")+" "+(n.tags||[]).join(" ")).toLowerCase().includes(q); return self || desc(n.id).some(d=>(d.title+" "+(d.body||"")).toLowerCase().includes(q)); }
+function vOutliner(){ return `<h2>Outliner <span class="sp"><button class="sm" data-addroot>+ Bereich</button><button class="sm" data-expandall>alle auf</button><button class="sm" data-collapseall>alle zu</button></span></h2>${legendH()}<div class="box">${treeHtml(null,false)}</div><p class="small" style="margin-top:8px">Ziehen und auf einen Eintrag fallen lassen = als Unterpunkt einordnen. Klick auf Titel = bearbeiten.</p>`; }
+
+/* ===================== TO-DO ===================== */
+function todoItems(){ return D.nodes.filter(n=>!n.geloescht && (n.type==="todo"||n.type==="termin"||n.faellig)); }
+function vTodo(){ const f=UI.todoFilter; let items=todoItems().filter(n=> f==="alle"?true : f==="erledigt"? n.status==="erledigt" : (n.status!=="erledigt"&&n.status!=="verworfen")); if(UI.search) items=items.filter(matches);
+  items.sort((a,b)=>(a.faellig||"9999").localeCompare(b.faellig||"9999"));
+  const groups={}; items.forEach(n=>{ const g=UI.todoGroup==="horizont"?(n.horizont||"keiner"):(topArea(n).title); (groups[g]=groups[g]||[]).push(n); });
+  const order=UI.todoGroup==="horizont"?HORIZ:Object.keys(groups).sort();
+  const row=n=>`<div class="item ${esc(n.horizont||"keiner")}"><input type="checkbox" data-done="${n.id}" ${n.status==="erledigt"?"checked":""} aria-label="erledigt"><div style="flex:1;min-width:0"><div class="ttl ${n.status==="erledigt"?"done":""}" data-open="${n.id}">${TYPES[n.type]||""} ${esc(n.title)}</div><div class="meta"><span class="small">${esc(path(n.id).slice(0,-1).map(p=>p.title).join(" › "))}</span>${n.faellig?`<span class="pill ${n.faellig<dkey(new Date())&&n.status!=="erledigt"?"r":"n"}">${fmtD(n.faellig)}</span>`:""}${n.start?`<span class="pill n">${fmtDT(n.start)}</span>`:""}${spill(n.status)}</div></div></div>`;
+  return `<h2>To-do <span class="sp">${["offen","erledigt","alle"].map(x=>`<button class="sm ${f===x?"ac":""}" data-tf="${x}">${x}</button>`).join("")}<button class="sm ${UI.todoGroup==="horizont"?"ac":""}" data-tg2="horizont">nach Horizont</button><button class="sm ${UI.todoGroup==="bereich"?"ac":""}" data-tg2="bereich">nach Bereich</button></span></h2>${legendH()}${items.length?order.filter(g=>groups[g]).map(g=>`<div class="grp">${UI.todoGroup==="horizont"?hdot(g):""}${esc(g)} <span class="small">(${groups[g].length})</span></div>${groups[g].map(row).join("")}`).join(""):`<div class="empty">Keine passenden Einträge.</div>`}`; }
+
+/* ===================== KALENDER + ICS ===================== */
+function dated(){ return D.nodes.filter(n=>!n.geloescht&&(n.faellig||n.start)); }
+function dayOf(n){ return n.start?n.start.slice(0,10):n.faellig; }
+function vKalender(){ const d=new Date(UI.cal.date+"T00:00"); const mode=UI.cal.mode; const ev=dated(); const chip=n=>`<span class="chip ${esc(n.horizont||"keiner")} ${n.status==="erledigt"?"done":""}" draggable="true" data-ev="${n.id}" data-open="${n.id}" title="${esc(n.title)}">${n.start?n.start.slice(11,16)+" ":""}${esc(n.title)}</span>`;
+  let body="";
+  if(mode==="monat"){ const first=new Date(d.getFullYear(),d.getMonth(),1); const startDow=(first.getDay()+6)%7; const start=new Date(first); start.setDate(1-startDow); const today=dkey(new Date()); let cells=""; for(let i=0;i<42;i++){ const c=new Date(start); c.setDate(start.getDate()+i); const k=dkey(c); const items=ev.filter(n=>dayOf(n)===k); cells+=`<div class="day ${c.getMonth()!==d.getMonth()?"other":""} ${k===today?"today":""}" data-day="${k}"><span class="dn">${c.getDate()}</span>${items.map(chip).join("")}</div>`; } body=`<div class="cal">${["Mo","Di","Mi","Do","Fr","Sa","So"].map(x=>`<div class="dh">${x}</div>`).join("")}${cells}</div>`; }
+  else { const days= mode==="woche"?7:1; const start=new Date(d); if(mode==="woche") start.setDate(d.getDate()-((d.getDay()+6)%7)); body=""; for(let i=0;i<days;i++){ const c=new Date(start); c.setDate(start.getDate()+i); const k=dkey(c); const items=ev.filter(n=>dayOf(n)===k).sort((a,b)=>(a.start||"").localeCompare(b.start||"")); body+=`<div class="box" data-day="${k}" style="margin-top:6px"><b>${c.toLocaleDateString("de-DE",{weekday:"long",day:"2-digit",month:"2-digit"})}</b> <button class="sm" data-newtermin="${k}">+ Termin</button>${items.length?items.map(n=>`<div class="item ${esc(n.horizont||"keiner")}" style="margin-top:6px"><div class="ttl" data-open="${n.id}">${n.start?fmtDT(n.start).slice(12)+" · ":""}${esc(n.title)}</div>${spill(n.status)}</div>`).join(""):`<div class="small">frei</div>`}</div>`; } }
+  const title= mode==="monat"? d.toLocaleDateString("de-DE",{month:"long",year:"numeric"}) : mode==="woche"? "Woche ab "+fmtD(dkey(new Date(d.getFullYear(),d.getMonth(),d.getDate()-((d.getDay()+6)%7)))) : d.toLocaleDateString("de-DE",{weekday:"long",day:"2-digit",month:"long"});
+  return `<h2>Kalender <span class="sp"><button class="sm" data-cal="prev">‹</button><button class="sm" data-cal="today">heute</button><button class="sm" data-cal="next">›</button>${["monat","woche","tag"].map(m=>`<button class="sm ${mode===m?"ac":""}" data-calmode="${m}">${m}</button>`).join("")}</span></h2><div class="row" style="margin-bottom:6px"><b>${esc(title)}</b><span class="small">Ziehen eines Eintrags auf einen Tag ändert das Datum.</span></div>${legendH()}${body}
+  <div class="box" style="margin-top:12px"><h3 style="margin-top:0">Outlook / ICS</h3><div class="row"><label class="file">ICS importieren <input type="file" id="icsfile" accept=".ics,text/calendar" hidden></label><button class="sm" data-icsexport>ICS exportieren (alle Termine und Fristen)</button><button class="sm" data-newtermin="${UI.cal.date}">+ Termin</button></div><div class="row" style="margin-top:8px"><input type="url" id="icsurl" placeholder="Veröffentlichte Outlook-ICS-URL (B2, Versuch)" value="${esc(D.settings.icsUrl||"")}" style="flex:1 1 240px"><button class="sm" data-icsfetch>ICS-URL abrufen</button></div><p class="small" style="margin:6px 0 0">B1 ICS-Datei: Outlook › Datei › Öffnen und Exportieren › In Datei exportieren (.ics), hier importieren; Export aus dem Tool in Outlook importieren. B4 Zapier: nach Kontoverbindung erscheint hier „Termin nach Outlook“ (Bauauftrag vorhanden). Abruf der ICS-URL kann an Browser-Sperren (CORS) scheitern.</p></div>`; }
+function parseICS(txt){ const lines=txt.replace(/\r\n[ \t]/g,"").split(/\r?\n/); const out=[]; let cur=null; for(const l of lines){ if(l==="BEGIN:VEVENT") cur={}; else if(l==="END:VEVENT"){ if(cur) out.push(cur); cur=null; } else if(cur){ const i=l.indexOf(":"); if(i<0) continue; const k=l.slice(0,i).split(";")[0], v=l.slice(i+1); cur[k]=v; cur["_"+k]=l.slice(0,i); } } return out.map(e=>{ const toIso=(v,p)=>{ if(!v) return null; const m=v.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?(Z)?)?/); if(!m) return null; if(!m[4]) return `${m[1]}-${m[2]}-${m[3]}`; if(m[7]){ const d=new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5])); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; } return `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}`; }; return {uid:e.UID||uid(),title:(e.SUMMARY||"(ohne Titel)").replace(/\\,/g,",").replace(/\\n/g," "),body:(e.DESCRIPTION||"").replace(/\\n/g,"\n").replace(/\\,/g,","),start:toIso(e.DTSTART),ende:toIso(e.DTEND),ort:e.LOCATION||""}; }); }
+function importICS(txt,quelle="ics"){ const evs=parseICS(txt); if(!evs.length){ toast("Keine Termine gefunden"); return; } let area=D.nodes.find(n=>!n.geloescht&&n.type==="bereich"&&n.title==="Termine"); if(!area) area=addNode({title:"Termine",type:"bereich",body:"Importierte Termine (ICS / Outlook)"}); const ids=[]; let upd=0; evs.forEach(e=>{ const ex=D.nodes.find(n=>n.icsUid===e.uid&&!n.geloescht); const st=e.start&&e.start.length===10?null:e.start; const fa=e.start?e.start.slice(0,10):null; if(ex){ Object.assign(ex,{title:e.title,body:e.body,start:st,ende:e.ende&&e.ende.length>10?e.ende:null,faellig:fa,geaendert:now()}); upd++; } else { const n=addNode({parentId:area.id,title:e.title,body:e.body+(e.ort?"\nOrt: "+e.ort:""),type:"termin",start:st,ende:e.ende&&e.ende.length>10?e.ende:null,faellig:fa,icsUid:e.uid,quelle}); ids.push(n.id); } }); log("ICS importiert",`${ids.length} neu, ${upd} aktualisiert`,ids.length?{type:"bulkcreate",ids}:null,quelle); save(); render(); toast(`ICS: ${ids.length} neu, ${upd} aktualisiert`); }
+function exportICS(){ const esc2=s=>String(s||"").replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\;"); const dt=iso=>iso.length===10?iso.replace(/-/g,""):iso.replace(/[-:]/g,"").slice(0,15); const lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Notizblock//DE","CALSCALE:GREGORIAN"]; dated().forEach(n=>{ const s=n.start||n.faellig; lines.push("BEGIN:VEVENT",`UID:${n.icsUid||n.id+"@notizblock"}`,`DTSTAMP:${now().replace(/[-:]/g,"").slice(0,15)}Z`, n.start?`DTSTART:${dt(n.start)}`:`DTSTART;VALUE=DATE:${dt(n.faellig)}`, n.ende?`DTEND:${dt(n.ende)}`:"", `SUMMARY:${esc2(n.title)}`, n.body?`DESCRIPTION:${esc2(n.body)}`:"", "END:VEVENT"); }); lines.push("END:VCALENDAR"); return lines.filter(Boolean).join("\r\n"); }
+
+/* ===================== MINDMAP ===================== */
+let MM={k:1,x:0,y:0,drag:null};
+function mmRootKids(){ return UI.focus?kids(UI.focus):roots(); }
+function vMindmap(){ const f=UI.focus?byId(UI.focus):null; const crumbs=f?path(f.id):[]; const depth=UI.mmDepth||D.settings.mindmapTiefe||3; return `<h2>Mindmap ${f?`<span class="pill b">Fokus</span>`:`<span class="pill n">gesamt</span>`}<span class="sp"><label class="small">Tiefe <select id="mmdepth" style="width:auto;padding:2px 6px">${[1,2,3,4,5].map(x=>`<option ${x===depth?"selected":""}>${x}</option>`).join("")}</select></label><button class="sm" data-mmzoom="in">+</button><button class="sm" data-mmzoom="out">−</button><button class="sm" data-mmzoom="reset">⟲</button>${f?`<button class="sm ac" data-focus="">Gesamt</button>`:""}<button class="sm" data-whimsical>Gliederung kopieren (Whimsical)</button></span></h2><div class="crumbs"><button class="sm ${f?"":"ac"}" data-focus="">Gesamt</button>${crumbs.map(c=>` › <button class="sm ${c.id===UI.focus?"ac":""}" data-focus="${c.id}">${esc(c.title)}</button>`).join("")}</div>${legendH()}<div class="mmwrap" id="mmwrap"><svg id="mmsvg" role="img" aria-label="Mindmap"></svg></div><p class="small" style="margin-top:6px">Klick auf einen Knoten = Fokus auf diesen Knoten · Klick auf das Zentrum = bearbeiten · Ziehen = verschieben · Mausrad = Zoom.</p>`; }
+function mmLayout(){ const depth=UI.mmDepth||D.settings.mindmapTiefe||3; const nodes=[], edges=[]; const leafCount=(id,d)=>{ if(d>=depth) return 1; const ks=kids(id); if(!ks.length) return 1; return ks.reduce((s,k)=>s+leafCount(k.id,d+1),0); };
+  const center=UI.focus?byId(UI.focus):{id:"__root",title:"Notizblock",type:"tool",horizont:"keiner",status:"aktiv",virtual:true}; nodes.push({n:center,x:0,y:0,d:0,r:34});
+  const place=(pid,d,a0,a1,parentPos)=>{ if(d>depth) return; const ks=kids(pid); if(!ks.length) return; const total=ks.reduce((s,k)=>s+leafCount(k.id,d),0); let a=a0; const rad=d*170; ks.forEach(k=>{ const span=(a1-a0)*leafCount(k.id,d)/total; const am=a+span/2; const x=Math.cos(am)*rad, y=Math.sin(am)*rad; const r=Math.max(12,26-d*4); nodes.push({n:k,x,y,d,r}); edges.push([parentPos,{x,y}]); place(k.id,d+1,a,a+span,{x,y}); a+=span; }); };
+  place(center.virtual?null:center.id,1,-Math.PI/2,Math.PI*1.5,{x:0,y:0}); return {nodes,edges}; }
+function mountMindmap(){ const svg=$("#mmsvg"); if(!svg) return; const wrap=$("#mmwrap"); const W=wrap.clientWidth||800, H=wrap.clientHeight||500; const {nodes,edges}=mmLayout(); const hcol=h=>`var(--h-${h||"keiner"})`; const scol=s=>({erledigt:"var(--green-soft)",aktiv:"var(--yellow-soft)",wartet:"var(--purple-soft)",verworfen:"var(--red-soft)"}[s]||"var(--surface)");
+  const g=`<g transform="translate(${W/2+MM.x},${H/2+MM.y}) scale(${MM.k})">${edges.map(([a,b])=>`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="var(--line)" stroke-width="1.4"/>`).join("")}${nodes.map(o=>{ const t=o.n.title.length>22?o.n.title.slice(0,21)+"…":o.n.title; const w=Math.max(o.r*2, t.length*6.6+16), h=o.r*2>26?o.r*2:26; const center=o.d===0; return `<g class="mmn" data-mm="${o.n.virtual?"":o.n.id}" style="cursor:pointer"><rect x="${o.x-w/2}" y="${o.y-h/2}" width="${w}" height="${h}" rx="${h/2}" fill="${center?"var(--accent)":scol(o.n.status)}" stroke="${center?"var(--accent)":hcol(o.n.horizont)}" stroke-width="${center?3:2}"/><text x="${o.x}" y="${o.y+4}" text-anchor="middle" font-size="${center?13:11}" font-weight="${center?700:500}" fill="${center?"#fff":"var(--fg)"}" font-family="var(--font)">${esc(t)}</text>${kids(o.n.virtual?null:o.n.id).length&&o.d>0?`<text x="${o.x+w/2+8}" y="${o.y+4}" font-size="9" fill="var(--muted)">${kids(o.n.id).length}</text>`:""}</g>`; }).join("")}</g>`;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`); svg.innerHTML=g;
+  svg.onpointerdown=e=>{ if(e.target.closest(".mmn")) return; MM.drag={x:e.clientX-MM.x,y:e.clientY-MM.y}; svg.classList.add("dragging"); svg.setPointerCapture(e.pointerId); };
+  svg.onpointermove=e=>{ if(!MM.drag) return; MM.x=e.clientX-MM.drag.x; MM.y=e.clientY-MM.drag.y; svg.firstElementChild.setAttribute("transform",`translate(${W/2+MM.x},${H/2+MM.y}) scale(${MM.k})`); };
+  svg.onpointerup=()=>{ MM.drag=null; svg.classList.remove("dragging"); };
+  svg.onwheel=e=>{ e.preventDefault(); MM.k=Math.min(3,Math.max(.3,MM.k*(e.deltaY<0?1.1:0.9))); mountMindmap(); };
+  svg.onclick=e=>{ const n=e.target.closest(".mmn"); if(!n) return; const id=n.dataset.mm; if(!id) return; if(id===UI.focus) openNode(id); else { UI.focus=id; MM.x=0; MM.y=0; render(); } };
+}
+function whimsicalOutline(){ const lines=[]; const walk=(pid,d)=>kids(pid).forEach(k=>{ lines.push("  ".repeat(d)+"- "+k.title); walk(k.id,d+1); }); lines.push("# Notizblock"); walk(UI.focus||null,0); return lines.join("\n"); }
+
+/* ===================== IDEEN ===================== */
+function vIdeen(){ const ideas=D.nodes.filter(n=>!n.geloescht&&n.type==="idee"&&(!UI.search||matches(n))); const col=s=>`<div class="kcol"><h4>${esc(s)} <span class="small">(${ideas.filter(i=>(i.stufe||"roh")===s).length})</span></h4>${ideas.filter(i=>(i.stufe||"roh")===s).map(i=>`<div class="kcard ${esc(i.horizont||"keiner")}"><div data-open="${i.id}" style="cursor:pointer"><b>${esc(i.title)}</b></div><div class="small" style="margin:3px 0">${esc((i.body||"").slice(0,120))}</div><div class="row tight"><button class="sm" data-stufe="${i.id}:-1" ${s==="roh"?"disabled":""}>◀</button><button class="sm" data-stufe="${i.id}:1" ${s==="integriert"?"disabled":""}>▶</button><button class="sm ac" data-ausarbeiten="${i.id}">Ausarbeiten</button>${hdot(i.horizont)}</div></div>`).join("")}</div>`; return `<h2>Ideen <span class="sp"><button class="sm" data-newidee>+ Idee</button></span></h2><p class="small">„Ausarbeiten“ erzeugt einen Vorschlag (Problem, Ansatz, Schritte, Horizont, Verknüpfungen) über den eingestellten KI-Weg; du prüfst und übernimmst. Jede Übernahme steht im Protokoll und ist rückgängig machbar.</p>${legendH()}<div class="kanban">${STUFEN.map(col).join("")}</div>`; }
+
+/* ===================== WORKFLOW ===================== */
+function vWorkflow(){ const tools=D.nodes.filter(n=>!n.geloescht&&n.type==="tool"); const pipe=(t)=>`<div class="pipe">${(t.workflow||[]).map((s,i)=>`<div class="pstep ${esc(s.s)}" data-wf="${t.id}:${i}" title="Klick = Status weiter">${esc(s.t)}<br>${spill(s.s)}</div>`).join("")}<button class="sm" data-wfadd="${t.id}" style="align-self:center">+ Schritt</button></div>`;
+  const flow=`<svg viewBox="0 0 900 70" role="img" aria-label="Gesamtfluss" style="max-width:100%;height:auto;color:var(--fg)" font-family="var(--font)" font-size="11"><defs><marker id="arw" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="currentColor"/></marker></defs>${["Eingabe","Inbox","Sortierung","Struktur","Ansichten","Export","Automation","Struktur"].map((t,i)=>`<rect x="${10+i*112}" y="18" width="100" height="32" rx="6" fill="var(--surface2)" stroke="${i===0||i===7?"var(--accent)":"currentColor"}"/><text x="${60+i*112}" y="38" text-anchor="middle" fill="currentColor">${t}</text>${i<7?`<line x1="${110+i*112}" y1="34" x2="${121+i*112}" y2="34" stroke="currentColor" marker-end="url(#arw)"/>`:""}`).join("")}</svg>`;
+  return `<h2>Workflow <span class="sp"><button class="sm" data-newtool>+ Tool</button></span></h2><div class="box"><b>Gesamtfluss des Ökosystems</b><div class="scroll">${flow}</div><div class="small">Tastatur, Sprache, Mail, Wispr → Inbox → lokal oder KI sortiert → Struktur → Outliner, To-do, Kalender, Mindmap → JSON, ICS, Repo → Routine, Zapier, Claude Code → zurück in die Struktur. Alles im Protokoll.</div></div>${tools.length?tools.map(t=>`<div class="box"><div class="row"><b data-open="${t.id}" style="cursor:pointer">${TYPES.tool} ${esc(t.title)}</b>${t.version?`<span class="pill n">V${esc(t.version)}</span>`:""}${spill(t.status)}${hdot(t.horizont)}${t.routineId?`<span class="pill p">Routine</span>`:""}<span class="small">${esc(t.repoPfad||"")}</span></div>${pipe(t)}</div>`).join(""):`<div class="empty">Keine Tool-Knoten.</div>`}`; }
+
+/* ===================== INSTRUMENTE ===================== */
+function vInstrumente(){ const ins=D.nodes.filter(n=>!n.geloescht&&n.type==="instrument"); const lay=["E6","E1","E2","E3","E4","E5"]; const names={E6:"E6 Steuerung",E1:"E1 Quelle",E2:"E2 Laufzeit",E3:"E3 Intelligenz",E4:"E4 Automation",E5:"E5 Konnektoren"}; const cn={g:"verbunden",y:"vorhanden / Konto fehlt",p:"Phase 2–3",r:"fehlt",n:"nicht benötigt"};
+  return `<h2>Instrumente <span class="sp"><button class="sm" data-newinstrument>+ Instrument</button></span></h2><div class="legend"><span class="pill g">verbunden</span><span class="pill y">vorhanden, Konto oder Ladung fehlt</span><span class="pill p">Phase 2–3</span><span class="pill r">fehlt</span><span class="pill n">nicht benötigt</span></div>${lay.map(l=>{ const items=ins.filter(i=>i.ebene===l); return `<div class="box"><b>${names[l]}</b> <span class="small">(${items.length})</span><div class="row" style="margin-top:6px">${items.map(i=>`<button class="pill ${esc(i.statusC||"n")}" data-open="${i.id}" title="${esc(cn[i.statusC]||"")}${i.naechsterSchritt?" · "+esc(i.naechsterSchritt):""}" style="cursor:pointer">${esc(i.title)}</button>`).join("")}</div></div>`; }).join("")}`; }
+
+/* ===================== AUSBAU ===================== */
+function zustand(){ const c=D.nodes.filter(n=>!n.geloescht).length; return `Version ${D.toolVersion}, ${c} Knoten, Ansichten: ${(D.settings.views||[]).join(", ")}; KI-Wege aktiv: ${Object.entries(D.settings.ki).filter(([k,v])=>v).map(([k])=>k).join(", ")}; Layout ${D.settings.layout}, Fristen ${D.settings.fristen}; Bauplan-Phasen: ${D.bauplan.phasen.map(p=>p.id+"="+p.status).join(", ")}`; }
+function buildAuftrag(id,titel,text){ return AUSBAU_VORLAGE.replace("{{version}}",D.toolVersion).replace("{{stand}}",fmtDT(D.geaendert)).replace("{{zustand}}",zustand()).replace("{{id}}",id).replace("{{titel}}",titel).replace("{{text}}",text); }
+function vAusbau(){ const ps=D.nodes.filter(n=>!n.geloescht&&n.type==="prompt"); const auf=D.bauplan.bauauftraege; return `<h2>Ausbau <span class="sp"><button class="sm" data-newprompt>+ Prompt-Fläche</button></span></h2><p class="small">Jede Prompt-Fläche wird mit „Als Bauauftrag exportieren“ zu einem vollständigen Auftrag für Claude Code (Zustand, Regeln, Validierungspflicht, Rückschreibpflicht). Einfügeort: Claude Code, Repo gty7wkh2m2-byte/token, Branch claude/epic-lamport-gdityd. Phase 2: direkt aus dem Artefakt starten (A6).</p><div class="grid">${ps.map(p=>`<div class="card p"><h4 data-open="${p.id}" style="cursor:pointer">${TYPES.prompt} ${esc(p.title)}</h4><div class="small">${esc((p.body||"").slice(0,220))}</div><div class="t"><button class="sm b" data-auftrag="${p.id}">Als Bauauftrag exportieren</button>${hdot(p.horizont)}${spill(p.status)}</div></div>`).join("")}</div><div id="auftragout"></div><h3>Bauaufträge (Backend)</h3>${auf.length?auf.map((a,i)=>`<div class="item"><div style="flex:1;min-width:0"><b>${esc(a.id)} ${esc(a.titel)}</b> ${spill(a.status)} <span class="small">${fmtDT(a.erstellt)}</span><div class="small">${esc((a.text||"").slice(0,160))}</div></div><button class="sm" data-auftragshow="${i}">anzeigen</button></div>`).join(""):`<div class="empty">Noch keine Bauaufträge. Entstehen aus Prompt-Flächen oder im Backend.</div>`}`; }
+
+/* ===================== PROTOKOLL ===================== */
+function vProtokoll(){ const L=D.log.slice(0,200); return `<h2>Protokoll <span class="sp"><span class="pill n">${D.log.length} Einträge</span></span></h2><p class="small">Jede Änderung, jeder KI-Vorschlag und jede Übernahme. Rückgängig, solange der Eintrag es erlaubt.</p><div class="box log">${L.length?L.map((e,i)=>`<div><span class="t">${fmtDT(e.t)}</span><span class="pill ${e.quelle==="ki-vorschlag"?"b":e.quelle==="ics"?"p":"n"}">${esc(e.quelle||"manuell")}</span><b>${esc(e.aktion)}</b><span style="flex:1;min-width:0">${esc(e.text)}</span>${e.undo?`<button class="sm" data-undo="${i}">Rückgängig</button>`:e.rueckgaengig?`<span class="pill n">rückgängig</span>`:""}</div>`).join(""):`<div class="empty">Noch keine Einträge.</div>`}</div>`; }
+</script>
+<script>
+/* ===================== BACKEND ===================== */
+const BTABS=[["bauplan","Bauplan"],["entscheidungen","Entscheidungen"],["einstellungen","Einstellungen"],["register","Optionsregister"],["anforderungen","Anforderungen"],["offene","Offene Punkte"],["auftraege","Bauaufträge"],["export","Export / Import"],["regeln","Regeln"],["changelog","Changelog"]];
+const REGSEC={ki:"KI-Wege",outlook:"Outlook-Wege",ablage:"Ablagen",layout:"Layouts",fristen:"Fristenpaletten",fokus:"Fokus-Darstellungen",eingabe:"Eingabe-Varianten",typen:"Knotentypen",horizonte:"Horizonte",status:"Statuswerte",stufen:"Ideen-Stufen"};
+function vBackend(){ const t=UI.backendTab; const B=D.bauplan; let body="";
+  if(t==="bauplan") body=`<div class="row" style="margin-bottom:8px"><span class="small">Klick auf Status = weiter (offen → aktiv → erledigt → blockiert). Bearbeiten öffnet alle Felder.</span><button class="sm" data-rec-add="phasen">+ Phase</button><button class="sm" data-bpexport>Bauplan als Markdown exportieren</button></div><div class="steps">${B.phasen.map((p,i)=>`<div class="step ${esc(p.status)}"><span class="num">${i}</span><div style="flex:1;min-width:0"><b>${esc(p.name)}</b> <button class="pill ${STATC[p.status]||"n"}" data-cycle="phasen:${i}" style="cursor:pointer">${esc(p.status)}</button><div class="small">${esc(p.inhalt)}</div><div class="small">Ergebnis: ${esc(p.ergebnis)}</div><div class="row tight" style="margin-top:4px"><button class="sm" data-rec-edit="phasen:${i}">Bearbeiten</button><button class="sm" data-rec-del="phasen:${i}">Löschen</button><button class="sm" data-rec-move="phasen:${i}:-1">↑</button><button class="sm" data-rec-move="phasen:${i}:1">↓</button></div></div></div>`).join("")}</div>`;
+  else if(t==="entscheidungen") body=`<div class="row" style="margin-bottom:8px"><button class="sm" data-rec-add="entscheidungen">+ Entscheidung</button></div><div class="scroll"><table><thead><tr><th>#</th><th>Titel</th><th>Wert</th><th>Stand</th><th></th></tr></thead><tbody>${B.entscheidungen.map((e,i)=>`<tr><td>${esc(e.id)}</td><td>${esc(e.titel)}</td><td>${esc(e.wert)}</td><td>${esc(e.stand)}</td><td><button class="sm" data-rec-edit="entscheidungen:${i}">Bearbeiten</button> <button class="sm" data-rec-del="entscheidungen:${i}">Löschen</button></td></tr>`).join("")}</tbody></table></div>`;
+  else if(t==="einstellungen"){ const S=D.settings; const sel=(name,sec)=>`<select data-set="${name}">${(D.register[sec]||[]).map(o=>`<option value="${esc(o.id)}" ${S[name]===o.id?"selected":""}>${esc(o.id)} ${esc(o.name)}</option>`).join("")}</select>`;
+    body=`<div class="two"><label class="fld">Layout ${sel("layout","layout")}</label><label class="fld">Fristenpalette ${sel("fristen","fristen")}</label><label class="fld">Mindmap-Fokus ${sel("fokus","fokus")}</label><label class="fld">Eingabefeld ${sel("eingabe","eingabe")}</label><label class="fld">Mindmap-Tiefe <input type="number" min="1" max="6" data-set="mindmapTiefe" value="${S.mindmapTiefe}"></label><label class="fld">Autosave (ms) <input type="number" min="200" step="100" data-set="autosaveMs" value="${S.autosaveMs}"></label><label class="fld">Sprache (Diktat) <input type="text" data-set="sprache" value="${esc(S.sprache)}"></label><label class="fld">Darstellung <select data-set="theme"><option value="auto" ${S.theme==="auto"?"selected":""}>System</option><option value="light" ${S.theme==="light"?"selected":""}>hell</option><option value="dark" ${S.theme==="dark"?"selected":""}>dunkel</option></select></label><label class="fld">ICS-URL (Outlook veröffentlicht) <input type="url" data-set="icsUrl" value="${esc(S.icsUrl||"")}"></label><label class="fld">Zapier-Aktion (Outlook) <input type="text" data-set="zapierAktion" value="${esc(S.zapierAktion||"")}"></label><label class="fld inl"><input type="checkbox" data-set="split" ${S.split?"checked":""}> Desktop: Baum als dritte Spalte (ab 1200 px, L3-Modus)</label></div>
+    <h3>KI-Wege aktiv</h3><div class="row">${(D.register.ki||[]).map(k=>`<label class="pill ${S.ki[k.id]?"g":"n"}" style="cursor:pointer"><input type="checkbox" data-setki="${esc(k.id)}" ${S.ki[k.id]?"checked":""}> ${esc(k.id)} ${esc(k.name)}</label>`).join("")}</div><p class="small" style="margin-top:6px">A3 wirkt nur im Artefakt (Claude fragen: ${CAP.sample?"verfügbar":"hier nicht verfügbar"}). A2 benötigt einen API-Schlüssel, der nur im Sitzungsspeicher liegt:</p><div class="row"><input type="password" id="apikey" placeholder="Anthropic-API-Schlüssel (nur diese Sitzung)" value="${esc(sessionStorage.getItem("nb_apikey")||"")}" style="flex:1 1 220px"><button class="sm" data-apikey>übernehmen</button></div>
+    <h3>Ansichten (ein/aus)</h3><div class="row">${VIEWS.map(v=>`<label class="pill ${(S.views||[]).includes(v[0])?"g":"n"}" style="cursor:pointer"><input type="checkbox" data-setview="${v[0]}" ${(S.views||[]).includes(v[0])?"checked":""} ${v[0]==="backend"?"disabled":""}> ${v[1]}</label>`).join("")}</div>`; }
+  else if(t==="register"){ const sec=UI.regSec; const list=D.register[sec]||[]; const del=(D.registerDeleted[sec]||[]); body=`<div class="subnav">${Object.entries(REGSEC).map(([k,v])=>`<button class="sm ${sec===k?"on":""}" data-regsec="${k}">${v}</button>`).join("")}</div><div class="row" style="margin-bottom:8px"><button class="sm" data-reg-add="${sec}">+ Neu</button><span class="small">Löschen verschiebt in „Gelöscht“ (wiederherstellbar). Aktiv = in V1 verwendet.</span></div><div class="scroll"><table><thead><tr><th>ID</th><th>Name</th><th>Status</th><th>Phase</th><th>Beleg</th><th>aktiv</th><th></th></tr></thead><tbody>${list.map((o,i)=>`<tr><td>${esc(o.id)}</td><td>${esc(o.name)}${o.sw?`<div class="row tight">${o.sw.map(c=>`<span style="display:inline-block;width:22px;height:12px;border-radius:3px;background:${esc(c)};border:1px solid var(--line)"></span>`).join("")}</div>`:""}</td><td><span class="pill ${esc(o.c||"n")}">${esc(o.c||"n")}</span></td><td>${esc(o.phase||"")}</td><td class="small">${esc(o.beleg||"")}</td><td><input type="checkbox" data-reg-aktiv="${sec}:${i}" ${o.aktiv?"checked":""}></td><td><div class="row tight"><button class="sm" data-reg-edit="${sec}:${i}">Bearbeiten</button><button class="sm" data-reg-del="${sec}:${i}">Löschen</button><button class="sm" data-reg-move="${sec}:${i}:-1">↑</button><button class="sm" data-reg-move="${sec}:${i}:1">↓</button></div></td></tr>`).join("")}</tbody></table></div>${del.length?`<div class="row" style="margin-top:8px"><span class="small">Gelöscht:</span>${del.map((o,i)=>`<span class="pill n">${esc(o.id)} ${esc(o.name)}</span><button class="sm" data-reg-restore="${sec}:${i}">wiederherstellen</button>`).join("")}</div>`:""}`; }
+  else if(t==="anforderungen") body=`<div class="row" style="margin-bottom:8px"><button class="sm" data-rec-add="anforderungen">+ Anforderung</button></div><div class="scroll"><table><thead><tr><th>#</th><th>Anforderung</th><th>Abdeckung</th><th>Status</th><th></th></tr></thead><tbody>${B.anforderungen.map((a,i)=>`<tr><td>${esc(a.nr)}</td><td>${esc(a.text)}</td><td class="small">${esc(a.abdeckung)}</td><td><button class="pill ${STATC[a.status]||"n"}" data-cycle="anforderungen:${i}" style="cursor:pointer">${esc(a.status)}</button></td><td><button class="sm" data-rec-edit="anforderungen:${i}">Bearbeiten</button> <button class="sm" data-rec-del="anforderungen:${i}">Löschen</button></td></tr>`).join("")}</tbody></table></div>`;
+  else if(t==="offene") body=`<div class="row" style="margin-bottom:8px"><button class="sm" data-rec-add="offene">+ Punkt</button></div>${B.offene.map((o,i)=>`<div class="item"><div class="ttl">${esc(o.text)}</div><button class="pill ${STATC[o.status]||"n"}" data-cycle="offene:${i}" style="cursor:pointer">${esc(o.status)}</button><button class="sm" data-rec-edit="offene:${i}">Bearbeiten</button><button class="sm" data-rec-del="offene:${i}">Löschen</button></div>`).join("")||`<div class="empty">Keine offenen Punkte.</div>`}`;
+  else if(t==="auftraege") body=`<div class="row" style="margin-bottom:8px"><button class="sm" data-rec-add="bauauftraege">+ Bauauftrag</button><span class="small">Ein Bauauftrag beschreibt eine Änderung am Werkzeug; „anzeigen“ erzeugt den vollständigen Claude-Code-Prompt.</span></div>${B.bauauftraege.map((a,i)=>`<div class="item"><div style="flex:1;min-width:0"><b>${esc(a.id)} ${esc(a.titel)}</b> <button class="pill ${STATC[a.status]||"n"}" data-cycle="bauauftraege:${i}" style="cursor:pointer">${esc(a.status)}</button> <span class="small">${fmtDT(a.erstellt)}</span><div class="small">${esc(a.text)}</div></div><button class="sm b" data-auftragshow="${i}">anzeigen</button><button class="sm" data-rec-edit="bauauftraege:${i}">Bearbeiten</button><button class="sm" data-rec-del="bauauftraege:${i}">Löschen</button></div>`).join("")||`<div class="empty">Noch keine Bauaufträge.</div>`}<div id="auftragout"></div>`;
+  else if(t==="export") body=`<div class="box"><h3 style="margin-top:0">Export</h3><div class="row"><button class="gr" data-exp="html">Werkzeugdatei mit Zeitstempel (HTML)</button><button class="gr" data-exp="json">Gesamtdaten (JSON)</button><button class="gr" data-exp="bauplan">Bauplan (Markdown)</button><button class="gr" data-exp="ics">Termine (ICS)</button><button class="gr" data-exp="paket">Update-Paket Bauplan (JSON)</button></div><p class="small" style="margin-top:6px">Herkunft aktueller Daten: ${esc(SRC)}. Die HTML-Datei enthält alle Daten eingebettet; im Artefakt wird über die Fähigkeit „downloads“ gespeichert, lokal als Download.</p></div><div class="box"><h3 style="margin-top:0">Import</h3><div class="row"><label class="file">JSON / Update-Paket wählen <input type="file" id="impfile" accept="application/json,.json" hidden></label></div><textarea id="impbox" rows="3" placeholder="oder JSON hier einfügen (Gesamtdaten, Update-Paket oder Entscheidungs-JSON aus der Entscheidungsdatei)" style="margin-top:8px"></textarea><div class="row" style="margin-top:6px"><button data-impbtn>Importieren</button><button data-seedreset>Startinhalt neu laden (aktueller Stand wird im Protokoll gesichert)</button></div><p class="small">Update-Paket: {"nodes":[…], "bauplan":{…}, "log":[…]} aus einer Claude-Code-Sitzung (Rückweg A5/A7). Gesamtdaten ersetzen alles (rückgängig möglich). Entscheidungs-JSON übernimmt Auswahl und Optionsänderungen ins Register.</p></div>`;
+  else if(t==="regeln") body=`<p class="small">Spiegel von CLAUDE.md. Änderungen hier werden mit „Als Bauauftrag“ an Claude Code übergeben; die Repo-Datei bleibt bis dahin maßgeblich für Sitzungen.</p><textarea id="regeln" rows="12">${esc(B.regeln||"")}</textarea><div class="row" style="margin-top:6px"><button class="sm" data-regeln-save>Speichern</button><button class="sm b" data-regeln-auftrag>Als Bauauftrag (CLAUDE.md angleichen)</button></div>`;
+  else if(t==="changelog") body=`<div class="row" style="margin-bottom:8px"><button class="sm" data-rec-add="changelog">+ Eintrag</button></div>${(B.changelog||[]).map((c,i)=>`<div class="item"><span class="pill n">V${esc(c.v)}</span><span class="small">${esc(c.d)}</span><div class="ttl">${esc(c.t)}</div><button class="sm" data-rec-edit="changelog:${i}">Bearbeiten</button></div>`).join("")}`;
+  return `<h2>Backend <span class="pill n">Bauplan, Einstellungen, Optionen</span></h2><div class="subnav">${BTABS.map(([k,v])=>`<button class="sm ${t===k?"on":""}" data-btab="${k}">${v}</button>`).join("")}</div><div class="box">${body}</div>`; }
+const RECFIELDS={phasen:[["id","ID"],["name","Name"],["inhalt","Inhalt","area"],["ergebnis","Ergebnis"],["status","Status","status"]],entscheidungen:[["id","ID"],["titel","Titel"],["wert","Wert","area"],["stand","Stand"]],anforderungen:[["nr","Nr"],["text","Anforderung"],["abdeckung","Abdeckung"],["status","Status","status"]],offene:[["text","Punkt","area"],["status","Status","status"]],bauauftraege:[["id","ID"],["titel","Titel"],["text","Auftragstext","area"],["status","Status","status"]],changelog:[["v","Version"],["d","Datum"],["t","Text","area"]],
+  reg:[["id","ID"],["name","Name"],["c","Status-Farbe","color"],["phase","Phase"],["beleg","Belegstufe"],["text","Beschreibung","area"],["sw","Farben (Hex, eine je Zeile)","area"]]};
+function cycleStatus(s){ const o=["offen","aktiv","erledigt","blockiert"]; return o[(o.indexOf(s)+1)%o.length]; }
+function bpSnapshot(aktion){ log(aktion,"Backend",{type:"restoreData",data:{bauplan:JSON.parse(JSON.stringify(D.bauplan)),register:JSON.parse(JSON.stringify(D.register)),registerDeleted:JSON.parse(JSON.stringify(D.registerDeleted)),settings:JSON.parse(JSON.stringify(D.settings))}},"backend"); }
+function bauplanMarkdown(){ const B=D.bauplan; const L=[`# BAUPLAN_AKTUELL (Export aus Notizblock V${D.toolVersion}, ${fmtDT(now())})`,"","## Phasen","","| # | Phase | Inhalt | Ergebnis | Status |","|---|---|---|---|---|",...B.phasen.map((p,i)=>`| ${i} | ${p.name} | ${p.inhalt} | ${p.ergebnis} | ${p.status} |`),"","## Entscheidungen","","| ID | Titel | Wert | Stand |","|---|---|---|---|",...B.entscheidungen.map(e=>`| ${e.id} | ${e.titel} | ${e.wert} | ${e.stand} |`),"","## Einstellungen","",`Layout ${D.settings.layout} · Fristen ${D.settings.fristen} · Fokus ${D.settings.fokus} · Eingabe ${D.settings.eingabe} · KI ${Object.entries(D.settings.ki).filter(([k,v])=>v).map(([k])=>k).join(", ")} · Ansichten ${(D.settings.views||[]).join(", ")}`,"","## Optionsregister","",...Object.entries(D.register).map(([k,v])=>`- **${REGSEC[k]||k}:** ${v.map(o=>`${o.id} ${o.name}${o.aktiv?" (aktiv)":""}`).join(" · ")}`),"","## Anforderungen (Kontrollblock)","","| # | Anforderung | Abdeckung | Status |","|---|---|---|---|",...B.anforderungen.map(a=>`| ${a.nr} | ${a.text} | ${a.abdeckung} | ${a.status} |`),"","## Offene Punkte","",...B.offene.map(o=>`- [${o.status==="erledigt"?"x":" "}] ${o.text}`),"","## Bauaufträge","",...(B.bauauftraege.length?B.bauauftraege.map(a=>`- ${a.id} ${a.titel} (${a.status}): ${a.text}`):["- keine"]),"","## Changelog","",...(B.changelog||[]).map(c=>`- V${c.v} (${c.d}): ${c.t}`),"","## Regeln (Spiegel CLAUDE.md)","",B.regeln||""]; return L.join("\n"); }
+function updatePaket(){ return JSON.stringify({paket:"bauplan",erzeugt:now(),toolVersion:D.toolVersion,bauplan:D.bauplan,settings:D.settings,register:D.register},null,2); }
+
+/* ===================== EDITOR (Knoten + Datensätze) ===================== */
+let ED=null;
+function openNode(id){ const n=byId(id); if(!n) return; ED={kind:"node",id}; $("#dlgtitle").textContent=(TYPES[n.type]||"")+" "+(n.title||"Knoten"); const parents=D.nodes.filter(x=>!x.geloescht&&x.id!==id&&!path(x.id).some(p=>p.id===id)); const opt=(arr,v,lab)=>arr.map(a=>`<option value="${esc(a)}" ${a===v?"selected":""}>${esc(lab?lab(a):a)}</option>`).join("");
+  $("#dlgbody").innerHTML=`<label class="fld">Titel<div class="row" style="flex-wrap:nowrap"><input type="text" name="title" value="${esc(n.title)}" required><button type="button" class="mic sm" data-mic="f-title" style="width:34px;height:34px">🎤</button></div></label><div class="two"><label class="fld">Typ<select name="type">${opt(Object.keys(TYPES),n.type,t=>TYPENAME[t])}</select></label><label class="fld">Übergeordnet<select name="parentId"><option value="">(oberste Ebene)</option>${parents.map(p=>`<option value="${p.id}" ${p.id===n.parentId?"selected":""}>${esc(path(p.id).map(x=>x.title).join(" › "))}</option>`).join("")}</select></label><label class="fld">Horizont<select name="horizont">${opt(HORIZ,n.horizont)}</select></label><label class="fld">Status<select name="status">${opt(STATUS,n.status)}</select></label><label class="fld">Fällig<input type="date" name="faellig" value="${esc(n.faellig||"")}"></label><label class="fld">Beginn (Termin)<input type="datetime-local" name="start" value="${esc(n.start||"")}"></label><label class="fld">Ende<input type="datetime-local" name="ende" value="${esc(n.ende||"")}"></label><label class="fld">Schlagwörter<input type="text" name="tags" value="${esc((n.tags||[]).join(", "))}"></label>${n.type==="idee"?`<label class="fld">Stufe<select name="stufe">${opt(STUFEN,n.stufe||"roh")}</select></label>`:""}${n.type==="instrument"?`<label class="fld">Ebene<select name="ebene">${opt(["E6","E1","E2","E3","E4","E5"],n.ebene)}</select></label><label class="fld">Kategorie<input type="text" name="kategorie" value="${esc(n.kategorie||"")}"></label><label class="fld">Status-Farbe<select name="statusC">${opt(["g","y","p","r","n"],n.statusC||"n",c=>({g:"grün verbunden",y:"gelb vorhanden",p:"lila Phase 2–3",r:"rot fehlt",n:"grau"}[c]))}</select></label><label class="fld">Nächster Schritt<input type="text" name="naechsterSchritt" value="${esc(n.naechsterSchritt||"")}"></label>`:""}${n.type==="tool"?`<label class="fld">Version<input type="text" name="version" value="${esc(n.version||"")}"></label><label class="fld">Repo-Pfad<input type="text" name="repoPfad" value="${esc(n.repoPfad||"")}"></label>`:""}</div><label class="fld">Text<div class="row" style="flex-wrap:nowrap;align-items:flex-start"><textarea name="body" rows="5" id="f-body">${esc(n.body||"")}</textarea><button type="button" class="mic sm" data-mic="f-body" style="width:34px;height:34px">🎤</button></div></label><div class="small">Pfad: ${esc(path(id).map(p=>p.title).join(" › "))} · Quelle: ${esc(n.quelle)} · geändert ${fmtDT(n.geaendert)}</div>`;
+  $("#dlgbody input[name=title]").id="f-title";
+  $("#dlgextra").innerHTML=`<button type="button" class="sm" data-dlg="child">+ Unterpunkt</button><button type="button" class="sm" data-dlg="focus">Fokus</button>${n.type==="prompt"?`<button type="button" class="sm b" data-dlg="auftrag">Bauauftrag</button>`:""}${n.type==="idee"?`<button type="button" class="sm ac" data-dlg="ausarbeiten">Ausarbeiten</button>`:""}<button type="button" class="sm" data-dlg="delete" style="color:var(--red)">Löschen</button>`;
+  $("#dlg").showModal(); }
+function saveNodeDlg(){ const fd=new FormData($("#dlgform")); const n=byId(ED.id); const p={}; ["title","type","horizont","status","faellig","start","ende","body","stufe","ebene","kategorie","statusC","naechsterSchritt","version","repoPfad"].forEach(k=>{ if(fd.has(k)) p[k]=String(fd.get(k)).trim()||null; }); p.tags=String(fd.get("tags")||"").split(",").map(s=>s.trim()).filter(Boolean); const np=String(fd.get("parentId")||"")||null; if(p.status==="erledigt"&&n.status!=="erledigt") p.erledigtAm=now(); updNode(ED.id,p); if(np!==n.parentId) moveNode(ED.id,np); }
+function openRecord(list,idx,fields,title){ const arr= list==="reg"? D.register[UI.regSec] : D.bauplan[list]; const rec= idx>=0? arr[idx] : {}; ED={kind:"rec",list,idx}; $("#dlgtitle").textContent=(idx>=0?"Bearbeiten: ":"Neu: ")+title; $("#dlgextra").innerHTML=""; $("#dlgbody").innerHTML=fields.map(([k,l,t])=>{ const v= k==="sw"?(rec.sw||[]).join("\n"):(rec[k]==null?"":rec[k]); if(t==="area") return `<label class="fld">${l}<textarea name="${k}" rows="3">${esc(v)}</textarea></label>`; if(t==="status") return `<label class="fld">${l}<select name="${k}">${["offen","aktiv","erledigt","blockiert","wartet","verworfen"].map(s=>`<option ${v===s?"selected":""}>${s}</option>`).join("")}</select></label>`; if(t==="color") return `<label class="fld">${l}<select name="${k}">${["g","y","p","r","b","n"].map(c=>`<option value="${c}" ${v===c?"selected":""}>${({g:"grün",y:"gelb",p:"lila",r:"rot",b:"blau",n:"grau"})[c]}</option>`).join("")}</select></label>`; return `<label class="fld">${l}<input type="text" name="${k}" value="${esc(v)}"></label>`; }).join(""); $("#dlg").showModal(); }
+function saveRecordDlg(){ const fd=new FormData($("#dlgform")); const arr= ED.list==="reg"? D.register[UI.regSec] : D.bauplan[ED.list]; bpSnapshot(ED.idx>=0?"Backend geändert":"Backend ergänzt"); const rec= ED.idx>=0? arr[ED.idx] : {}; const fields= ED.list==="reg"?RECFIELDS.reg:RECFIELDS[ED.list]; fields.forEach(([k])=>{ const v=String(fd.get(k)||"").trim(); if(k==="sw") rec.sw=v?v.split("\n").map(s=>s.trim()).filter(Boolean):undefined; else if(k==="nr") rec.nr=+v||v; else rec[k]=v; }); if(ED.list==="bauauftraege"&&!rec.erstellt) rec.erstellt=now(); if(ED.list==="reg"&&rec.aktiv==null) rec.aktiv=true; if(ED.list==="bauauftraege"&&!rec.id) rec.id="BA"+(arr.length+1); if(ED.idx<0) arr.push(rec); save(); }
+
+/* ===================== EINGABE: HEURISTIK + KI ===================== */
+const WD={montag:1,dienstag:2,mittwoch:3,donnerstag:4,freitag:5,samstag:6,sonntag:0};
+function parseDate(s){ const t=s.toLowerCase(); const d=new Date(); d.setHours(0,0,0,0); let date=null,time=null,rest=s;
+  const m1=t.match(/\b(\d{1,2})\.(\d{1,2})\.(\d{2,4})?/); if(m1){ const y=m1[3]?(m1[3].length===2?2000+ +m1[3]:+m1[3]):d.getFullYear(); const c=new Date(y,+m1[2]-1,+m1[1]); if(!m1[3]&&c<d) c.setFullYear(y+1); date=dkey(c); rest=rest.replace(m1[0],""); }
+  else if(/\bübermorgen\b/.test(t)){ d.setDate(d.getDate()+2); date=dkey(d); rest=rest.replace(/übermorgen/i,""); }
+  else if(/\bmorgen\b/.test(t)){ d.setDate(d.getDate()+1); date=dkey(d); rest=rest.replace(/morgen/i,""); }
+  else if(/\bheute\b/.test(t)){ date=dkey(d); rest=rest.replace(/heute/i,""); }
+  else { for(const [w,n] of Object.entries(WD)){ if(new RegExp("\\b"+w+"\\b").test(t)){ const diff=(n-d.getDay()+7)%7||7; d.setDate(d.getDate()+diff); date=dkey(d); rest=rest.replace(new RegExp(w,"i"),""); break; } } }
+  const m2=rest.match(/\b(\d{1,2}):(\d{2})\b/); if(m2){ time=`${pad(+m2[1])}:${m2[2]}`; rest=rest.replace(m2[0],""); } else { const m3=rest.match(/\b(\d{1,2}) ?uhr\b/i); if(m3){ time=`${pad(+m3[1])}:00`; rest=rest.replace(m3[0],""); } }
+  if(/\bin (\d+) (tag|tage|tagen)\b/i.test(t)){ const m=t.match(/\bin (\d+) (tag|tage|tagen)\b/i); d.setDate(d.getDate()+ +m[1]); date=dkey(d); rest=rest.replace(m[0],""); }
+  if(/\bnächste woche\b/i.test(t)){ d.setDate(d.getDate()+7); date=dkey(d); rest=rest.replace(/nächste woche/i,""); }
+  return {date,time,rest:rest.replace(/\s{2,}/g," ").trim()}; }
+function tokens(s){ return (s||"").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ").split(/\s+/).filter(w=>w.length>2); }
+function guessParent(text){ const tk=tokens(text); let best=null,score=0; D.nodes.filter(n=>!n.geloescht&&["bereich","projekt","tool","idee","notiz"].includes(n.type)).forEach(n=>{ const nt=tokens(n.title+" "+(n.tags||[]).join(" ")); let s=0; tk.forEach(w=>{ if(nt.some(x=>x===w||x.startsWith(w)||w.startsWith(x))) s+=1; }); if(n.type==="bereich") s*=1.1; if(s>score){score=s;best=n;} }); return {best:score>=1?best:null,score}; }
+function heuristic(text){ return text.split(/\n|;\s/).map(l=>l.trim()).filter(Boolean).map(line=>{ let s=line, type=null, hor=null, parent=null, reason=[];
+  const mp=s.match(/^(todo|idee|termin|notiz|projekt|prompt|aufgabe)\s*:\s*/i); if(mp){ type={aufgabe:"todo"}[mp[1].toLowerCase()]||mp[1].toLowerCase(); s=s.slice(mp[0].length); reason.push("Präfix "+mp[1]); }
+  const mh=s.match(/!(kurz|mittel|lang|keiner)\b/i); if(mh){ hor=mh[1].toLowerCase(); s=s.replace(mh[0],""); reason.push("Markierung !"+hor); }
+  const ma=s.match(/#([\p{L}\p{N}_-]+)/u); if(ma){ const q=ma[1].toLowerCase(); parent=D.nodes.find(n=>!n.geloescht&&n.title.toLowerCase().replace(/\s/g,"")===q)||D.nodes.find(n=>!n.geloescht&&n.title.toLowerCase().includes(q)); s=s.replace(ma[0],""); if(parent) reason.push("#"+ma[1]+" gefunden"); }
+  const pd=parseDate(s); s=pd.rest; if(pd.date) reason.push("Datum erkannt");
+  if(!type) type= pd.time?"termin" : pd.date?"todo" : /\?\s*$/.test(s)?"notiz" : /^(ich (will|möchte|sollte)|wir sollten|könnte man|was wäre wenn|vielleicht)/i.test(s)?"idee" : /^(anrufen|kaufen|schreiben|prüfen|erledigen|machen|buchen|senden|klären|fragen|bestellen|überweisen|abgeben|holen|bringen|zapier|verbinden)\b/i.test(s)?"todo":"notiz";
+  if(!parent){ const g=guessParent(s); if(g.best){ parent=g.best; reason.push(`Wortabgleich mit „${g.best.title}“`); } else { parent=byId("inbox"); reason.push("kein Ziel erkannt → Inbox"); } }
+  if(!hor) hor= pd.date? (new Date(pd.date)-new Date()<14*864e5?"kurz":new Date(pd.date)-new Date()<90*864e5?"mittel":"lang") : type==="idee"?"mittel":"keiner";
+  const title=s.replace(/^[\s,.:-]+|[\s,.:-]+$/g,"")||line; return {title:title.slice(0,140),body:title.length>140?title:"",type,horizont:hor,parentId:parent?parent.id:"inbox",faellig:pd.date,start:pd.date&&pd.time?`${pd.date}T${pd.time}`:null,begruendung:reason.join(", "),quelle:"manuell"}; }); }
+function renderProposals(list,quelle){ const box=$("#proposals"); if(!list.length){ box.innerHTML=`<div class="empty">Keine Vorschläge.</div>`; return; } const parents=D.nodes.filter(n=>!n.geloescht&&["bereich","projekt","tool","idee","notiz","prompt"].includes(n.type)); box.innerHTML=`<div class="row" style="margin-top:8px"><b>${list.length} Vorschlag${list.length>1?"e":""}</b><span class="pill ${quelle==="ki-vorschlag"?"b":"n"}">${quelle==="ki-vorschlag"?"KI-Vorschlag":"lokale Sortierung"}</span><span class="sp"><button class="sm gr" data-acceptall>alle übernehmen</button><button class="sm" data-rejectall>alle verwerfen</button></span></div>`+list.map((p,i)=>`<div class="prop" data-prop="${i}"><div class="f"><label>Titel<input type="text" name="title" value="${esc(p.title)}"></label><label>Ziel<select name="parentId">${parents.map(x=>`<option value="${x.id}" ${x.id===p.parentId?"selected":""}>${esc(path(x.id).map(y=>y.title).join(" › "))}</option>`).join("")}</select></label><label>Typ<select name="type">${Object.keys(TYPES).map(t=>`<option value="${t}" ${t===p.type?"selected":""}>${TYPENAME[t]}</option>`).join("")}</select></label><label>Horizont<select name="horizont">${HORIZ.map(h=>`<option ${h===p.horizont?"selected":""}>${h}</option>`).join("")}</select></label><label>Fällig<input type="date" name="faellig" value="${esc(p.faellig||"")}"></label><label>Beginn<input type="datetime-local" name="start" value="${esc(p.start||"")}"></label></div>${p.body?`<textarea name="body" rows="2">${esc(p.body)}</textarea>`:`<input type="hidden" name="body" value="">`}<div class="row"><span class="small">Begründung: ${esc(p.begruendung||"")}</span><span class="sp" style="margin-left:auto"><button class="sm gr" data-accept="${i}">Übernehmen</button><button class="sm" data-reject="${i}">Verwerfen</button></span></div></div>`).join(""); box._list=list; box._quelle=quelle; }
+function acceptProposal(i){ const el=$(`.prop[data-prop="${i}"]`); if(!el) return; const g=n=>{ const f=el.querySelector(`[name=${n}]`); return f?f.value:""; }; const q=$("#proposals")._quelle; const n=addNode({title:g("title"),body:g("body"),type:g("type"),horizont:g("horizont"),parentId:g("parentId")||"inbox",faellig:g("faellig")||null,start:g("start")||null,quelle:q==="ki-vorschlag"?"ki-vorschlag":"manuell",stufe:g("type")==="idee"?"roh":undefined},{quelle:q}); el.remove(); toast("Übernommen: "+n.title); render(); if(!$("#proposals .prop")) $("#proposals").innerHTML=""; }
+async function kiSuggest(){ const txt=$("#inbox").value.trim(); if(!txt){ toast("Eingabe leer"); return; } const prompt=INBOX_PROMPT.replace("{{outline}}",outline(3)).replace("{{input}}",txt); const box=$("#kibox"); box.hidden=false;
+  if(D.settings.ki.A3&&CAP.sample){ box.innerHTML=`<div class="small">Claude wird gefragt (A3) …</div>`; try{ const v=await CAP.sample.json(prompt,{modelTier:"default"}); handleKiJson(v,"A3 Artefakt"); box.hidden=true; return; }catch(e){ box.innerHTML=`<div class="small" style="color:var(--red)">A3 fehlgeschlagen (${esc(e.code||e.message||"unbekannt")}), weiter mit A1.</div>`; } }
+  if(D.settings.ki.A2&&sessionStorage.getItem("nb_apikey")){ box.innerHTML=`<div class="small">Anthropic-API wird aufgerufen (A2) …</div>`; try{ const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":sessionStorage.getItem("nb_apikey"),"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-5-5",max_tokens:2000,messages:[{role:"user",content:prompt}]})}); const j=await r.json(); const t=(j.content||[]).map(c=>c.text||"").join(""); handleKiJson(extractJson(t),"A2 API"); box.hidden=true; return; }catch(e){ box.innerHTML=`<div class="small" style="color:var(--red)">A2 fehlgeschlagen (${esc(e.message)}), weiter mit A1.</div>`; } }
+  box.innerHTML+=`<div class="small" style="margin-top:6px"><b>A1 Prompt-Copybox:</b> Prompt kopieren → in Claude ausführen → JSON-Antwort unten einfügen.</div>${copybox("Sortier-Prompt · Ziel: Claude Chat oder Claude Code",prompt,"kiprompt")}<textarea id="kiresult" rows="3" placeholder='JSON-Antwort hier einfügen: {"vorschlaege":[…]}'></textarea><div class="row" style="margin-top:6px"><button class="sm b" data-kiparse>Antwort übernehmen</button></div>`; log("KI-Prompt erzeugt (A1)",txt.slice(0,80),null,"ki-vorschlag"); save(); }
+function extractJson(t){ try{ return JSON.parse(t); }catch(e){} const m=String(t).match(/\{[\s\S]*\}/); if(m){ try{ return JSON.parse(m[0]); }catch(e){} } return null; }
+function handleKiJson(v,weg){ if(!v||!Array.isArray(v.vorschlaege)){ toast("Antwort enthält kein Feld „vorschlaege“"); return; } const list=v.vorschlaege.map(p=>({title:String(p.title||"").slice(0,140),body:String(p.body||""),type:Object.keys(TYPES).includes(p.type)?p.type:"notiz",horizont:HORIZ.includes(p.horizont)?p.horizont:"keiner",parentId:byId(p.parentId)&&!byId(p.parentId).geloescht?p.parentId:"inbox",faellig:/^\d{4}-\d{2}-\d{2}$/.test(p.faellig||"")?p.faellig:null,start:null,begruendung:(p.begruendung||"")+" ("+weg+")"})); log("KI-Vorschlag erhalten ("+weg+")",list.length+" Vorschläge",null,"ki-vorschlag"); save(); renderProposals(list,"ki-vorschlag"); }
+async function ausarbeiten(id){ const n=byId(id); const prompt=IDEE_PROMPT.replace("{{title}}",n.title).replace("{{body}}",n.body||"").replace("{{outline}}",outline(2,80)); openSheet(); $("#inbox").value=""; const box=$("#kibox"); box.hidden=false; $("#proposals").innerHTML="";
+  const apply=(v,weg)=>{ if(!v||!Array.isArray(v.schritte)){ toast("Antwort ohne Feld „schritte“"); return; } const list=v.schritte.map(s=>({title:String(s.title||"").slice(0,140),body:"",type:Object.keys(TYPES).includes(s.type)?s.type:"todo",horizont:HORIZ.includes(s.horizont)?s.horizont:(v.horizont||"mittel"),parentId:id,faellig:/^\d{4}-\d{2}-\d{2}$/.test(s.faellig||"")?s.faellig:null,start:null,begruendung:"Schritt aus Ausarbeitung ("+weg+")"})); const body=(n.body?n.body+"\n\n":"")+`Problem: ${v.problem||""}\nAnsatz: ${v.ansatz||""}\nHorizont: ${v.horizont||""}\nOffene Fragen: ${(v.offene_fragen||[]).join("; ")}\nVerknüpfungen: ${(v.verknuepfungen||[]).join(", ")}`; box.innerHTML=`<div class="prop"><b>Ausarbeitung für „${esc(n.title)}“ (${esc(weg)})</b><div class="small" style="white-space:pre-wrap">${esc(body)}</div><div class="row"><button class="sm gr" data-ideeapply="${id}">Text übernehmen, Stufe → ausgearbeitet</button></div></div>`; box._ideeBody=body; log("Ideen-Ausarbeitung erhalten ("+weg+")",n.title,null,"ki-vorschlag"); save(); renderProposals(list,"ki-vorschlag"); };
+  if(D.settings.ki.A3&&CAP.sample){ box.innerHTML=`<div class="small">Claude arbeitet die Idee aus (A3) …</div>`; try{ const v=await CAP.sample.json(prompt,{modelTier:"default"}); apply(v,"A3 Artefakt"); return; }catch(e){ box.innerHTML=`<div class="small" style="color:var(--red)">A3 fehlgeschlagen, weiter mit A1.</div>`; } }
+  box.innerHTML+=`<div class="small" style="margin-top:6px"><b>A1:</b> Prompt kopieren → in Claude ausführen → JSON-Antwort einfügen.</div>${copybox("Ideen-Prompt · Ziel: Claude",prompt,"kiprompt")}<textarea id="kiresult" rows="3" placeholder='JSON-Antwort: {"problem":…,"schritte":[…]}'></textarea><div class="row" style="margin-top:6px"><button class="sm b" data-ideeparse="${id}">Antwort übernehmen</button></div>`; box._apply=apply; log("Ideen-Prompt erzeugt (A1)",n.title,null,"ki-vorschlag"); save(); }
+function openSheet(){ $("#sheet").hidden=false; $("#inbox").focus(); }
+function closeSheet(){ $("#sheet").hidden=true; stopMic(); }
+
+/* ===================== IMPORT ===================== */
+function importJson(txt,fromFile){ let p; try{ p=JSON.parse(txt); }catch(e){ toast("Kein gültiges JSON"); return; }
+  if(p.schema===SCHEMA&&Array.isArray(p.nodes)){ log("Gesamtdaten importiert",`${p.nodes.length} Knoten`,{type:"restoreData",data:JSON.parse(JSON.stringify({nodes:D.nodes,bauplan:D.bauplan,settings:D.settings,register:D.register,log:D.log}))},"import"); const keepLog=D.log; D=p; D.log=keepLog.concat(p.log||[]).slice(0,500); SRC="Import "+fmtDT(now()); save(true); render(); toast("Gesamtdaten übernommen"); return; }
+  if(p.paket||p.nodes||p.bauplan){ bpSnapshot("Update-Paket importiert"); let add=0,upd=0; (p.nodes||[]).forEach(n=>{ const ex=byId(n.id); if(ex){ Object.assign(ex,n,{geaendert:now()}); upd++; } else { D.nodes.push(Object.assign({id:uid(),parentId:null,order:0,type:"notiz",horizont:"keiner",status:"offen",tags:[],links:[],quelle:"routine",erstellt:now(),geaendert:now()},n)); add++; } }); if(p.bauplan){ Object.keys(p.bauplan).forEach(k=>{ if(Array.isArray(p.bauplan[k])&&Array.isArray(D.bauplan[k])){ p.bauplan[k].forEach(r=>{ const key=r.id!=null?"id":r.nr!=null?"nr":null; const i=key?D.bauplan[k].findIndex(x=>x[key]===r[key]):-1; if(i>=0) Object.assign(D.bauplan[k][i],r); else D.bauplan[k].push(r); }); } else if(typeof p.bauplan[k]==="string") D.bauplan[k]=p.bauplan[k]; }); } if(p.settings) Object.assign(D.settings,p.settings); if(p.register) Object.assign(D.register,p.register); (p.log||[]).forEach(l=>D.log.unshift(Object.assign({t:now(),quelle:"routine"},typeof l==="string"?{aktion:"Paket",text:l}:l))); save(true); render(); toast(`Paket: ${add} neu, ${upd} aktualisiert`); return; }
+  if(p.entscheidungen){ bpSnapshot("Entscheidungs-JSON importiert"); const E=p.entscheidungen; const first=v=>Array.isArray(v)?v:[v]; const ids=v=>first(v||[]).map(x=>String(x).split(" ")[0]); if(E.ki){ const a=ids(E.ki); Object.keys(D.settings.ki).forEach(k=>D.settings.ki[k]=a.includes(k)); a.forEach(k=>D.settings.ki[k]=true); (D.register.ki||[]).forEach(o=>o.aktiv=a.includes(o.id)); } if(E.outlook){ const a=ids(E.outlook); (D.register.outlook||[]).forEach(o=>o.aktiv=a.includes(o.id)); } if(E.ablage){ const a=ids(E.ablage).concat(ids(E.ablage_ergaenzungen||[])); (D.register.ablage||[]).forEach(o=>o.aktiv=a.includes(o.id)); } ["layout","fristen","fokus","eingabe"].forEach(k=>{ if(E[k]){ const id=ids(E[k])[0]; D.settings[k]=id; (D.register[k]||[]).forEach(o=>o.aktiv=o.id===id); } }); if(E.ansichten){ const a=ids(E.ansichten); const map={V1:"outliner",V2:"todo",V3:"kalender",V4:"mindmap",V5:"mindmap",V6:"ideen",V7:"workflow",V8:"instrumente",V9:"ausbau",V10:"protokoll",V11:"backend",V12:"outliner"}; const views=new Set(["backend"]); a.forEach(v=>views.add(map[v])); D.settings.views=VIEWS.map(v=>v[0]).filter(v=>views.has(v)); }
+    if(p.aenderungen){ Object.entries(p.aenderungen).forEach(([sec,d])=>{ const list=D.register[sec]; if(!list) return; (d.geaendert||[]).concat(d.neu||[]).forEach(it=>{ const i=list.findIndex(x=>x.id===it.id); const rec={id:it.id,name:it.name,c:it.c,phase:it.phase,beleg:it.beleg,text:it.text,sw:it.sw,aktiv:i>=0?list[i].aktiv:false}; if(i>=0) Object.assign(list[i],rec); else list.push(rec); }); (d.geloescht||[]).forEach(id=>{ const i=list.findIndex(x=>x.id===id); if(i>=0){ const [it]=list.splice(i,1); (D.registerDeleted[sec]=D.registerDeleted[sec]||[]).push(it); } }); }); }
+    if(p.alt_projekte&&Array.isArray(p.alt_projekte.bestaetigt)){ const area=D.nodes.find(n=>!n.geloescht&&n.type==="bereich"&&n.title==="Alt-Projekte"); p.alt_projekte.bestaetigt.forEach(a=>{ const name=typeof a==="string"?a:a.name; const ex=D.nodes.find(n=>!n.geloescht&&n.title===name); if(ex){ ex.status="aktiv"; if(a.horizont) ex.horizont=a.horizont; } else if(area) addNode({parentId:area.id,title:name,type:"projekt",status:"aktiv",horizont:a.horizont||"mittel",body:(a.stand||"")+(a.naechster_schritt?"\n\nNächster Schritt: "+a.naechster_schritt:""),quelle:"import"}); }); (p.alt_projekte.weitere||[]).forEach(w=>{ if(area) addNode({parentId:area.id,title:String(w).slice(0,120),type:"projekt",status:"wartet",quelle:"import"}); }); }
+    if(p.anmerkungen) D.bauplan.offene.push({text:"Anmerkung aus Entscheidungsdatei: "+p.anmerkungen,status:"offen"}); D.bauplan.entscheidungen.push({id:"E"+(D.bauplan.entscheidungen.length+1),titel:"Entscheidungs-JSON importiert",wert:JSON.stringify(E).slice(0,300),stand:fmtD(dkey(new Date()))}); save(true); render(); toast("Entscheidungen übernommen"); return; }
+  toast("Unbekanntes Format"); }
+</script>
+<script>
+/* ===================== EREIGNISSE ===================== */
+document.addEventListener("click", e=>{
+  const b=e.target.closest("[data-view],[data-open],[data-tg],[data-addchild],[data-up],[data-down],[data-in],[data-out],[data-addroot],[data-expandall],[data-collapseall],[data-done],[data-tf],[data-tg2],[data-cal],[data-calmode],[data-newtermin],[data-icsexport],[data-icsfetch],[data-mmzoom],[data-focus],[data-whimsical],[data-stufe],[data-ausarbeiten],[data-newidee],[data-wf],[data-wfadd],[data-newtool],[data-newinstrument],[data-newprompt],[data-auftrag],[data-auftragshow],[data-undo],[data-btab],[data-regsec],[data-cycle],[data-rec-add],[data-rec-edit],[data-rec-del],[data-rec-move],[data-reg-add],[data-reg-edit],[data-reg-del],[data-reg-move],[data-reg-restore],[data-bpexport],[data-exp],[data-impbtn],[data-seedreset],[data-regeln-save],[data-regeln-auftrag],[data-apikey],[data-copy],[data-mic],[data-dlg],[data-accept],[data-reject],[data-acceptall],[data-rejectall],[data-kiparse],[data-ideeparse],[data-ideeapply]");
+  if(!b) return; const d=b.dataset;
+  if(d.view!=null) return go(d.view);
+  if(d.open!=null) return openNode(d.open);
+  if(d.tg!=null){ UI.collapsed[d.tg]=!UI.collapsed[d.tg]; return render(); }
+  if(d.addchild!=null){ const n=addNode({parentId:d.addchild,title:"Neuer Punkt",type:"notiz"}); UI.collapsed[d.addchild]=false; render(); return openNode(n.id); }
+  if(d.up!=null) return shift(d.up,-1); if(d.down!=null) return shift(d.down,1); if(d.in!=null) return indent(d.in); if(d.out!=null) return outdent(d.out);
+  if(d.addroot!=null){ const n=addNode({title:"Neuer Bereich",type:"bereich"}); render(); return openNode(n.id); }
+  if(d.expandall!=null){ UI.collapsed={}; return render(); } if(d.collapseall!=null){ D.nodes.forEach(n=>{ if(kids(n.id).length) UI.collapsed[n.id]=true; }); return render(); }
+  if(d.tf!=null){ UI.todoFilter=d.tf; return render(); } if(d.tg2!=null){ UI.todoGroup=d.tg2; return render(); }
+  if(d.cal!=null){ const c=new Date(UI.cal.date+"T00:00"); if(d.cal==="today") UI.cal.date=dkey(new Date()); else { const s=d.cal==="prev"?-1:1; if(UI.cal.mode==="monat") c.setMonth(c.getMonth()+s); else c.setDate(c.getDate()+s*(UI.cal.mode==="woche"?7:1)); UI.cal.date=dkey(c); } return render(); }
+  if(d.calmode!=null){ UI.cal.mode=d.calmode; return render(); }
+  if(d.newtermin!=null){ const n=addNode({title:"Neuer Termin",type:"termin",faellig:d.newtermin,start:d.newtermin+"T09:00",horizont:"kurz",parentId:(D.nodes.find(x=>!x.geloescht&&x.type==="bereich"&&x.title==="Termine")||addNode({title:"Termine",type:"bereich"})).id}); render(); return openNode(n.id); }
+  if(d.icsexport!=null) return download("notizblock_termine_"+stamp()+".ics",exportICS(),"text/calendar");
+  if(d.icsfetch!=null){ const u=$("#icsurl").value.trim(); D.settings.icsUrl=u; save(); if(!u) return toast("Keine URL"); toast("Abruf …"); return fetch(u).then(r=>{ if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); }).then(t=>importICS(t,"ics-url")).catch(err=>{ toast("Abruf fehlgeschlagen: "+err.message+" (meist CORS-Sperre; dann ICS-Datei importieren)"); log("ICS-URL-Abruf fehlgeschlagen",err.message,null,"ics"); save(); }); }
+  if(d.mmzoom!=null){ if(d.mmzoom==="in") MM.k=Math.min(3,MM.k*1.2); else if(d.mmzoom==="out") MM.k=Math.max(.3,MM.k/1.2); else { MM={k:1,x:0,y:0,drag:null}; } return mountMindmap(); }
+  if(d.focus!=null){ UI.focus=d.focus||null; MM.x=0; MM.y=0; UI.view="mindmap"; return render(); }
+  if(d.whimsical!=null) return copyText(whimsicalOutline());
+  if(d.stufe!=null){ const [id,dir]=d.stufe.split(":"); const n=byId(id); const i=STUFEN.indexOf(n.stufe||"roh")+ +dir; if(i<0||i>=STUFEN.length) return; updNode(id,{stufe:STUFEN[i],status:STUFEN[i]==="integriert"?"erledigt":n.status},"Ideen-Stufe geändert"); return render(); }
+  if(d.ausarbeiten!=null) return ausarbeiten(d.ausarbeiten);
+  if(d.newidee!=null){ const a=D.nodes.find(x=>!x.geloescht&&x.type==="bereich"&&x.title==="Ideen"); const n=addNode({parentId:a?a.id:null,title:"Neue Idee",type:"idee",stufe:"roh",horizont:"mittel"}); render(); return openNode(n.id); }
+  if(d.wf!=null){ const [id,i]=d.wf.split(":"); const n=byId(id); const before=JSON.parse(JSON.stringify(n.workflow)); n.workflow[+i].s=cycleStatus(n.workflow[+i].s); log("Workflow-Schritt",n.title+": "+n.workflow[+i].t+" → "+n.workflow[+i].s,{type:"update",id,before:{workflow:before}}); save(); return render(); }
+  if(d.wfadd!=null){ const n=byId(d.wfadd); const t=$("#dlg").open?null:"Neuer Schritt"; n.workflow=n.workflow||[]; n.workflow.push({t:t,s:"offen"}); save(); render(); return openNode(d.wfadd); }
+  if(d.newtool!=null){ const a=D.nodes.find(x=>!x.geloescht&&x.type==="bereich"&&x.title==="Projekte"); const n=addNode({parentId:a?a.id:null,title:"Neues Tool",type:"tool",status:"offen",workflow:[{t:"Stand sichten",s:"offen"},{t:"Eingliedern",s:"offen"}]}); render(); return openNode(n.id); }
+  if(d.newinstrument!=null){ const a=D.nodes.find(x=>!x.geloescht&&x.type==="bereich"&&x.ebene==="E5"); const n=addNode({parentId:a?a.id:null,title:"Neues Instrument",type:"instrument",ebene:"E5",statusC:"y",kategorie:"Konnektor"}); render(); return openNode(n.id); }
+  if(d.newprompt!=null){ const a=D.nodes.find(x=>!x.geloescht&&x.type==="bereich"&&x.title==="Prompt-Flächen"); const n=addNode({parentId:a?a.id:null,title:"Neue Prompt-Fläche",type:"prompt"}); render(); return openNode(n.id); }
+  if(d.auftrag!=null){ const n=byId(d.auftrag); const id="BA"+(D.bauplan.bauauftraege.length+1); const txt=buildAuftrag(id,n.title,n.body||""); D.bauplan.bauauftraege.push({id,titel:n.title,text:n.body||"",status:"offen",erstellt:now(),nodeId:n.id}); log("Bauauftrag erzeugt",id+" "+n.title,null,"backend"); save(); render(); const out=$("#auftragout"); if(out){ out.innerHTML=copybox(`Bauauftrag ${id} · Ziel: Claude Code (Repo token, Branch claude/epic-lamport-gdityd)`,txt); out.scrollIntoView({behavior:"smooth"}); } return; }
+  if(d.auftragshow!=null){ const a=D.bauplan.bauauftraege[+d.auftragshow]; const out=$("#auftragout"); if(out&&a){ out.innerHTML=copybox(`Bauauftrag ${a.id} · Ziel: Claude Code`,buildAuftrag(a.id,a.titel,a.text)); out.scrollIntoView({behavior:"smooth"}); } return; }
+  if(d.undo!=null) return undoEntry(+d.undo);
+  if(d.btab!=null){ UI.backendTab=d.btab; return render(); } if(d.regsec!=null){ UI.regSec=d.regsec; return render(); }
+  if(d.cycle!=null){ const [list,i]=d.cycle.split(":"); bpSnapshot("Backend-Status"); D.bauplan[list][+i].status=cycleStatus(D.bauplan[list][+i].status); save(); return render(); }
+  if(d.recAdd!=null) return openRecord(d.recAdd,-1,RECFIELDS[d.recAdd],BTABS.find(x=>x[0]===d.recAdd||x[0]==="auftraege"&&d.recAdd==="bauauftraege")?.[1]||d.recAdd);
+  if(d.recEdit!=null){ const [l,i]=d.recEdit.split(":"); return openRecord(l,+i,RECFIELDS[l],l); }
+  if(d.recDel!=null){ const [l,i]=d.recDel.split(":"); bpSnapshot("Backend gelöscht"); D.bauplan[l].splice(+i,1); save(); return render(); }
+  if(d.recMove!=null){ const [l,i,dir]=d.recMove.split(":"); const a=D.bauplan[l], j=+i+ +dir; if(j<0||j>=a.length) return; [a[+i],a[j]]=[a[j],a[+i]]; save(); return render(); }
+  if(d.regAdd!=null){ UI.regSec=d.regAdd; return openRecord("reg",-1,RECFIELDS.reg,REGSEC[d.regAdd]); }
+  if(d.regEdit!=null){ const [s,i]=d.regEdit.split(":"); UI.regSec=s; return openRecord("reg",+i,RECFIELDS.reg,REGSEC[s]); }
+  if(d.regDel!=null){ const [s,i]=d.regDel.split(":"); bpSnapshot("Option gelöscht"); const [it]=D.register[s].splice(+i,1); (D.registerDeleted[s]=D.registerDeleted[s]||[]).push(it); save(); return render(); }
+  if(d.regMove!=null){ const [s,i,dir]=d.regMove.split(":"); const a=D.register[s], j=+i+ +dir; if(j<0||j>=a.length) return; [a[+i],a[j]]=[a[j],a[+i]]; save(); return render(); }
+  if(d.regRestore!=null){ const [s,i]=d.regRestore.split(":"); const [it]=D.registerDeleted[s].splice(+i,1); D.register[s].push(it); log("Option wiederhergestellt",it.id,null,"backend"); save(); return render(); }
+  if(d.bpexport!=null) return download("BAUPLAN_AKTUELL_"+stamp()+".md",bauplanMarkdown(),"text/markdown");
+  if(d.exp!=null){ if(d.exp==="html") return download("notizblock_"+stamp()+".html",buildHtml(),"text/html"); if(d.exp==="json") return download("notizblock_daten_"+stamp()+".json",JSON.stringify(D,null,2),"application/json"); if(d.exp==="bauplan") return download("BAUPLAN_AKTUELL_"+stamp()+".md",bauplanMarkdown(),"text/markdown"); if(d.exp==="ics") return download("notizblock_termine_"+stamp()+".ics",exportICS(),"text/calendar"); if(d.exp==="paket") return download("bauplan_"+stamp()+".json",updatePaket(),"application/json"); }
+  if(d.impbtn!=null) return importJson($("#impbox").value);
+  if(d.seedreset!=null){ log("Startinhalt neu geladen","vorheriger Stand gesichert",{type:"restoreData",data:JSON.parse(JSON.stringify({nodes:D.nodes,bauplan:D.bauplan,settings:D.settings,register:D.register}))},"backend"); const keep=D.log; D=buildSeed(); D.log=keep; SRC="Startinhalt neu geladen"; save(true); return render(); }
+  if(d.regelnSave!=null){ bpSnapshot("Regeln geändert"); D.bauplan.regeln=$("#regeln").value; save(); return toast("Regeln gespeichert"); }
+  if(d.regelnAuftrag!=null){ const id="BA"+(D.bauplan.bauauftraege.length+1); D.bauplan.bauauftraege.push({id,titel:"CLAUDE.md an Backend-Regeln angleichen",text:"CLAUDE.md im Repo auf folgenden Stand bringen:\n\n"+$("#regeln").value,status:"offen",erstellt:now()}); save(); UI.backendTab="auftraege"; return render(); }
+  if(d.apikey!=null){ const v=$("#apikey").value.trim(); if(v) sessionStorage.setItem("nb_apikey",v); else sessionStorage.removeItem("nb_apikey"); return toast(v?"Schlüssel für diese Sitzung gesetzt":"Schlüssel entfernt"); }
+  if(d.copy!=null){ const el=document.getElementById(d.copy); return copyText(el.textContent,el); }
+  if(d.mic!=null){ const t=document.getElementById(d.mic); return startMic(t,b); }
+  if(d.dlg!=null){ const id=ED&&ED.id; if(d.dlg==="child"){ saveNodeDlg(); $("#dlg").close(); const n=addNode({parentId:id,title:"Neuer Unterpunkt",type:"notiz"}); UI.collapsed[id]=false; render(); return openNode(n.id); } if(d.dlg==="focus"){ saveNodeDlg(); $("#dlg").close(); UI.focus=id; UI.view="mindmap"; return render(); } if(d.dlg==="delete"){ $("#dlg").close(); delNode(id); return render(); } if(d.dlg==="auftrag"){ saveNodeDlg(); $("#dlg").close(); UI.view="ausbau"; render(); return $(`[data-auftrag="${id}"]`)?.click(); } if(d.dlg==="ausarbeiten"){ saveNodeDlg(); $("#dlg").close(); return ausarbeiten(id); } }
+  if(d.accept!=null) return acceptProposal(+d.accept); if(d.reject!=null){ $(`.prop[data-prop="${d.accept||d.reject}"]`)?.remove(); return; }
+  if(d.acceptall!=null){ $$(".prop").map(p=>+p.dataset.prop).forEach(i=>acceptProposal(i)); $("#inbox").value=""; return; } if(d.rejectall!=null){ $("#proposals").innerHTML=""; return; }
+  if(d.kiparse!=null){ const v=extractJson($("#kiresult").value); if(!v) return toast("Kein gültiges JSON"); $("#kibox").hidden=true; return handleKiJson(v,"A1 Copybox"); }
+  if(d.ideeparse!=null){ const v=extractJson($("#kiresult").value); if(!v) return toast("Kein gültiges JSON"); return $("#kibox")._apply&&$("#kibox")._apply(v,"A1 Copybox"); }
+  if(d.ideeapply!=null){ const box=$("#kibox"); updNode(d.ideeapply,{body:box._ideeBody,stufe:"ausgearbeitet"},"Idee ausgearbeitet"); box.hidden=true; toast("Idee aktualisiert"); return render(); }
+});
+document.addEventListener("change", e=>{ const t=e.target; const d=t.dataset;
+  if(d.done!=null){ const n=byId(d.done); updNode(d.done,{status:t.checked?"erledigt":"offen",erledigtAm:t.checked?now():null},t.checked?"Erledigt":"Wieder offen"); return render(); }
+  if(t.id==="mmdepth"){ UI.mmDepth=+t.value; return render(); }
+  if(t.id==="icsfile"){ const f=t.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>importICS(String(r.result)); return r.readAsText(f); }
+  if(t.id==="impfile"){ const f=t.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>importJson(String(r.result),true); return r.readAsText(f); }
+  if(d.set!=null){ bpSnapshot("Einstellung geändert"); let v= t.type==="checkbox"?t.checked : t.type==="number"?+t.value : t.value; D.settings[d.set]=v; if(["layout","fristen","fokus","eingabe"].includes(d.set)) (D.register[d.set]||[]).forEach(o=>o.aktiv=o.id===v); if(d.set==="theme") applyTheme(); if(d.set==="fristen") applyPalette(); save(); return render(); }
+  if(d.setki!=null){ bpSnapshot("KI-Weg geändert"); D.settings.ki[d.setki]=t.checked; (D.register.ki||[]).forEach(o=>{ if(o.id===d.setki) o.aktiv=t.checked; }); save(); return render(); }
+  if(d.setview!=null){ bpSnapshot("Ansichten geändert"); const s=new Set(D.settings.views||[]); if(t.checked) s.add(d.setview); else s.delete(d.setview); s.add("backend"); D.settings.views=VIEWS.map(v=>v[0]).filter(v=>s.has(v)); save(); return render(); }
+  if(d.regAktiv!=null){ const [s,i]=d.regAktiv.split(":"); D.register[s][+i].aktiv=t.checked; save(); return; }
+});
+$("#search").addEventListener("input", e=>{ UI.search=e.target.value.trim(); render(); });
+$("#fab").addEventListener("click", ()=>{ if($("#sheet").hidden) openSheet(); else closeSheet(); });
+$("#sheetclose").addEventListener("click", closeSheet);
+$("#btn-sort").addEventListener("click", ()=>{ const t=$("#inbox").value.trim(); if(!t) return toast("Eingabe leer"); $("#kibox").hidden=true; renderProposals(heuristic(t),"lokal"); });
+$("#btn-ki").addEventListener("click", kiSuggest);
+$("#btn-inbox").addEventListener("click", ()=>{ const t=$("#inbox").value.trim(); if(!t) return toast("Eingabe leer"); t.split(/\n/).map(s=>s.trim()).filter(Boolean).forEach(l=>addNode({parentId:"inbox",title:l.slice(0,140),body:l.length>140?l:"",type:"notiz"})); $("#inbox").value=""; toast("In Inbox abgelegt"); render(); });
+$("#micglobal").addEventListener("click", e=>{ const t=UI.lastField&&document.body.contains(UI.lastField)?UI.lastField:(openSheet(),$("#inbox")); startMic(t,e.currentTarget); });
+$("#btn-save").addEventListener("click", ()=>download("notizblock_"+stamp()+".html",buildHtml(),"text/html"));
+$("#dlgform").addEventListener("submit", e=>{ e.preventDefault(); if(!ED) return $("#dlg").close(); if(ED.kind==="node") saveNodeDlg(); else saveRecordDlg(); ED=null; $("#dlg").close(); render(); });
+$("#dlgcancel").addEventListener("click", ()=>{ ED=null; $("#dlg").close(); });
+$("#dlg").addEventListener("close", ()=>{ stopMic(); });
+/* Drag-and-drop: Outliner und Kalender */
+let DRAG=null;
+document.addEventListener("dragstart", e=>{ const r=e.target.closest(".nrow[data-id],.chip[data-ev]"); if(!r) return; DRAG=r.dataset.id||r.dataset.ev; e.dataTransfer.effectAllowed="move"; try{ e.dataTransfer.setData("text/plain",DRAG); }catch(x){} });
+document.addEventListener("dragover", e=>{ const t=e.target.closest(".nrow[data-id],.day[data-day],[data-day]"); if(t&&DRAG){ e.preventDefault(); t.classList.add("drag-over"); } });
+document.addEventListener("dragleave", e=>{ const t=e.target.closest(".drag-over"); if(t) t.classList.remove("drag-over"); });
+document.addEventListener("drop", e=>{ const t=e.target.closest(".nrow[data-id],[data-day]"); $$(".drag-over").forEach(x=>x.classList.remove("drag-over")); if(!t||!DRAG) return; e.preventDefault(); if(t.dataset.day){ const n=byId(DRAG); const p={faellig:t.dataset.day}; if(n.start) p.start=t.dataset.day+"T"+n.start.slice(11); updNode(DRAG,p,"Datum verschoben"); } else if(t.dataset.id!==DRAG){ moveNode(DRAG,t.dataset.id); UI.collapsed[t.dataset.id]=false; } DRAG=null; render(); });
+document.addEventListener("dragend", ()=>{ DRAG=null; $$(".drag-over").forEach(x=>x.classList.remove("drag-over")); });
+
+/* ===================== DARSTELLUNG ===================== */
+function applyTheme(){ const t=D.settings.theme||"auto"; if(t==="auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme",t); }
+function applyPalette(){ const f=(D.register.fristen||[]).find(o=>o.id===D.settings.fristen); const sw=f&&f.sw&&f.sw.length>=4?f.sw:null; const r=document.documentElement.style; if(sw){ r.setProperty("--h-kurz",sw[0]); r.setProperty("--h-mittel",sw[1]); r.setProperty("--h-lang",sw[2]); r.setProperty("--h-keiner",sw[3]); } }
+
+/* ===================== START ===================== */
+load(); applyTheme(); applyPalette(); render();
+(async()=>{ try{ if(window.claude&&typeof window.claude.use==="function"){ CAP.sample=await window.claude.use("sample"); CAP.downloads=await window.claude.use("downloads"); } }catch(e){} CAP.checked=true; updateHeader(); })();
+if(location.hash){ const v=location.hash.slice(1); if(VIEWS.some(x=>x[0]===v)) go(v); }
+</script>
+</body>
+</html>

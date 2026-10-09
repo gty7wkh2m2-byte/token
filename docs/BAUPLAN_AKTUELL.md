@@ -190,8 +190,9 @@ token/
 
 | Phase | Inhalt | Ergebnis | Gate |
 |---|---|---|---|
-| **0 Entscheidung** | gerenderte Datei: **(1) Architekturkarte** (Ebenen E1–E6 als SVG mit Ist/Soll-Status je Instrument, Abschnitt 2–3), **(2) Optionsmatrizen 6A–6C** als Kartenreihen mit Datenfluss-Diagrammen, **(3) 6 Layout-Vorschauen**, **(4) Alt-Projekt-Kandidaten** zum Bestätigen; Auswahl → Entscheidungs-JSON als Copybox | `notizblock/entscheidungen_2026-10-09_HHMM.html` | ⏳ deine Wahl E3/E4/E5/E7 |
-| **1 Bau V1 + Repo-Gerüst** | Werkzeugdatei (Abschnitt 8–9) + Grundgerüst (Abschnitt 4: CLAUDE.md, Skills, Hook, Prompts, Scripts, Handover) | Dateien im Repo | – |
+| **0 Entscheidung** | gerenderte Datei: **(1) Architekturkarte** (Ebenen E1–E6 als SVG mit Ist/Soll-Status je Instrument, Abschnitt 2–3), **(2) Optionsmatrizen 6A–6C** als Kartenreihen mit Datenfluss-Diagrammen, **(3) 6 Layout-Vorschauen**, **(4) Alt-Projekt-Kandidaten** zum Bestätigen; Auswahl → Entscheidungs-JSON als Copybox | `notizblock/entscheidungen_2026-10-09_2236.html` | 🟢 erledigt (Commit 6e93c24, Artefakt) |
+| **0b Entscheidungsdatei V2: bearbeitbar + Vorschau aller Abschnitte** | siehe Abschnitt 17: jede Option ändern, neue anlegen, löschen, Reihenfolge; Vorschau-Mockup je Tool-Ansicht (11 Ansichten + Eingabeblatt); Export/Import JSON; Original wiederherstellbar; gleiche Datei und gleiche Artefakt-URL | `notizblock/entscheidungen_2026-10-09_2236.html` (Republish) | kein Gate (Plan-Freigabe = Baufreigabe) |
+| **1 Bau V1 + Repo-Gerüst** | Werkzeugdatei (Abschnitt 8–9) + Grundgerüst (Abschnitt 4: CLAUDE.md, Skills, Hook, Prompts, Scripts, Handover) + **Backend-Ansicht** (Abschnitt 16–17) als Ort für Einstellungen und Optionen | Dateien im Repo | kein Gate; Vorbelegung = Empfehlung, änderbar im Backend |
 | **1b Outlook-Schnellweg** | falls B4 gewählt: Anleitung als Schrittkarten (Outlook-Konto in Zapier verbinden) → Aktionsprüfung → Tool-Knopf „Termin nach Outlook“ | Zapier-Aktion verifiziert | ⏳ dein Zapier-Schritt |
 | **2 Validierung** | Abschnitt 10 | 0 Fehler, Screenshots | – |
 | **3 Auslieferung** | Commit + Push, Artefakt-Publish (`sample`, `downloads`; `mcp` nur bei B4/A6), Link | Link + Datei | – |
@@ -295,6 +296,8 @@ token/
 
 > **Instrumentarium zuerst:** bei jedem neuen Werkzeugprojekt zuerst Bestand erheben (Repos, Skills, Befehle, Prompts, Plugins, Konnektoren, Routinen, Cloud) und als Instrument-Knoten im Werkzeug führen; Bau erst nach Zuordnung der Instrumente zu Ebenen.
 
+> **Plan-Freigabe = Baufreigabe** (Entscheidung 09.10.2026): nach genehmigtem Plan alle Phasen ohne Zwischen-„go“ bauen, nach Empfehlung vorbelegen; Entscheidungen bleiben im Backend des Werkzeugs änderbar. Der Gegenvorschlag „go je Phase“ ist **verworfen** und wird nicht erneut vorgeschlagen.
+
 ---
 
 ## 13. KONTROLLBLOCK (Prompt-Anforderungen → Plan-Abdeckung)
@@ -325,69 +328,97 @@ token/
 
 ---
 
-# NACHTRAG V3 · 2026-10-09 · Baustand, Freigabe-Verlauf, Backend-Fenster
+# NACHTRAG V4 · 2026-10-09 · Baufreigabe, bearbeitbare Entscheidungen, Backend als Optionsverwaltung
 
-## 14. BAUSTAND (was gebaut wurde, was nicht)
+## 14. ENTSCHEIDUNGEN AUS PROMPT 5 (verbindlich)
 
-| Schritt | Status | Beleg |
+| # | Entscheidung | Wirkung |
 |---|---|---|
-| Plan V1 → V2 (Plan-Modus) | 🟢 abgeschlossen | diese Datei, Abschnitte 0–13 |
-| **Freigabe des Plans** | 🟢 erteilt | Klick „Plan genehmigen“ im Plan-Modus (Harness-Meldung „User has approved your plan“) |
-| **Phase 0: Entscheidungsdatei** | 🟢 abgeschlossen | `notizblock/entscheidungen_2026-10-09_2236.html`, Commit 6e93c24, Artefakt https://claude.ai/artifact/2ukztfz9d5rYBVs5F9VqRe |
-| Phase 1: Bau V1 (Werkzeugdatei + Repo-Gerüst) | 🔴 **nicht begonnen** | wartet auf Entscheidungs-JSON oder „go“ |
-| Phase 1b, 2, 3, 4 | 🔴 nicht begonnen | – |
+| E8 | **Kein „go“ je Phase.** Plan-Freigabe = Baufreigabe aller Phasen | nach Freigabe dieses Plans: Phase 0b → 1 → 2 → 3 ohne Zwischenstopp; Vorbelegung = Empfehlungen aus Phase 0; Regelvorschlag „go je Phase“ verworfen |
+| E9 | **Entscheidungsdatei bearbeitbar** | Optionen in allen Abschnitten ändern, erweitern, löschen (Abschnitt 17) |
+| E10 | **Vorschau für alle Abschnitte** | jede Tool-Ansicht erhält ein gerendertes Mockup, nicht nur das Grundlayout (Abschnitt 17.2) |
+| E11 | **Backend = Verwaltung von Einstellungen und Optionen im Tool** | jede Einstellung ändern, Optionen erweitern und löschen, Bauplan pflegen (Abschnitt 16 + 17.3) |
+| E12 | Backend-Quelle | **O2** (Tool kanonisch, Repo-Markdown als Spiegel) nach Empfehlung, da keine abweichende Wahl; im Backend änderbar |
 
-**Interpretation der Freigabe:** Die Plan-Genehmigung deckte den Plan als Ganzes; der Plan selbst setzt nach Phase 0 ein **Gate** (deine Wahl der Optionen). Gebaut wurde deshalb nur die Entscheidungsdatei, kein Teil des Notizblocks.
+**Plausibilitätsbox:** „für alle Abschnitte Vorschau“ interpretiert als: *Vorschau-Mockup je Tool-Ansicht* (Outliner, To-do, Kalender, Mindmap gesamt, Mindmap Fokus, Ideen, Workflow, Instrumente, Ausbau, Protokoll, Backend, Eingabeblatt); zusätzlich bleiben die Datenfluss-Diagramme je Option. Falls „Abschnitte“ die sieben Abschnitte der Entscheidungsdatei meint: auch abgedeckt, da jeder Abschnitt dann mindestens ein gerendertes Element enthält (Alt-Projekte: Projektkarten-Vorschau; JSON: Live-Vorschau).
 
-## 15. FREIGABE-VERLAUF (wo gedrückt wurde, welche Optionen standen)
+## 15. BAUSTAND
+
+| Schritt | Status |
+|---|---|
+| Phase 0 Entscheidungsdatei V1 | 🟢 erledigt (Commit 6e93c24, Artefakt https://claude.ai/artifact/2ukztfz9d5rYBVs5F9VqRe) |
+| Bauplan im Repo `docs/BAUPLAN_AKTUELL.md` (V3) | 🟢 erledigt (gepusht) |
+| Phase 0b, 1, 2, 3 | 🔴 nach Freigabe dieses Plans direkt nacheinander |
+
+## 16. BACKEND-ANSICHT (aus V3, ergänzt)
+
+- **Bauplan**: Phasen 0–4 als Schrittkarten mit Status, Inhalt, Ergebnis; inline bearbeitbar; Phase hinzufügen/löschen.
+- **Entscheidungen**: E1–E12 mit Vorher/Nachher-Protokoll.
+- **Einstellungen** (E11): jede Einstellung aus 8.1 als Feld: Layout, Fristenfarben, Mindmap-Fokus-Darstellung, Eingabefeld-Variante, KI-Weg (A-Optionen aktiv/inaktiv), Outlook-Weg (B-Optionen), Ablage (C), ICS-URL, Zapier-Aktion, Sprache, Autosave-Intervall, Dunkelmodus.
+- **Optionsregister** (E11): alle Optionslisten als Tabellen mit **Anlegen / Bearbeiten / Löschen / Reihenfolge**: KI-Wege, Outlook-Wege, Ablagen, Layouts, Fristenpaletten, Fokus-Darstellungen, Eingabe-Varianten, Ansichten (ein-/ausblenden, Reihenfolge der Tabs), Knotentypen, Horizonte, Statuswerte, Ideen-Stufen, Instrumente, Alt-Projekte. Löschen = Verschieben in „Gelöscht“ (additiv-only, wiederherstellbar), Entferntes im Changelog gelistet.
+- **Bauaufträge**: Änderung → „Als Bauauftrag exportieren“ (Claude-Code-Prompt, Copybox); Phase 2: direkt per A6.
+- **Protokoll**: jede Backend-Änderung mit Zeit, Feld, Vorher, Nachher, Quelle; Rückgängig je Eintrag.
+- **Export/Import**: Markdown `BAUPLAN_AKTUELL.md`, JSON (Einstellungen + Optionsregister + Bauplan), Update-Paket-Import (Rückweg Claude Code).
+- **Rückschreibpflicht** für Claude Code (CLAUDE.md, Skill `notizblock-build`): jeder Bauauftrag endet mit Update-Paket + Markdown-Export.
+
+## 17. PHASE 0b: ENTSCHEIDUNGSDATEI V2 (gleiche Datei, Republish auf gleiche Artefakt-URL)
+
+### 17.1 Bearbeitung (E9)
+- Jede Karte (A, B, C, L, F, M, E, Alt-Projekte, Instrumente der Architekturkarte) erhält **Bearbeiten**: Titel, Beschreibung, Eigenschaften, Plus/Minus, Status-Farbe, Phase, Belegstufe als Felder; **Löschen** (in „Gelöscht“-Liste, wiederherstellbar); **Neu anlegen** je Abschnitt; **Reihenfolge** (hoch/runter).
+- Datenhaltung: `EMBEDDED_DATA` (Originalstand) + `localStorage` (Arbeitsstand, 1×/s) + **JSON-Export/-Import** (Copybox, im Artefakt kein Datei-Download ohne Fähigkeit; `downloads`-Fähigkeit wird deklariert) + **„Original wiederherstellen“**.
+- Entscheidungs-JSON enthält zusätzlich alle geänderten/neuen/gelöschten Optionen (Diff zum Original), damit Phase 1 sie übernimmt.
+- Datenmodell identisch mit dem Optionsregister des Backends (Abschnitt 16), damit V1 den Stand 1:1 importiert; danach Entscheidungsdatei in Obsolet-Liste.
+
+### 17.2 Vorschau aller Abschnitte (E10)
+- Neuer Abschnitt **„5e Ansichten-Vorschau“**: 12 Mockups (CSS/SVG, schematisch mit Beispielinhalt): Outliner, To-do, Kalender (Monat), Mindmap gesamt, Mindmap Fokus, Ideen-Kanban, Workflow-Pipeline, Instrumente-Karte, Ausbau/Prompt-Flächen, Protokoll, **Backend**, Eingabeblatt (schwebend, mit Mikrofon und Vorschlagskarte).
+- Je Mockup: Kurztext, Status „in V1 enthalten“, Schalter „in V1 ein/aus“ (fließt ins JSON), Bearbeiten wie 17.1.
+- Abschnitt 6 Alt-Projekte: Projektkarten-Vorschau (Name, Stand, Horizontfarbe, nächster Schritt); Abschnitt 7: JSON-Live-Vorschau bleibt.
+
+### 17.3 Übergang zu Phase 1
+- Phase 1 importiert den Arbeitsstand aus dem JSON (oder, ohne Einfügen, den Originalstand mit Empfehlungen) in das Backend-Optionsregister; Backend ist danach die einzige Pflegestelle (E12 O2).
+
+### 17.4 Validierung Phase 0b
+- Syntax, Playwright (mobil/desktop, hell/dunkel), kein Überlauf, 0 Fehler, Interaktionstest: Option bearbeiten → löschen → wiederherstellen → neu anlegen → JSON zeigt Diff; Autosave nach Neuladen.
+
+## 18. KONTROLLBLOCK (Ergänzung)
+
+| # | Anforderung | Abdeckung | Status |
+|---|---|---|---|
+| 20 | Backend-Fenster mit Bauplan, bearbeitbar | 16 | 🟡 Phase 1 |
+| 21 | Kein „go“ je Phase, Plan-Freigabe = Baufreigabe | 14 E8, 12 | 🟢 übernommen |
+| 22 | Entscheidungsdatei bearbeitbar (ändern, erweitern, löschen) | 17.1 | 🟡 Phase 0b |
+| 23 | Vorschau für alle Abschnitte | 17.2 | 🟡 Phase 0b |
+| 24 | Backend: Einstellungen ändern, Optionen erweitern und löschen | 16 | 🟡 Phase 1 |
+
+**Ablauf nach Freigabe:** Phase 0b (Republish Entscheidungsdatei) → Phase 1 (V1 + Repo-Gerüst + Backend) → Phase 2 (Validierung) → Phase 3 (Push + Artefakt-Link). Danach Bericht mit Kontrollblock; Änderungen über das Backend oder im Chat.
+
+---
+
+# NACHTRAG V5 · 2026-10-09 · Freigabe-Verlauf und Baustand nach Phase 3
+
+## 19. FREIGABE-VERLAUF
 
 | Zeitpunkt | Deine Handlung | Optionen | Deine Wahl |
 |---|---|---|---|
 | Turn 1 | Prompt: Notizblock-Wunsch | – | – |
-| Turn 1, Rückfrage 1 | KI-Anbindung | O1 Copybox · O2 API-Schlüssel · O3 beides | „visuell alle nebeneinander + Alternativen“ |
-| Turn 1, Rückfrage 2 | Outlook | O1 ICS · O2 Graph · O3 gestuft | „gleiche Antwort“ |
-| Turn 1, Rückfrage 3 | Vorschau-Runde | O1 Vorschau zuerst · O2 direkt bauen | „jedes Mal entscheiden, später festlegen“ |
-| Turn 1, Rückfrage 4 | Ablage | O1 nur Repo · O2 Repo + Artefakt | O2 + visueller Vergleich |
+| Turn 1, Rückfragen 1–4 | KI-Anbindung, Outlook, Vorschau, Ablage | O1–O3 je Frage | visuell alle Optionen; gleiche Antwort; je Element entscheiden; O2 Repo + Artefakt |
 | Turn 3 | Prompt: Instrumentarium zuerst | – | eingearbeitet (Abschnitte 2–4) |
-| Turn 3 | **Plan genehmigen** (Plan-Modus-Dialog) | genehmigen · ablehnen · ändern | genehmigt |
-| Turn 4 | – | Phase-0-Datei mit A1–A7, B1–B7, C1–C6, L1–L6, F1–F3, M1–M2, E1–E3 | **offen** (JSON noch nicht eingefügt) |
+| Turn 3 | Plan genehmigen (Plan-Modus) | genehmigen · ablehnen · ändern | genehmigt → Phase 0 gebaut |
+| Turn 5 | Prompt: Plan zeigen, Backend-Fenster | – | Plan ins Repo, Backend-Anforderung (16) |
+| Turn 7 | Prompt: kein go je Phase, Entscheidungen bearbeitbar, Backend | – | E8–E12 |
+| Turn 7 | Plan V4 genehmigen | genehmigen · ablehnen · ändern | genehmigt → Phase 0b, 1, 2, 3 ohne Zwischenstopp |
 
-## 16. NEUE ANFORDERUNG 20: BACKEND-FENSTER (Bauplan live im Tool, bearbeitbar)
+## 20. BAUSTAND (nach Phase 3)
 
-### 16.1 Ziel
-- Der Bauplan (diese Datei) ist **im Tool selbst** sichtbar, aktuell und bearbeitbar, in einer eigenen Ansicht **„Backend“**.
-- Änderungen im Backend werden zu Bauaufträgen (Prompt-Flächen) und fließen über Claude Code zurück ins Repo.
-
-### 16.2 Eine-Quelle-Regel: Optionen
-
-| Opt | Quelle der Wahrheit | Fluss | Vorteil | Nachteil | Bewertung |
-|---|---|---|---|---|---|
-| **O1 Repo-Markdown kanonisch** | `docs/BAUPLAN_AKTUELL.md` | Tool liest Markdown ein (Import), zeigt an, Notizen nur lokal | einfach, Git-Historie | Bearbeitung nicht im Tool | 🟡 |
-| **O2 Tool kanonisch** | Backend-Ansicht im Tool (`EMBEDDED_DATA.bauplan`) | Tool exportiert Markdown → Repo (Commit durch Claude Code bei jedem Phasenabschluss) | Bearbeitung dort, wo gearbeitet wird; Versionierung je Änderung im Protokoll | Repo-Datei kann kurzzeitig hinterherhinken | 🟢 **Empfehlung aus Sachlage** |
-| **O3 beidseitig** | beide, mit Abgleich über Update-Paket | Tool ↔ Repo, Konflikte manuell | flexibel | Doppelpflege, Konfliktrisiko | 🔴 widerspricht Eine-Quelle-Regel |
-
-**Empfehlung:** O2. Repo-Markdown bleibt als **versionierter Spiegel**, den Claude Code bei jedem Phasenabschluss aus dem Tool-Export schreibt. **Aus Verhalten:** mehr Sichtbarkeit > weniger, automatisch > manuell.
-
-### 16.3 Spezifikation Backend-Ansicht (V1)
-
-| Bereich | Inhalt | Bearbeitung |
+| Phase | Status | Ergebnis |
 |---|---|---|
-| **Bauplan** | Phasen 0–4 als Schrittkarten mit Status (grün/gelb/rot), je Phase Inhalt, Ergebnis, Gate | Status umschalten, Text inline bearbeiten, Phase hinzufügen |
-| **Entscheidungen** | E1–E7 + Phase-0-Wahl (JSON aus der Entscheidungsdatei importierbar) | Wert ändern = neuer Protokolleintrag mit Vorher/Nachher |
-| **Anforderungen (Kontrollblock)** | Nr. 1–20 mit Status und Verweis auf Abschnitt | abhaken, ergänzen |
-| **Offene Punkte / Lücken** | Abschnitt 11 als Liste | erledigen, ergänzen |
-| **Bauaufträge (Prompt-Flächen)** | jede Änderung kann als Bauauftrag markiert werden → Knopf **„Als Bauauftrag exportieren“** erzeugt vollständigen Claude-Code-Prompt (Zustand, Datei, Branch, Änderung, Validierungsregeln, Rückschreibpflicht in den Bauplan) als Copybox | Phase 2: direkt per A6 starten |
-| **Protokoll** | jede Backend-Änderung: Zeit, Feld, Vorher, Nachher, Quelle (manuell / Claude Code) | Rückgängig je Eintrag |
-| **Export / Import** | Markdown-Export (`BAUPLAN_AKTUELL.md`, Copybox + Download), JSON-Export; Import von Markdown (Repo-Stand) und Update-Paket (Claude-Code-Rückweg) | – |
-| **Regeln** | Spiegel von `CLAUDE.md` (Dateinamen, Additiv-only, Validierungspflicht) | Änderung = Bauauftrag |
+| 0 Entscheidungsdatei V1 | 🟢 | Commit 6e93c24 |
+| 0b Entscheidungsdatei V2 bearbeitbar + 12 Vorschauen | 🟢 | Artefakt https://claude.ai/artifact/2ukztfz9d5rYBVs5F9VqRe (Version 2) |
+| 1a Werkzeug V1.0.0 | 🟢 | `notizblock/notizblock_AKTUELL.html` |
+| 1b Repo-Gerüst | 🟢 | CLAUDE.md, .claude/settings.json, 3 Skills, 3 Prompts, 3 Scripts, Docs |
+| 1b Outlook-Schnellweg (Zapier) | 🟡 wartet auf dich | Outlook-Konto in Zapier verbinden |
+| 2 Validierung | 🟢 | `scripts/validate.mjs`: 0 Fehler, kein Überlauf, Autosave ok (Prüfbericht im Chat) |
+| 3 Auslieferung | 🟢 | Push + Artefakt (Link im Handover-Nachtrag) |
+| 4 Ausbau | 🔴 Folgechats | Routine, db, A6, PWA, B3/B7, Cloudflare, Alt-Projekte |
 
-### 16.4 Rückschreibpflicht für Claude Code (in `CLAUDE.md` und Skill `notizblock-build`)
-- Jeder Bauauftrag endet mit: Bauplan-Status im Tool aktualisieren (Update-Paket `pakete/bauplan_JJJJ-MM-TT_HHMM.json`) **und** `docs/BAUPLAN_AKTUELL.md` neu exportieren.
-- Kein Phasenabschluss ohne Eintrag im Backend-Protokoll.
-
-### 16.5 Auswirkung auf Phase 1
-- Ansicht **Backend** wird in 8.2 ergänzt (neunte Ansicht wird zehnte).
-- Seed enthält diesen Bauplan vollständig (Abschnitte 0–16) als strukturierte Daten, nicht nur als Text.
-- Kontrollblock Zeile 20: **Backend-Fenster mit Bauplan, bearbeitbar** → 🟡 Phase 1.
-
-**Nächster Schritt:** Entscheidungs-JSON aus der Phase-0-Datei im Chat einfügen **oder** „go“ (Bau nach Empfehlung) → Phase 1 beginnt, inkl. Backend-Ansicht.
+Abweichungen gegenüber Plan: JSDOM-Smoke durch Chromium-Headless ersetzt (strenger, bereits installiert); Kalender-Drag auf Tag umgesetzt, Wochen-/Tagesansicht als Listen; L3-Dreispalten als Backend-Schalter „Baum als dritte Spalte“ ab 1200 px.

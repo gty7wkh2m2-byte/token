@@ -1,0 +1,4 @@
+{"paket":"bauplan","erzeugt":"2026-10-09T21:38:17Z","toolVersion":"1.0.0",
+ "bauplan":{"phasen":[{"id":"P1","status":"erledigt"},{"id":"P2","status":"erledigt","ergebnis":"scripts/validate.mjs: 0 Fehler, kein Überlauf, Autosave ok; 20 Screenshots"},{"id":"P3","status":"erledigt"}],
+  "anforderungen":[{"nr":18,"status":"erledigt"}]},
+ "log":["09.10.2026 23:38 · Phase 1–3 abgeschlossen (Claude Code), Paket aus der Bausitzung"]}
