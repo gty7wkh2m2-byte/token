@@ -40,13 +40,14 @@ nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;pad
 nav.tabs button.on{color:var(--fg);border-bottom-color:var(--acc);font-weight:700}
 nav.tabs button:hover{color:var(--fg)}
 :focus-visible{outline:3px solid var(--info);outline-offset:1px}
-.btn{display:inline-block;background:var(--surf);border:1px solid var(--line);border-radius:8px;padding:6px 11px;cursor:pointer;font-size:14px;color:var(--fg)}
+.btn{display:inline-block;background:var(--surf);border:1px solid var(--line);border-radius:8px;padding:6px 11px;cursor:pointer;font-size:14px;color:var(--fg);text-decoration:none}
 .btn:hover{border-color:var(--acc)}
 .btn.sm{padding:3px 8px;font-size:12.5px}
 .btn.pri{background:var(--acc);border-color:var(--acc);color:var(--acc-fg);font-weight:700}
 .btn.cp{border-color:var(--copy);color:var(--copy);background:var(--copybg)}
 .btn.fl{border-color:var(--file);color:var(--file);background:var(--okbg);font-family:var(--f-mono);font-size:13px}
 .btn.dg{border-color:var(--bad);color:var(--bad)}
+a.btn{color:var(--info);border-color:var(--info)}
 input,select,textarea{background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:5px 7px;min-width:0;max-width:100%}
 input[type=range]{padding:0;accent-color:var(--acc)}
 input[type=checkbox]{accent-color:var(--acc);width:16px;height:16px}
@@ -84,7 +85,6 @@ tr.best td{background:var(--okbg)}
 .legend{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
 details>summary{cursor:pointer;font-weight:700;padding:4px 0}
 .oc{border:1px solid var(--line);border-left:5px solid var(--c,var(--acc));border-radius:10px;background:var(--surf);margin:10px 0;padding:8px 12px}
-.oc.bad{--c:var(--bad)}.oc.ex{--c:var(--warn)}
 .fh{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .fh b{flex:1;min-width:150px}
 .vals td input[type=number]{width:70px}
@@ -96,9 +96,25 @@ details>summary{cursor:pointer;font-weight:700;padding:4px 0}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:50;font-size:13.5px;max-width:90vw}
 .cbx{border:2px solid var(--copy);border-radius:8px;background:var(--surf);margin:6px 0}
 .cbx .h{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 8px;background:var(--copybg);font-size:13px;flex-wrap:wrap}
-.cbx pre{margin:0;padding:8px;max-height:170px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:12px/1.45 var(--f-mono)}
+.cbx pre{margin:0;padding:8px;max-height:200px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:12px/1.45 var(--f-mono)}
 .tg{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;background:var(--warn);color:var(--bg);border-radius:4px;padding:0 6px;margin-left:6px}
-@media (max-width:560px){.hrow h1{flex-basis:100%}}
+.step{display:flex;gap:10px;align-items:flex-start;background:var(--surf);border:1px solid var(--line);border-left:5px solid var(--c,var(--acc));border-radius:10px;padding:8px 10px;margin:6px 0}
+.step .no{font:700 12px var(--f-mono);background:var(--c,var(--acc));color:var(--acc-fg);border-radius:50%;min-width:24px;height:24px;display:grid;place-items:center;flex:none}
+.step .bd{flex:1;min-width:0}
+/* Prioritätsliste */
+.cr{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;background:var(--surf);border:1px solid var(--line);border-left:6px solid var(--c,var(--info));border-radius:8px;padding:6px 8px;margin:6px 0}
+.cr.must{--c:var(--bad)}.cr.soft{--c:var(--warn)}.cr.off{opacity:.5}
+.cr.drag{opacity:.35}.cr.over{outline:3px dashed var(--acc)}
+.cr .nm{flex:1 1 220px;min-width:0;font-weight:700}
+.grip{cursor:grab;font-size:20px;color:var(--fg2);user-select:none;line-height:1}
+.rk{font:700 13px var(--f-mono);background:var(--surf2);border-radius:6px;padding:1px 7px}
+.cv{border:1px solid var(--line);border-radius:999px;padding:1px 9px;font-size:12px;cursor:pointer;background:var(--surf);color:var(--fg2)}
+.cv.on{background:var(--okbg);border-color:var(--ok);color:var(--ok);font-weight:700}
+.mu{border:1px solid var(--c);color:var(--c);background:var(--cb);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;font-weight:700}
+.mu.m{--c:var(--bad);--cb:var(--badbg)}.mu.w{--c:var(--warn);--cb:var(--warnbg)}
+.tgl{display:inline-flex;gap:4px;align-items:center;font-size:12.5px;color:var(--fg2)}
+.cvs{flex-basis:100%;display:flex;flex-wrap:wrap;gap:4px;padding-left:34px}
+@media (max-width:560px){.hrow h1{flex-basis:100%}.cvs{padding-left:0}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -106,14 +122,14 @@ details>summary{cursor:pointer;font-weight:700;padding:4px 0}
 <div id="toast" hidden></div>
 
 <script type="application/json" id="EMBEDDED_DATA">
-{"v":1,"cur":"t_marokko","tab":"start","prof":"p_ausg","trips":[{"id":"t_marokko","name":"Marokko 15.10. bis 31.10.2026 (FRA, Agadir, Casablanca, FRA)","created":"2026-10-09","url":"https://www.kiwi.com/fr/multicity/results/aeroport-de-francfort-sur-le-main-francfort-sur-le-main-allemagne~agadir-maroc~2026-10-15/agadir-maroc~aeroport-mohammed-v-de-casablanca-casablanca-maroc~2026-10-19/aeroport-mohammed-v-de-casablanca-casablanca-maroc~aeroport-de-francfort-sur-le-main-francfort-sur-le-main-allemagne~2026-10-31/?stopNumber=0%7Efalse&returnFromDifferentAirport=false&returnToDifferentAirport=false&allowDifferentStationConnection=false&multicity_times=0-24-0-19_5-16-0-17_0-13-0-17&multicity_stopNumber=1%7Efalse%2C0%7Efalse%2C0%7Efalse&multicity_allowDifferentStationConnection=false&bags=1.1-","legs":[{"id":"l1","from":"FRA","to":"AGA","date":"2026-10-15","depWin":[0,24],"arrWin":[0,19],"maxStops":"1","imp":"1"},{"id":"l2","from":"AGA","to":"CMN","date":"2026-10-19","depWin":[5,16],"arrWin":[0,17],"maxStops":"0","imp":"1"},{"id":"l3","from":"CMN","to":"FRA","date":"2026-10-31","depWin":[0,13],"arrWin":[0,17],"maxStops":"0","imp":"1"}],"budget":{"amount":"","basis":"offen"},"bagMode":"hold","pay":"","notes":"Weitere Flugseiten folgen (Nutzer: 'rest folgt').","opts":{},"chk":{},"src":[{"id":"s1","name":"Kiwi.com","url":"kiwi","st":{}},{"id":"s2","name":"lastminute.com","url":"","st":{}},{"id":"s3","name":"Google Flights","url":"","st":{}},{"id":"s4","name":"Skyscanner","url":"","st":{}},{"id":"s5","name":"Opodo","url":"","st":{}},{"id":"s6","name":"Kayak","url":"","st":{}},{"id":"s7","name":"Momondo","url":"","st":{}},{"id":"s8","name":"eDreams","url":"","st":{}},{"id":"s9","name":"Expedia","url":"","st":{}},{"id":"s10","name":"Airline direkt (z. B. Royal Air Maroc)","url":"","st":{}}]}],"tz":{"FRA":"EU","HHN":"EU","MUC":"EU","DUS":"EU","BER":"EU","MAD":"EU","LIS":"EU","CDG":"EU","AGA":0,"CMN":0,"RAK":0,"FEZ":0,"TNG":0},"log":[],"fb":[]}
+{"v":3,"cur":"t_marokko","tab":"start","prof":"p_pr","trips":[{"id":"t_marokko","name":"Marokko 15.10. bis 31.10.2026 (FRA, Casablanca, Agadir)","created":"2026-10-09","url":"https://www.kiwi.com/fr/multicity/results/aeroport-de-francfort-sur-le-main-francfort-sur-le-main-allemagne~agadir-maroc~2026-10-15/agadir-maroc~aeroport-mohammed-v-de-casablanca-casablanca-maroc~2026-10-19/aeroport-mohammed-v-de-casablanca-casablanca-maroc~aeroport-de-francfort-sur-le-main-francfort-sur-le-main-allemagne~2026-10-31/?stopNumber=0%7Efalse&returnFromDifferentAirport=false&returnToDifferentAirport=false&allowDifferentStationConnection=false&multicity_times=0-24-0-19_5-16-0-17_0-13-0-17&multicity_stopNumber=1%7Efalse%2C0%7Efalse%2C0%7Efalse&multicity_allowDifferentStationConnection=false&bags=1.1-","legs":[{"id":"l1","from":"FRA","to":"CMN","date":"2026-10-15","depWin":[0,24],"arrWin":[0,24],"maxStops":"0","imp":"1"},{"id":"l2","from":"CMN","to":"AGA","date":"2026-10-15","depWin":[0,24],"arrWin":[0,19],"maxStops":"0","imp":"1"},{"id":"l3","from":"AGA","to":"CMN","date":"2026-10-19","depWin":[5,16],"arrWin":[0,17],"maxStops":"0","imp":"1"},{"id":"l4","from":"CMN","to":"FRA","date":"2026-10-31","depWin":[0,13],"arrWin":[0,17],"maxStops":"0","imp":"1"}],"budget":{"amount":"","basis":"min"},"bagMode":"hold","pay":"Klarna: später bezahlen, Rechnung oder Raten bevorzugt (letzte Priorität, kein Ausschluss)","gapSep":"120","gapSame":"60","notes":"Stand 09.10.2026. Preise und Zeiten aus Royal-Air-Maroc-Screenshots, Abrufzeit fehlt.\nAnnahme: Der angezeigte Eco-Classic-Preis gilt mit 1 Koffer (deine Vorgabe 1 Aufgabegepäck + 1 Handgepäck), im Tarif nicht belegt. Preis nur Handgepäck fehlt.\nEco ausverkauft am 20.10. AGA→CMN: 11:55→12:55 (Business 182,50 €) und 18:05→19:30 (Business 206,50 €, 3 Sitzplätze), nicht erfasst.\nTagesstreifen zeigt am 15.10. 59,59 €, Liste ab 61,17 €: Abweichung ungeklärt.\nEtappen 1 und 4 (FRA↔CMN) und Durchgangstickets FRA→AGA fehlen noch.\nZeitfenster: Kiwi-Link, Ankunft Agadir bis 19 Uhr als Annahme für Etappe 2 (CMN→AGA) übernommen. Etappe 1: Fenster unbekannt, offen gelassen.","opts":{"l2":[{"id":"o_ram01","date":"2026-10-15","depAp":"CMN","arrAp":"AGA","dep":"09:55","arr":"11:20","plus":0,"stops":"0","lay":"","dur":"85","priceHand":"","priceHold":"61.17","access":"","group":"RAM-1","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 182,34 €; Business: 4 Sitzplätze. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"dir","f_cert":"one","h_avail":"ok"}},{"id":"o_ram02","date":"2026-10-15","depAp":"CMN","arrAp":"AGA","dep":"14:00","arr":"15:25","plus":0,"stops":"0","lay":"","dur":"85","priceHand":"","priceHold":"61.17","access":"","group":"RAM-2","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 182,34 €; Business: 3 Sitzplätze. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"dir","f_cert":"one","h_avail":"ok"}},{"id":"o_ram03","date":"2026-10-15","depAp":"CMN","arrAp":"AGA","dep":"16:00","arr":"17:25","plus":0,"stops":"0","lay":"","dur":"85","priceHand":"","priceHold":"61.17","access":"","group":"RAM-3","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 182,34 €. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"dir","f_cert":"one","h_avail":"ok"}},{"id":"o_ram04","date":"2026-10-15","depAp":"CMN","arrAp":"AGA","dep":"22:15","arr":"23:15","plus":0,"stops":"0","lay":"","dur":"60","priceHand":"","priceHold":"61.17","access":"","group":"RAM-4","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 182,34 €. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"dir","f_cert":"one","h_avail":"ok"}},{"id":"o_ram05","date":"2026-10-15","depAp":"CMN","arrAp":"AGA","dep":"07:30","arr":"20:10","plus":0,"stops":"1","lay":"","dur":"760","priceHand":"","priceHold":"214.85","access":"","group":"RAM-5","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 380,02 €. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"thr","f_cert":"one","h_avail":"ok"}}],"l3":[{"id":"o_ram06","date":"2026-10-19","depAp":"AGA","arrAp":"CMN","dep":"08:50","arr":"09:50","plus":0,"stops":"0","lay":"","dur":"60","priceHand":"","priceHold":"58.17","access":"","group":"RAM-6","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 182,50 €. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"dir","f_cert":"one","h_avail":"ok"}},{"id":"o_ram07","date":"2026-10-19","depAp":"AGA","arrAp":"CMN","dep":"12:00","arr":"13:25","plus":0,"stops":"0","lay":"","dur":"85","priceHand":"","priceHold":"58.17","access":"","group":"RAM-7","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 182,50 €; Business: 4 Sitzplätze. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"dir","f_cert":"one","h_avail":"ok"}},{"id":"o_ram08","date":"2026-10-19","depAp":"AGA","arrAp":"CMN","dep":"23:40","arr":"00:40","plus":1,"stops":"0","lay":"","dur":"60","priceHand":"","priceHold":"58.17","access":"","group":"RAM-8","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 182,50 €. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"dir","f_cert":"one","h_avail":"ok"}},{"id":"o_ram09","date":"2026-10-19","depAp":"AGA","arrAp":"CMN","dep":"17:05","arr":"23:10","plus":0,"stops":"1","lay":"","dur":"365","priceHand":"","priceHold":"213","access":"","group":"RAM-9","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 381,33 €. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"thr","f_cert":"one","h_avail":"ok"}},{"id":"o_ram10","date":"2026-10-19","depAp":"AGA","arrAp":"CMN","dep":"17:05","arr":"11:50","plus":1,"stops":"1","lay":"","dur":"1125","priceHand":"","priceHold":"213","access":"","group":"RAM-10","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 381,33 €. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"thr","f_cert":"one","h_avail":"ok"}},{"id":"o_ram11","date":"2026-10-19","depAp":"AGA","arrAp":"CMN","dep":"17:05","arr":"21:25","plus":1,"stops":"1","lay":"","dur":"1700","priceHand":"","priceHold":"213","access":"","group":"RAM-11","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 381,33 €. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"thr","f_cert":"one","h_avail":"ok"}},{"id":"o_ram12","date":"2026-10-20","depAp":"AGA","arrAp":"CMN","dep":"04:30","arr":"05:55","plus":0,"stops":"0","lay":"","dur":"85","priceHand":"","priceHold":"58.17","access":"","group":"RAM-12","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 182,50 €; Datum +1 Tag zum Plan. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"dir","f_cert":"one","h_avail":"ok"}},{"id":"o_ram13","date":"2026-10-20","depAp":"AGA","arrAp":"CMN","dep":"08:50","arr":"09:50","plus":0,"stops":"0","lay":"","dur":"60","priceHand":"","priceHold":"58.17","access":"","group":"RAM-13","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 182,50 €; Datum +1 Tag zum Plan. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"dir","f_cert":"one","h_avail":"ok"}},{"id":"o_ram14","date":"2026-10-20","depAp":"AGA","arrAp":"CMN","dep":"20:50","arr":"22:15","plus":0,"stops":"0","lay":"","dur":"85","priceHand":"","priceHold":"58.17","access":"","group":"RAM-14","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 182,50 €; Datum +1 Tag zum Plan. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"dir","f_cert":"one","h_avail":"ok"}},{"id":"o_ram15","date":"2026-10-20","depAp":"AGA","arrAp":"CMN","dep":"16:05","arr":"21:25","plus":0,"stops":"1","lay":"","dur":"320","priceHand":"","priceHold":"213","access":"","group":"RAM-15","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 381,33 €; Datum +1 Tag zum Plan. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"thr","f_cert":"one","h_avail":"ok"}},{"id":"o_ram16","date":"2026-10-20","depAp":"AGA","arrAp":"CMN","dep":"16:05","arr":"11:50","plus":1,"stops":"1","lay":"","dur":"1185","priceHand":"","priceHold":"213","access":"","group":"RAM-16","span":"1","source":"Royal Air Maroc (Screenshot)","url":"","retrieved":"","flightno":"","fare":"Eco Classic","note":"Business 381,33 €; Datum +1 Tag zum Plan. Preis laut Seite für 1 Erwachsenen.","f":{"d_airline":"ram","d_type":"net","c_cabin":"eco","m_mode":"fl","c_ticket":"thr","f_cert":"one","h_avail":"ok"}}]},"chk":{},"src":[{"id":"s1","name":"Kiwi.com","url":"https://www.kiwi.com/fr/multicity/results/aeroport-de-francfort-sur-le-main-francfort-sur-le-main-allemagne~agadir-maroc~2026-10-15/agadir-maroc~aeroport-mohammed-v-de-casablanca-casablanca-maroc~2026-10-19/aeroport-mohammed-v-de-casablanca-casablanca-maroc~aeroport-de-francfort-sur-le-main-francfort-sur-le-main-allemagne~2026-10-31/?stopNumber=0%7Efalse&returnFromDifferentAirport=false&returnToDifferentAirport=false&allowDifferentStationConnection=false&multicity_times=0-24-0-19_5-16-0-17_0-13-0-17&multicity_stopNumber=1%7Efalse%2C0%7Efalse%2C0%7Efalse&multicity_allowDifferentStationConnection=false&bags=1.1-","st":{}},{"id":"s2","name":"lastminute.com","url":"","st":{}},{"id":"s3","name":"Google Flights","url":"","st":{}},{"id":"s4","name":"Skyscanner","url":"","st":{}},{"id":"s5","name":"Opodo","url":"","st":{}},{"id":"s6","name":"Kayak","url":"","st":{}},{"id":"s7","name":"Momondo","url":"","st":{}},{"id":"s8","name":"eDreams","url":"","st":{}},{"id":"s9","name":"Expedia","url":"","st":{}},{"id":"s10","name":"Airline direkt (Royal Air Maroc)","url":"","st":{"l2_hold":"2026-10-09 (Uhrzeit fehlt)","l3_hold":"2026-10-09 (Uhrzeit fehlt)"}}]}],"tz":{"FRA":"EU","HHN":"EU","MUC":"EU","DUS":"EU","BER":"EU","MAD":"EU","LIS":"EU","CDG":"EU","AGA":0,"CMN":0,"RAK":0,"FEZ":0,"TNG":0},"log":[],"fb":[]}
 </script>
 
 <script>
 (function(){
 'use strict';
 var SRC='<!doctype html>\n'+document.documentElement.outerHTML;
-var LS='reisefinder.v1';
+var LS='reisefinder.v2';
 var $=function(s,r){return (r||document).querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 var num=function(x){if(x===''||x==null)return null;var n=+String(x).replace(',','.');return isNaN(n)?null:n};
@@ -121,12 +137,11 @@ var uid=function(p){return p+Math.random().toString(36).slice(2,8)};
 var pad=function(n){return (n<10?'0':'')+n};
 var nowIso=function(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes())};
 
-/* ---------- Merkmalskatalog (Quelle der Wahrheit für alle Ausprägungen) ---------- */
+/* ---------- Merkmalskatalog ---------- */
 var GRP=[['zeit','Zeit und Termin','#4d9be6'],['route','Route und Umstieg','#7b73e0'],['air','Airline und Produkt','#0E8878'],['bag','Gepäck','#EF9F27'],['preis','Preis und Datenlage','#E86850'],['buch','Buchung und Zahlung','#C2477A'],['kom','Komfort und Zuverlässigkeit','#1D9E75'],['weg','Anreise und Boden','#7f9490'],['recht','Einreise und Recht','#E24B4A'],['umw','Nachhaltigkeit','#3C9E5A'],['kombi','Ganze Reise (Kombination)','#8b5cc4']];
-var GNAME={};GRP.forEach(function(g){GNAME[g[0]]=g});
 var FE=[];
 function V(s){return s.split(';').map(function(x){var p=x.split('|');return {k:p[0],l:p[1],u:+p[2]}})}
-/* kind: in = Eingabe (Auswahl), der = abgeleitet aus Zeiten/Daten, num = Zahl, cmb = abgeleitet für die ganze Reise */
+/* kind: in = Eingabe (Auswahl), der = abgeleitet, num = Zahl, cmb = abgeleitet für die ganze Reise */
 function F(id,name,grp,kind,w,desc,vals,def){var v=vals?V(vals):[];if(kind==='in'&&!v.some(function(x){return x.k==='?'}))v.push({k:'?',l:'unbekannt',u:50});FE.push({id:id,name:name,grp:grp,kind:kind,w:w,desc:desc,vals:v,def:def})}
 F('z_dep_band','Abflugzeit (Tageszeit)','zeit','der',3,'Abgeleitet aus Abflug HH:MM (Ortszeit)','n|Nacht 00–05 Uhr|20;e|Früh 05–08 Uhr|60;v|Vormittag 08–12 Uhr|100;a|Nachmittag 12–17 Uhr|90;s|Abend 17–21 Uhr|65;l|Spät 21–24 Uhr|25;?|unbekannt|50');
 F('z_arr_band','Ankunftszeit (Tageszeit)','zeit','der',3,'Abgeleitet aus Ankunft HH:MM (Ortszeit)','n|Nacht 00–05 Uhr|15;e|Früh 05–08 Uhr|45;v|Vormittag 08–12 Uhr|85;a|Nachmittag 12–17 Uhr|100;s|Abend 17–21 Uhr|80;l|Spät 21–24 Uhr|30;?|unbekannt|50');
@@ -145,18 +160,18 @@ F('m_mode','Verkehrsmittel','route','in',2,'Für Etappen, die auch per Zug, Bus 
 F('d_airline','Airline','air','in',2,'Startwerte sind Annahmen, im Katalog anpassen','ram|Royal Air Maroc|85;lh|Lufthansa|90;ew|Eurowings|65;fr|Ryanair|45;u2|easyJet|55;hv|Transavia|60;3o|Air Arabia|50;bi|Binter|55;cfg|Condor|65;x3|TUIfly|60;ib|Iberia|75;af|Air France|80;kl|KLM|80;sn|Brussels Airlines|75;vy|Vueling|50;oth|andere|50');
 F('d_type','Airline-Typ','air','in',1,'','net|Netzwerk-Airline|100;lcc|Low-Cost-Airline|60;chart|Charter oder Ferienflieger|55');
 F('d_aircraft','Flugzeugtyp','air','in',0,'','wide|Großraum|100;narrow|Schmalrumpf|80;reg|Regional oder Turboprop|50');
-F('e_hand','Handgepäck','bag','in',3,'','big|großes Handgepäck inklusive|100;small|nur kleines Stück unter dem Sitz|40;paid|kostenpflichtig|20');
-F('e_hold','Aufgabegepäck (1 Koffer)','bag','in',3,'Ausschluss "nicht möglich" gilt nur bei Preismodus Koffer','incl|inklusive|100;add|zubuchbar (Aufpreis im Preis Koffer)|70;none|nicht möglich|0');
-F('e_weight','Freigepäck-Gewicht','bag','in',1,'','23|23 kg oder mehr|100;20|20–22 kg|80;15|15–19 kg|50;lt15|unter 15 kg|20');
 F('c_cabin','Kabinenklasse','air','in',1,'Preise je Klasse als eigene Option erfassen (Economy und Business getrennt)','eco|Economy|60;prem|Premium Economy|80;biz|Business|100');
-F('h_avail','Verfügbarkeit im Tarif','kom','in',1,'Hinweis der Buchungsseite, z. B. "2 Sitzplätze"','ok|ausreichend|100;low|knapp (wenige Plätze)|55;wl|nur Warteliste|10');
-F('p_price','Preis (Etappe, inkl. Anreisekosten)','preis','num',10,'Min-Max-Normierung je Etappe unter den zulässigen Optionen: günstigste = 100, teuerste = 0');
-F('f_cert','Preisgewissheit','preis','in',3,'','air|Airline-Endpreis bestätigt|100;multi|2 oder mehr Portale stimmen überein|80;one|1 Portal|50;est|Schätzung oder ohne Gepäckangabe|15');
+F('e_hand','Handgepäck','bag','in',3,'','big|großes Handgepäck inklusive|100;small|nur kleines Stück unter dem Sitz|40;paid|kostenpflichtig|20');
+F('e_hold','Aufgabegepäck (1 Koffer)','bag','in',3,'Nebenbedingung wirkt nur im Preismodus Koffer','incl|inklusive|100;add|zubuchbar (Aufpreis im Preis Koffer)|70;none|nicht möglich|0');
+F('e_weight','Freigepäck-Gewicht','bag','in',1,'','23|23 kg oder mehr|100;20|20–22 kg|80;15|15–19 kg|50;lt15|unter 15 kg|20');
+F('p_price','Preis (Etappe, inkl. Anreisekosten)','preis','num',10,'Wertmodell: Min-Max-Normierung je Etappe, günstigste = 100, teuerste = 0');
+F('f_cert','Preisgewissheit','preis','in',3,'','air|Airline-Endpreis bestätigt|100;multi|2 oder mehr Portale stimmen überein|80;one|1 Quelle|50;est|Schätzung oder ohne Gepäckangabe|15');
 F('p_age','Alter des Preisstands','preis','der',1,'Aus Abrufzeit','6h|unter 6 h|100;24h|unter 24 h|80;72h|unter 72 h|50;old|älter|20;?|unbekannt|50');
 F('g_flex','Umbuchung','buch','in',3,'','none|nicht möglich|25;fee|gegen Gebühr|65;free|kostenlos|100');
 F('g_refund','Stornierung','buch','in',2,'','none|keine Erstattung|20;credit|Gutschein|50;full|Erstattung|100');
-F('g_pay','Pflicht-Zahlweg (Reise-Einstellung)','buch','in',4,'Ausschluss "nicht möglich" gilt, wenn ein Pflicht-Zahlweg gesetzt ist','ok|Pflicht-Zahlweg möglich|100;other|anderer Weg möglich|60;no|Pflicht-Zahlweg nicht möglich|0');
+F('g_pay','Bevorzugter Zahlweg (Klarna, später bezahlen, Rechnung, Raten)','buch','in',4,'Je Option: ist der bevorzugte Zahlweg möglich?','ok|bevorzugter Zahlweg möglich|100;other|nur anderer Weg|60;no|bevorzugter Zahlweg nicht möglich|30');
 F('g_miles','Meilengutschrift','buch','in',1,'Bedingung: Partner-Airline und Buchungsklasse','yes|Meilen möglich|100;no|keine Meilen|40');
+F('h_avail','Verfügbarkeit im Tarif','kom','in',1,'Hinweis der Buchungsseite, z. B. "2 Sitzplätze"','ok|ausreichend|100;low|knapp (wenige Plätze)|55;wl|nur Warteliste|10');
 F('h_seat','Sitzplatz','kom','in',1,'','free|gratis wählbar|100;paid|kostenpflichtig|50;rand|Zufallszuteilung|30');
 F('h_meal','Verpflegung','kom','in',1,'','incl|inklusive|100;buy|kaufbar|50;none|keine|30');
 F('h_otp','Pünktlichkeit der Linie','kom','in',3,'Historie der Linie, Quelle notieren','hi|hoch|100;mid|mittel|60;lo|niedrig|20');
@@ -166,28 +181,32 @@ F('j_entry','Einreise im Zielland','recht','in',2,'Quelle und Stand notieren','f
 F('n_co2','CO2 je Passagier','umw','in',0,'','low|niedrig|100;mid|mittel|60;high|hoch|20');
 F('k_bookings','Anzahl Buchungen','kombi','cmb',4,'Optionen mit gleicher Buchungsgruppe zählen als eine Buchung','1|1 Buchung|100;2|2 Buchungen|70;3|3 Buchungen|40;4|4 oder mehr|20');
 F('k_budget','Budgetstatus der Reise','kombi','cmb',6,'Nur wirksam, wenn ein Budget gesetzt ist','under|unter der Grenze|100;part|teils über (Handgepäck unter, Koffer über)|50;over|über der Grenze|0;?|Budget offen|50');
-var DEFX={c_ticket:['self'],z_window:['out'],z_nextday:['next'],g_pay:['no'],e_hold:['none']};
+
+/* ---------- Nebenbedingungen (Prioritätsliste) ---------- */
+var CDEF={
+  maxstops:{name:'Max. Stopps je Etappe eingehalten',desc:'Grenze je Etappe in Tab 1'},
+  gap:{name:'Anschlusspuffer zwischen Etappen',desc:'Mindestabstand Ankunft bis nächster Abflug (Puffer in Tab 1)'},
+  noself:{name:'Kein Selbsttransfer (getrennte Tickets bei Umstieg unter 24 h)',desc:'Gleiche Buchungsgruppe = ein Ticket'},
+  budget:{name:'Budgetgrenze eingehalten',desc:'Nur wirksam, wenn in Tab 1 ein Betrag gesetzt ist'}
+};
+function CA(fid,keys,must,on){return {id:'f:'+fid,on:on!==false,must:!!must,allowed:keys}}
+function CS(id,must,on){return {id:id,on:on!==false,must:!!must}}
+function consStd(){return [CS('maxstops',true),CS('gap',true),CA('z_window',['in'],true),CA('c_cabin',['eco'],true),CS('noself',false),CA('c_ticket',['dir','thr'],false),CA('ap_dep',['p'],false),CA('ap_arr',['p'],false),CA('z_dateshift',['p'],false),CA('e_hold',['incl','add'],false),CA('z_layover',['na','90','240'],false),CS('budget',false),CA('g_pay',['ok'],false)]}
+function consGunst(){return [CS('maxstops',true),CS('gap',true),CA('z_window',['in'],true),CA('c_cabin',['eco'],true),CS('noself',false,false),CA('c_ticket',['dir','thr'],false,false),CA('ap_dep',['p'],false,false),CA('ap_arr',['p'],false,false),CA('z_dateshift',['p'],false,false),CA('e_hold',['incl','add'],false,false),CA('z_layover',['na','90','240'],false,false),CS('budget',false),CA('g_pay',['ok'],false,false)]}
+function consKomf(){return [CS('maxstops',true),CS('gap',true),CA('z_window',['in'],true),CA('c_cabin',['eco'],true),CA('z_stops',['0'],false),CS('noself',false),CA('c_ticket',['dir','thr'],false),CA('z_layover',['na','90','240'],false),CA('e_hold',['incl','add'],false),CA('ap_dep',['p'],false),CA('ap_arr',['p'],false),CA('z_dateshift',['p'],false),CS('budget',false),CA('g_pay',['ok'],false)]}
+function defaultProfiles(){
+  return [
+    {id:'p_pr',name:'Preis minimieren (Standard)',obj:'price',A:10,w:{},u:{},cons:consStd()},
+    {id:'p_gunst',name:'Günstig, wenige Regeln',obj:'price',A:10,w:{},u:{},cons:consGunst()},
+    {id:'p_komf',name:'Komfort',obj:'price',A:10,w:{p_price:4,z_stops:8,z_dur_band:8,e_hold:5,g_flex:5},u:{},cons:consKomf()},
+    {id:'p_zeit',name:'Kürzeste Reisezeit',obj:'time',A:10,w:{},u:{},cons:consStd()},
+    {id:'p_wert',name:'Wertmodell (Gewichte aus Tab 4)',obj:'score',A:10,w:{},u:{},cons:consStd()}
+  ];
+}
+var OBJ=[['price','Preis minimieren'],['time','Reisezeit minimieren'],['score','Wertmodell (Gewichte, Tab 4)']];
 
 /* ---------- Zustand ---------- */
 var S=null,dirty=false;
-function defaultProfiles(){
-  var X=function(){return JSON.parse(JSON.stringify(DEFX))};
-  return [
-    {id:'p_ausg',name:'Ausgewogen',A:10,w:{},u:{},x:X()},
-    {id:'p_gunst',name:'Günstig',A:10,w:{p_price:20,k_budget:12,z_dur_band:2,z_stops:3,h_seat:0,h_meal:0,d_airline:0,g_flex:1},u:{},x:X()},
-    {id:'p_komf',name:'Komfort',A:10,w:{p_price:4,z_stops:8,z_dur_band:8,e_hold:5,g_flex:5,g_refund:4,h_seat:3,h_meal:3,z_dep_band:5,z_arr_band:5},u:{},x:X()},
-    {id:'p_zeit',name:'Kürzeste Zeit',A:10,w:{z_dur_band:12,z_stops:10,p_price:3,z_layover:6},u:{},x:X()}
-  ];
-}
-function demoOpts(){
-  var mk=function(o){o.id=uid('o_');o.ex=true;o.f=o.f||{};o.f.d_airline='?';o.source='BEISPIEL';o.retrieved='';return o};
-  return {l1:[mk({date:'2026-10-15',depAp:'FRA',arrAp:'AGA',dep:'07:30',arr:'11:40',plus:0,stops:'0',lay:'',priceHand:'150',priceHold:'190',group:'DEMO-1',f:{c_ticket:'dir',e_hold:'incl'}}),
-           mk({date:'2026-10-15',depAp:'FRA',arrAp:'AGA',dep:'06:15',arr:'15:20',plus:0,stops:'1',lay:'130',priceHand:'110',priceHold:'150',group:'DEMO-2',f:{c_ticket:'thr',c_lay_place:'sch',e_hold:'add'}})],
-          l2:[mk({date:'2026-10-19',depAp:'AGA',arrAp:'CMN',dep:'09:00',arr:'10:05',plus:0,stops:'0',lay:'',priceHand:'70',priceHold:'95',group:'DEMO-3',f:{c_ticket:'dir',e_hold:'incl'}}),
-           mk({date:'2026-10-19',depAp:'AGA',arrAp:'CMN',dep:'14:30',arr:'15:35',plus:0,stops:'0',lay:'',priceHand:'55',priceHold:'80',group:'DEMO-4',f:{c_ticket:'dir',e_hold:'add'}})],
-          l3:[mk({date:'2026-10-31',depAp:'CMN',arrAp:'FRA',dep:'08:40',arr:'12:55',plus:0,stops:'0',lay:'',priceHand:'130',priceHold:'165',group:'DEMO-5',f:{c_ticket:'dir',e_hold:'incl'}}),
-           mk({date:'2026-10-31',depAp:'CMN',arrAp:'FRA',dep:'12:10',arr:'16:30',plus:0,stops:'0',lay:'',priceHand:'95',priceHold:'135',group:'DEMO-6',f:{c_ticket:'dir',e_hold:'add'}})]};
-}
 function load(){
   var emb=JSON.parse($('#EMBEDDED_DATA').textContent),st=null;
   try{var r=localStorage.getItem(LS);if(r)st=JSON.parse(r)}catch(e){}
@@ -195,17 +214,15 @@ function load(){
   if(!S.profiles)S.profiles=defaultProfiles();
   if(!S.custom)S.custom=[];
   if(!S.log)S.log=[];if(!S.fb)S.fb=[];
-  if(!S.tab)S.tab='start';if(!S.prof)S.prof='p_ausg';
-  S.trips.forEach(function(t){
-    t.src.forEach(function(s){if(s.url==='kiwi')s.url=t.url});
-    if(!st&&t.id==='t_marokko'&&!Object.keys(t.opts).length){t.opts=demoOpts()}
-  });
+  if(!S.tab)S.tab='start';if(!S.prof)S.prof=S.profiles[0].id;
+  S.rst=false;S.pdel=false;
 }
 function save(){dirty=true}
 setInterval(function(){if(!dirty)return;dirty=false;try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}},1000);
 function T(){return S.trips.filter(function(t){return t.id===S.cur})[0]||S.trips[0]}
 function P(id){return S.profiles.filter(function(p){return p.id===(id||S.prof)})[0]||S.profiles[0]}
 function CAT(){return FE.concat(S.custom.map(function(c){return {id:c.id,name:c.name,grp:c.grp||'kom',kind:'in',w:c.w||0,desc:c.desc||'Eigenes Merkmal',vals:c.vals.concat([{k:'?',l:'unbekannt',u:50}]),custom:true}}))}
+function catById(id){return CAT().filter(function(f){return f.id===id})[0]}
 function logEv(t){S.log.unshift({t:nowIso(),x:t});if(S.log.length>200)S.log.length=200}
 
 /* ---------- Zeit und Zeitzonen ---------- */
@@ -214,13 +231,15 @@ function lastSun(y,mon){var d=new Date(Date.UTC(y,mon+1,0));return d.getUTCDate(
 function tzOff(ap,locMs){var t=S.tz[ap];if(t===undefined)return null;if(t==='EU'){var y=new Date(locMs).getUTCFullYear();var a=Date.UTC(y,2,lastSun(y,2),2),b=Date.UTC(y,9,lastSun(y,9),3);return locMs>=a&&locMs<b?2:1}return +t}
 function dUTC(ds){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(ds||'');return m?Date.UTC(+m[1],+m[2]-1,+m[3]):null}
 function addDays(ds,n){var d=new Date(dUTC(ds)+n*864e5);return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate())}
-function durMin(o,l){
-  var d=num(o.dur);if(d&&d>0)return d;
-  var ds=o.date||l.date,a=tm(o.dep),b=tm(o.arr);if(dUTC(ds)==null||a==null||b==null)return null;
-  var l1=dUTC(ds)+a*6e4,l2=dUTC(addDays(ds,+o.plus||0))+b*6e4;
-  var o1=tzOff(o.depAp||l.from,l1),o2=tzOff(o.arrAp||l.to,l2);if(o1==null||o2==null)return null;
-  return Math.round(((l2-o2*36e5)-(l1-o1*36e5))/6e4);
+/* w = 'd' Abflug, 'a' Ankunft; Ergebnis in UTC-Millisekunden */
+function utc(o,l,w){
+  var ds=o.date||l.date;if(dUTC(ds)==null)return null;
+  var m=tm(w==='d'?o.dep:o.arr);if(m==null)return null;
+  var loc=dUTC(addDays(ds,w==='a'?(+o.plus||0):0))+m*6e4;
+  var off=tzOff(w==='d'?(o.depAp||l.from):(o.arrAp||l.to),loc);if(off==null)return null;
+  return loc-off*36e5;
 }
+function durMin(o,l){var d=num(o.dur);if(d&&d>0)return d;var a=utc(o,l,'d'),b=utc(o,l,'a');return a==null||b==null?null:Math.round((b-a)/6e4)}
 function fmtDur(m){return m==null?'(fehlt)':Math.floor(m/60)+' h '+pad(m%60)+' min'}
 function fmtDate(ds){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(ds||'');return m?m[3]+'.'+m[2]+'.'+m[1]:'(fehlt)'}
 
@@ -242,69 +261,87 @@ var DER={
 function val(o,l,f){if(f.kind==='der')return DER[f.id](o,l);var v=(o.f||{})[f.id];return v==null||v===''?(f.def||'?'):v}
 function effW(p,f){var v=p.w[f.id];return v!=null?+v:f.w}
 function effU(p,f,k){var m=p.u[f.id];if(m&&m[k]!=null)return +m[k];var v=f.vals.filter(function(x){return x.k===k})[0];return v?v.u:50}
-function isX(p,f,k){return !!(p.x[f.id]&&p.x[f.id].indexOf(k)>=0)}
 function lab(f,k){var v=f.vals.filter(function(x){return x.k===k})[0];return v?v.l:k}
 function price(o,mode){var m=mode||T().bagMode;var h=num(o.priceHand),k=num(o.priceHold),a=num(o.access)||0;var b=m==='hand'?h:k;return b==null?null:b+a}
-function viol(o,l,p,t){
-  var out=[];
-  CAT().forEach(function(f){
-    if(f.kind==='cmb'||f.kind==='num')return;
-    var k=val(o,l,f);if(!isX(p,f,k))return;
-    if(f.id==='e_hold'&&t.bagMode==='hand')return;
-    if(f.id==='g_pay'&&!t.pay)return;
-    out.push(f.name+': '+lab(f,k));
-  });
-  var ms=num(l.maxStops),st=num(o.stops);if(ms!=null&&st!=null&&st>ms)out.push('mehr Stopps als erlaubt ('+st+' von max. '+ms+')');
-  return out;
-}
 
-/* ---------- Bewertung und Rangliste ---------- */
+/* ---------- Nebenbedingungen und Rangliste ---------- */
+function consName(c){if(CDEF[c.id])return CDEF[c.id].name;var f=catById(c.id.slice(2));return f?f.name:c.id}
+function consShort(c){if(CDEF[c.id])return CDEF[c.id].name.split(' (')[0];var f=catById(c.id.slice(2));if(!f)return c.id;return f.name.split(' (')[0]+' = '+(c.allowed||[]).map(function(k){return lab(f,k)}).join(' / ')}
+/* 1 erfüllt, 0 verletzt, 2 unbekannt (zählt als erfüllt), null = nur auf Reiseebene prüfbar */
+function optSat(o,l,c,t){
+  if(c.id==='maxstops'){var ms=num(l.maxStops),st=num(o.stops);if(ms==null)return 1;if(st==null)return 2;return st<=ms?1:0}
+  if(c.id.indexOf('f:')===0){var f=catById(c.id.slice(2));if(!f)return 1;if(f.id==='e_hold'&&t.bagMode==='hand')return 1;var k=val(o,l,f);if(k==='?')return 2;return (c.allowed||[]).indexOf(k)>=0?1:0}
+  return null;
+}
+function legsView(t,i,s){
+  if(s<=1)return t.legs[i];
+  var a=t.legs[i],b=t.legs[i+s-1],ms=0,open=false;
+  for(var k=i;k<i+s;k++){var m=num(t.legs[k].maxStops);if(m==null)open=true;else ms+=m}
+  return {id:a.id+'+'+b.id,from:a.from,to:b.to,date:a.date,depWin:a.depWin,arrWin:b.arrWin,maxStops:open?'':String(ms+s-1),imp:a.imp,span:s};
+}
 function bstat(h,k,lim){if(!lim)return '?';if(h==null&&k==null)return '?';if(k!=null&&k<=lim)return 'under';if(h!=null&&h>lim)return 'over';if(h!=null&&h<=lim&&(k==null||k>lim))return k==null?'?':'part';return '?'}
 function rank(t,p){
   var cat=CAT(),optF=cat.filter(function(f){return f.kind!=='cmb'}),cmbF=cat.filter(function(f){return f.kind==='cmb'});
-  var lim=num(t.budget.amount);
-  var per=t.legs.map(function(l){
-    var info=(t.opts[l.id]||[]).map(function(o){return {o:o,l:l,v:viol(o,l,p,t),pr:price(o)}});
-    var ok=info.filter(function(x){return !x.v.length&&x.pr!=null}).map(function(x){return x.pr});
-    var mn=Math.min.apply(null,ok),mx=Math.max.apply(null,ok);
+  var lim=num(t.budget.amount),n=t.legs.length,cons=p.cons.filter(function(c){return c.on}),softs=cons.filter(function(c){return !c.must});
+  var per=t.legs.map(function(l,i){return (t.opts[l.id]||[]).map(function(o){var s=Math.max(1,+o.span||1);if(i+s>n)s=1;return {o:o,i:i,s:s,l:legsView(t,i,s),pr:price(o)}})});
+  per.forEach(function(info){
+    var ok=info.filter(function(x){return x.pr!=null}).map(function(x){return x.pr}),mn=Math.min.apply(null,ok),mx=Math.max.apply(null,ok);
     info.forEach(function(x){
       var sw=0,s=0,gaps=[];
       optF.forEach(function(f){var w=effW(p,f);if(!w)return;var u;
         if(f.kind==='num'){if(x.pr==null){u=50;gaps.push('Preis')}else u=(!ok.length||mx===mn)?100:100*(mx-x.pr)/(mx-mn)}
-        else{var k=val(x.o,l,f);u=effU(p,f,k);if(k==='?')gaps.push(f.name)}
+        else{var k=val(x.o,x.l,f);u=effU(p,f,k);if(k==='?')gaps.push(f.name)}
         s+=w*u;sw+=w});
-      x.sc=sw?s/sw:0;x.gaps=gaps;
+      x.sc=sw?s/sw:0;x.gaps=gaps;x.sat={};x.mf=[];x.wf=[];x.pre=0;
+      cons.forEach(function(c){var r=optSat(x.o,x.l,c,t);if(r===null)return;x.sat[c.id]=r;if(r===0)(c.must?x.mf:x.wf).push(c.id)});
+      var run=true;softs.forEach(function(c){if(x.sat[c.id]===undefined)return;if(run&&x.sat[c.id]!==0)x.pre++;else run=false});
     });
-    return info;
   });
-  var capped=false;var prod=per.reduce(function(a,b){return a*Math.max(1,b.length)},1);
-  var use=per.map(function(a){if(prod>5000){capped=true;return a.slice().sort(function(x,y){return y.sc-x.sc}).slice(0,10)}return a});
-  var combos=[[]];
-  use.forEach(function(a){var nx=[];if(!a.length){combos=[];return}combos.forEach(function(c){a.forEach(function(x){nx.push(c.concat([x]))})});combos=nx});
-  var res=combos.map(function(c){
-    var ih=c.reduce(function(a,x){return a===null||num(x.o.priceHand)==null?null:a+num(x.o.priceHand)+(num(x.o.access)||0)},0);
-    var ik=c.reduce(function(a,x){return a===null||num(x.o.priceHold)==null?null:a+num(x.o.priceHold)+(num(x.o.access)||0)},0);
-    var imp=0,sm=0;c.forEach(function(x){var w=num(x.l.imp);w=w==null?1:w;imp+=w;sm+=w*x.sc});
-    var avg=imp?sm/imp:0;
+  var prod=per.reduce(function(a,b){return a*Math.max(1,b.length)},1),capped=false;
+  var use=per.map(function(a){if(prod>5000){capped=true;return a.slice().sort(function(x,y){return (x.mf.length?1:0)-(y.mf.length?1:0)||y.pre-x.pre||(x.pr==null?1e9:x.pr)-(y.pr==null?1e9:y.pr)}).slice(0,10)}return a});
+  var missing=[];t.legs.forEach(function(l,i){if(!use[i].length)missing.push(i)});
+  function rec(i){if(i>=n)return [[]];if(!use[i].length)return rec(i+1);var out=[];use[i].forEach(function(x){rec(i+x.s).forEach(function(tl){out.push([x].concat(tl))})});return out}
+  var res=rec(0).filter(function(c){return c.length}).map(function(c){
+    var ih=0,ik=0,hOk=true,kOk=true,dur=0,dOk=true,imp=0,sm=0,gp=0;
+    c.forEach(function(x){var h=num(x.o.priceHand),k=num(x.o.priceHold),a=num(x.o.access)||0;if(h==null)hOk=false;else ih+=h+a;if(k==null)kOk=false;else ik+=k+a;
+      var d=durMin(x.o,x.l);if(d==null)dOk=false;else dur+=d;var w=num(x.l.imp);w=w==null?1:w;imp+=w;sm+=w*x.sc;gp+=x.gaps.length});
+    if(!hOk)ih=null;if(!kOk)ik=null;if(!dOk)dur=null;
+    var conn=[],gapF=0,gapU=0,selfF=0,selfU=0;
+    for(var j=0;j<c.length-1;j++){
+      var a=c[j],b=c[j+1],ua=utc(a.o,a.l,'a'),ub=utc(b.o,b.l,'d'),same=!!(a.o.group&&a.o.group===b.o.group);
+      if(ua==null||ub==null){gapU++;selfU++;conn.push(null);continue}
+      var g=Math.round((ub-ua)/6e4),rq=same?(num(t.gapSame)==null?60:num(t.gapSame)):(num(t.gapSep)==null?120:num(t.gapSep));
+      conn.push({g:g,rq:rq,same:same});if(g<rq)gapF++;if(!same&&g<1440)selfF++;
+    }
+    var tot=t.bagMode==='hand'?ih:ik,sat={};
+    cons.forEach(function(cn){var r;
+      if(cn.id==='gap')r=gapF?0:gapU?2:1;
+      else if(cn.id==='noself')r=selfF?0:selfU?2:1;
+      else if(cn.id==='budget'){if(!lim)r=1;else if(t.budget.basis==='ticket'){r=c.every(function(x){return x.pr==null||x.pr<=lim})?(c.some(function(x){return x.pr==null})?2:1):0}else r=tot==null?2:(tot<=lim?1:0)}
+      else{var z=0,u=0;c.forEach(function(x){var q=x.sat[cn.id];if(q===0)z++;else if(q===2)u++});r=z?0:u?2:1}
+      sat[cn.id]=r});
+    var mf=cons.filter(function(cn){return cn.must&&sat[cn.id]===0}).map(function(cn){return cn.id});
+    var pre0=0,run=true;softs.forEach(function(cn){if(run&&sat[cn.id]!==0)pre0++;else run=false});
     var groups={};c.forEach(function(x){groups[x.o.group||x.o.id]=1});var nb=Object.keys(groups).length;
-    var rs=bstat(ih,ik,lim);
-    var ts=c.map(function(x){return bstat(num(x.o.priceHand)==null?null:num(x.o.priceHand)+(num(x.o.access)||0),num(x.o.priceHold)==null?null:num(x.o.priceHold)+(num(x.o.access)||0),lim)});
-    var ticket=ts.indexOf('over')>=0?'over':ts.indexOf('part')>=0?'part':ts.indexOf('?')>=0?'?':'under';
-    var bk=t.budget.basis==='ticket'?ticket:rs;
-    var cs={k_bookings:String(Math.min(nb,4)),k_budget:bk},sw=p.A!=null?+p.A:10,sum=sw*avg,gaps=0;
+    var bk=bstat(ih,ik,lim);
+    if(t.budget.basis==='ticket'&&lim){var ts=c.map(function(x){var a=num(x.o.access)||0,h=num(x.o.priceHand),k=num(x.o.priceHold);return bstat(h==null?null:h+a,k==null?null:k+a,lim)});bk=ts.indexOf('over')>=0?'over':ts.indexOf('part')>=0?'part':ts.indexOf('?')>=0?'?':'under'}
+    var cs={k_bookings:String(Math.min(nb,4)),k_budget:bk},sw=p.A!=null?+p.A:10,sum=sw*(imp?sm/imp:0);
     cmbF.forEach(function(f){var w=effW(p,f);if(!w)return;sum+=w*effU(p,f,cs[f.id]);sw+=w});
-    var v=[];c.forEach(function(x){x.v.forEach(function(r){v.push(r)})});
-    c.forEach(function(x){gaps+=x.gaps.length});
-    var tot=t.bagMode==='hand'?ih:ik;
-    return {c:c,ih:ih,ik:ik,tot:tot,score:sw?sum/sw:0,nb:nb,rs:rs,ticket:ticket,bk:bk,viol:v,gaps:gaps,key:c.map(function(x){return x.o.id}).join('+')};
+    return {c:c,ih:ih,ik:ik,tot:tot,dur:dur,score:sw?sum/sw:0,nb:nb,bk:bk,mf:mf,sat:sat,pre0:pre0,pre:p.obj==='score'?0:pre0,conn:conn,gaps:gp,key:c.map(function(x){return x.o.id}).join('+')};
   });
-  var el=res.filter(function(r){return !r.viol.length&&r.tot!=null});
+  var okey=function(r){return p.obj==='time'?(r.dur==null?1e9:r.dur):p.obj==='score'?-r.score:(r.tot==null?1e9:r.tot)};
+  res.sort(function(a,b){return (a.mf.length?1:0)-(b.mf.length?1:0)||b.pre-a.pre||okey(a)-okey(b)||((a.tot==null?1e9:a.tot)-(b.tot==null?1e9:b.tot))});
+  var levels=[];
+  for(var j=0;j<=softs.length;j++){
+    var Fj=res.filter(function(r){return !r.mf.length&&r.pre0>=j&&r.tot!=null}).sort(function(a,b){return a.tot-b.tot});
+    levels.push({j:j,name:j?consShort(softs[j-1]):'nur Muss-Bedingungen',n:Fj.length,best:Fj[0]||null});
+  }
+  var el=res.filter(function(r){return !r.mf.length&&r.tot!=null});
   el.forEach(function(r){r.par=!el.some(function(q){return q!==r&&q.tot<=r.tot&&q.score>=r.score&&(q.tot<r.tot||q.score>r.score)})});
-  res.sort(function(a,b){return (a.viol.length?1:0)-(b.viol.length?1:0)||b.score-a.score});
-  return {per:per,res:res,capped:capped,prod:prod};
+  return {per:per,res:res,levels:levels,softs:softs,cons:cons,missing:missing,capped:capped,prod:prod};
 }
 
-/* ---------- Kiwi-Link lesen ---------- */
+/* ---------- Kiwi-Link, Links und Suchvorgaben ---------- */
 var AP=[[/hahn/,'HHN'],[/francfort|frankfurt/,'FRA'],[/agadir/,'AGA'],[/casablanca/,'CMN'],[/marrakech|marrakesch/,'RAK'],[/madrid/,'MAD'],[/lisbonne|lisbon|lissabon/,'LIS'],[/paris/,'CDG'],[/munich|muenchen|münchen/,'MUC'],[/berlin/,'BER'],[/dusseldorf|düsseldorf/,'DUS'],[/tanger|tangier/,'TNG'],[/fes|fez/,'FEZ']];
 function slugAp(s){s=(s||'').toLowerCase();for(var i=0;i<AP.length;i++)if(AP[i][0].test(s))return AP[i][1];return s.replace(/-/g,' ').slice(0,18)}
 function parseKiwi(u){
@@ -312,15 +349,37 @@ function parseKiwi(u){
     var legs=m[1].split('/').filter(Boolean).map(function(s){var p=s.split('~');return {f:p[0],t:p[1],d:p[2]}}).filter(function(x){return /^\d{4}-\d{2}-\d{2}$/.test(x.d||'')});
     if(!legs.length)return null;
     var times=(url.searchParams.get('multicity_times')||'').split('_'),stops=(url.searchParams.get('multicity_stopNumber')||'').split(',');
-    var out=legs.map(function(x,i){var tt=(times[i]||'').split('-').map(Number),ok=tt.length===4&&tt.every(function(n){return !isNaN(n)});
-      var sp=(stops[i]||'').split('~')[0];
+    var out=legs.map(function(x,i){var tt=(times[i]||'').split('-').map(Number),ok=tt.length===4&&tt.every(function(n){return !isNaN(n)});var sp=(stops[i]||'').split('~')[0];
       return {id:uid('l'),from:slugAp(x.f),to:slugAp(x.t),date:x.d,depWin:ok?[tt[0],tt[1]]:[0,24],arrWin:ok?[tt[2],tt[3]]:[0,24],maxStops:sp===''?'':sp,imp:'1'}});
-    return {legs:out,bags:url.searchParams.get('bags')||''};
+    return {legs:out};
   }catch(e){return null}
 }
 function newTrip(name,legs,url){
   var srcs=['Kiwi.com','lastminute.com','Google Flights','Skyscanner','Opodo','Kayak','Momondo','eDreams','Expedia','Airline direkt'];
-  return {id:uid('t_'),name:name,created:nowIso().slice(0,10),url:url||'',legs:legs,budget:{amount:'',basis:'offen'},bagMode:'hold',pay:'',notes:'',opts:{},chk:{},src:srcs.map(function(n,i){return {id:uid('s'),name:n,url:i===0?(url||''):'',st:{}}})};
+  return {id:uid('t_'),name:name,created:nowIso().slice(0,10),url:url||'',legs:legs,budget:{amount:'',basis:'min'},bagMode:'hold',pay:'',gapSep:'120',gapSame:'60',notes:'',opts:{},chk:{},src:srcs.map(function(n,i){return {id:uid('s'),name:n,url:i===0?(url||''):'',st:{}}})};
+}
+var SLUG={FRA:'aeroport-de-francfort-sur-le-main-francfort-sur-le-main-allemagne',AGA:'agadir-maroc',CMN:'aeroport-mohammed-v-de-casablanca-casablanca-maroc'};
+function kiwiMulti(t){
+  if(!t.legs.every(function(l){return SLUG[l.from]&&SLUG[l.to]&&l.date}))return '';
+  var path=t.legs.map(function(l){return SLUG[l.from]+'~'+SLUG[l.to]+'~'+l.date}).join('/');
+  var times=t.legs.map(function(l){return l.depWin.join('-')+'-'+l.arrWin.join('-')}).join('_');
+  var st=t.legs.map(function(l){return (l.maxStops===''?'2':l.maxStops)+'%7Efalse'}).join('%2C');
+  return 'https://www.kiwi.com/fr/multicity/results/'+path+'/?stopNumber=0%7Efalse&returnFromDifferentAirport=false&returnToDifferentAirport=false&allowDifferentStationConnection=false&multicity_times='+times+'&multicity_stopNumber='+st+'&multicity_allowDifferentStationConnection=false&bags=1.1-';
+}
+var LINKS=[
+  {n:'Google Flights',re:/google/i,lv:'UNSICHER',f:function(l){return 'https://www.google.com/travel/flights?hl=de&curr=EUR&q='+encodeURIComponent('Flights from '+l.from+' to '+l.to+' on '+l.date+' one way economy 1 adult')},tip:'Filter: Stopps, Zeiten, "Gepäck" (aufgegebenes Gepäck 1). Sortieren nach Preis. Zeiten dienen als Referenz für andere Portale.'},
+  {n:'Skyscanner',re:/skyscanner/i,lv:'UNSICHER',f:function(l){return 'https://www.skyscanner.de/transport/fluge/'+l.from.toLowerCase()+'/'+l.to.toLowerCase()+'/'+l.date.slice(2).replace(/-/g,'')+'/?adultsv2=1&cabinclass=economy&rtn=0&currency=EUR'},tip:'Filter: Direktflüge, Zeiten, Gepäck (Aufgabegepäck). Sortieren "Günstigste".'},
+  {n:'Kayak',re:/kayak/i,lv:'UNSICHER',f:function(l){return 'https://www.kayak.de/flights/'+l.from+'-'+l.to+'/'+l.date+'/1adults?sort=price_a'},tip:'Filter: Stopps, Zeiten, "Gepäckgebühren einbeziehen". Doppelte Zeilen (±1 Stunde) gegen Google Flights prüfen.'},
+  {n:'Momondo',re:/momondo/i,lv:'UNSICHER',f:function(l){return 'https://www.momondo.de/flight-search/'+l.from+'-'+l.to+'/'+l.date+'/1adults?sort=price_a'},tip:'Filter wie Kayak (gleicher Anbieter).'},
+  {n:'Expedia',re:/expedia/i,lv:'UNSICHER',f:function(l){return 'https://www.expedia.de/Flights-Search?flight-type=on&mode=search&trip=oneway&leg1=from:'+l.from+',to:'+l.to+',departure:'+l.date+'TANYT&passengers=adults:1&options=cabinclass:economy'},tip:'Gepäck oft erst im Buchungsschritt sichtbar, Preis mit Koffer dort prüfen.'},
+  {n:'Kiwi.com (einzeln)',re:/kiwi/i,lv:'UNSICHER',f:function(l){return 'https://www.kiwi.com/de/search/results/'+l.from.toLowerCase()+'/'+l.to.toLowerCase()+'/'+l.date+'/no-return'},tip:'Je Etappe getrennt abfragen: Gepäck Handgepäck 1 + Aufgabegepäck 1, Nonstop-Filter, Airline-Filter. Höchstens 15 Treffer je Abfrage.'}
+];
+var HOME=[['Opodo','https://www.opodo.de','Gepäck im Suchschritt wählen, sonst Preis ohne Koffer. Kein Direktlink bekannt.'],['eDreams','https://www.edreams.de','Gepäck im Suchschritt wählen. Kein Direktlink bekannt.'],['lastminute.com','https://www.lastminute.com','Ausgabe oft ohne Datum und Gepäck: Zuordnung über Uhrzeit und Airline.'],['Royal Air Maroc','https://www.royalairmaroc.com','Buchungsseiten sind für mich nicht lesbar (Bot-Prüfung). Tarif aufklappen: Gepäck, Umbuchung und Storno sichtbar.']];
+function specText(t){
+  var L=['Suchvorgaben für alle Portale','- 1 Erwachsener, Economy','- Gepäck: 1 Handgepäck + 1 Aufgabegepäck (Preis mit Koffer notieren)','- Währung EUR, Sortierung nach Preis aufsteigend, alle Treffer anzeigen','- Flughäfen exakt wie angegeben (keine Nachbarflughäfen)','- Kein Selbsttransfer; Anschlusspuffer mind. '+(t.gapSep||'120')+' Min bei getrennten Tickets, '+(t.gapSame||'60')+' Min bei einem Ticket','- Zahlweg bevorzugt: '+(t.pay||'(fehlt, bitte liefern)')];
+  t.legs.forEach(function(l,i){L.push('- Etappe '+(i+1)+': '+l.from+' → '+l.to+', '+fmtDate(l.date)+', Abflug '+l.depWin[0]+'–'+l.depWin[1]+' Uhr, Ankunft '+l.arrWin[0]+'–'+l.arrWin[1]+' Uhr, max. Stopps '+(l.maxStops===''?'egal':l.maxStops))});
+  L.push('- Je Treffer erfassen: Abflug, Ankunft (+Tage), Dauer, Stopps, Airline, Flugnummer, Tarifname, Preis, Gepäck im Tarif, Umbuchung, Storno, Abrufzeit');
+  return L.join('\n');
 }
 
 /* ---------- Darstellung ---------- */
@@ -328,39 +387,40 @@ function pill(t,c){return '<span class="pill p-'+(c||'info')+'">'+esc(t)+'</span
 function fld(l,h){return '<label class="fld">'+esc(l)+h+'</label>'}
 function inp(b,v,ty,ex){return '<input data-b="'+esc(b)+'" type="'+(ty||'text')+'" value="'+esc(v)+'" '+(ex||'')+'>'}
 function sel(b,v,opts){return '<select data-b="'+esc(b)+'">'+opts.map(function(o){return '<option value="'+esc(o[0])+'"'+(String(o[0])===String(v)?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')+'</select>'}
-function eur(n){return n==null?'(fehlt)':Math.round(n).toLocaleString('de-DE')+' €'}
-function bpill(s){return s==='under'?pill('unter Grenze','ok'):s==='part'?pill('teils über','warn'):s==='over'?pill('über Grenze','bad'):pill('Budget offen','info')}
+function eur(n){return n==null?'(fehlt)':n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'}
+function bpill(s){return s==='under'?pill('unter Grenze','ok'):s==='part'?pill('teils über','warn'):s==='over'?pill('über Grenze','bad'):pill('kein Limit','info')}
 function toast(m){var e=$('#toast');e.textContent=m;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(function(){e.hidden=true},2600)}
 function copyTxt(txt,msg){
   var fb=function(){var a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove();toast(msg||'Kopiert')};
   try{navigator.clipboard.writeText(txt).then(function(){toast(msg||'Kopiert')},fb)}catch(e){fb()}
 }
 function cbox(where,txt){return '<div class="sub">'+where+'</div><div class="cbx"><div class="h"><span>Kopierbarer Text</span><button class="btn sm cp" data-a="copy" data-t="'+esc(txt)+'">Kopieren</button></div><pre>'+esc(txt)+'</pre></div>'}
+function step(n,t,b,c){return '<div class="step" style="--c:'+(c||'var(--acc)')+'"><span class="no">'+n+'</span><div class="bd"><b>'+t+'</b><div>'+b+'</div></div></div>'}
 
+var TABLIST=[['start','1 Vorbereitung'],['quellen','2 Datenerhebung'],['prio','3 Prioritäten'],['merk','4 Merkmale'],['opt','5 Optionen'],['ent','6 Entscheidung'],['daten','7 Daten und Lernen']];
 function head(){
   var t=T();
   return '<header class="top"><div class="hrow"><h1>Reise-Entscheidungsfinder</h1><select data-b="cur" aria-label="Reise wählen">'+S.trips.map(function(x){return '<option value="'+esc(x.id)+'"'+(x.id===t.id?' selected':'')+'>'+esc(x.name)+'</option>'}).join('')+'</select>'+
    '<button class="btn sm" data-a="newtrip">Neue Reise</button></div><nav class="tabs">'+
-   [['start','1 Vorbereitung'],['quellen','2 Datenerhebung'],['merk','3 Merkmale'],['opt','4 Optionen'],['ent','5 Entscheidung'],['daten','6 Daten und Lernen']].map(function(x){return '<button data-a="tab" data-v="'+x[0]+'" class="'+(S.tab===x[0]?'on':'')+'">'+x[1]+'</button>'}).join('')+'</nav></header>';
+   TABLIST.map(function(x){return '<button data-a="tab" data-v="'+x[0]+'" class="'+(S.tab===x[0]?'on':'')+'">'+x[1]+'</button>'}).join('')+'</nav></header>';
 }
 
 /* Tab 1 */
 function checks(t){
-  var oc=t.legs.map(function(l){return (t.opts[l.id]||[]).filter(function(o){return !o.ex}).length});
-  var real=t.legs.every(function(l){return (t.opts[l.id]||[]).some(function(o){return !o.ex})});
-  var allP=real&&t.legs.every(function(l){return (t.opts[l.id]||[]).filter(function(o){return !o.ex}).every(function(o){return num(o.priceHand)!=null&&num(o.priceHold)!=null})});
-  var fresh=real&&t.legs.every(function(l){return (t.opts[l.id]||[]).filter(function(o){return !o.ex}).every(function(o){return DER.p_age(o)==='6h'||DER.p_age(o)==='24h'})});
+  var real=t.legs.every(function(l){return (t.opts[l.id]||[]).length>0});
+  var allP=real&&t.legs.every(function(l){return (t.opts[l.id]||[]).every(function(o){return num(o.priceHand)!=null&&num(o.priceHold)!=null})});
+  var fresh=real&&t.legs.every(function(l){return (t.opts[l.id]||[]).every(function(o){return DER.p_age(o)==='6h'||DER.p_age(o)==='24h'})});
   return [
     ['a1','Etappen mit Datum, Flughäfen und Zeitfenstern definiert',t.legs.length>0&&t.legs.every(function(l){return l.from&&l.to&&l.date}),true],
-    ['a2','Budget festgelegt (Betrag und Bezugsgröße)',num(t.budget.amount)>0&&t.budget.basis!=='offen',true],
-    ['a3','Pflicht-Zahlweg festgelegt',!!t.pay,true],
+    ['a2','Budgetregel festgelegt (Preis minimieren oder Betrag)',t.budget.basis==='min'||num(t.budget.amount)>0,true],
+    ['a3','Zahlweg festgelegt',!!t.pay,true],
     ['a4','Mindestens 5 Quellen mit Link hinterlegt',t.src.filter(function(s){return s.url}).length>=5,true],
-    ['a5','Mindestens 2 echte Optionen je Etappe',t.legs.every(function(l){return (t.opts[l.id]||[]).filter(function(o){return !o.ex}).length>=2}),true],
-    ['a6','Preise Handgepäck und Koffer bei allen echten Optionen',allP,true],
-    ['a7','Preisstand unter 24 Stunden',fresh,true],
+    ['a5','Mindestens 2 Optionen je Etappe',t.legs.every(function(l){return (t.opts[l.id]||[]).length>=2}),true],
+    ['a6','Preise Handgepäck und Koffer bei allen Optionen',allP,true],
+    ['a7','Preisstand unter 24 Stunden bei allen Optionen',fresh,true],
     ['m1','Reisepass gültig für den gesamten Aufenthalt (Datum prüfen)',!!t.chk.m1,false],
     ['m2','Einreisebedingungen Zielland geprüft (Quelle und Stand notieren)',!!t.chk.m2,false],
-    ['m3','Zeitzonen der Flughäfen geprüft (Tabelle in Tab 6)',!!t.chk.m3,false],
+    ['m3','Zeitzonen der Flughäfen geprüft (Tabelle in Tab 7)',!!t.chk.m3,false],
     ['m4','Anreise zu den Abflughäfen geplant (Zeit, Kosten)',!!t.chk.m4,false],
     ['m5','Feste Termine und Unterkunft mit den Flugzeiten abgestimmt',!!t.chk.m5,false],
     ['m6','Gepäckregeln der in Frage kommenden Airlines geprüft',!!t.chk.m6,false]
@@ -369,17 +429,19 @@ function checks(t){
 function tabStart(){
   var t=T(),ck=checks(t),done=ck.filter(function(c){return c[2]}).length,pc=Math.round(100*done/ck.length);
   var d0=dUTC(t.legs[0]&&t.legs[0].date),days=d0==null?null:Math.ceil((d0-Date.now())/864e5);
-  var nopt=t.legs.reduce(function(a,l){return a+(t.opts[l.id]||[]).filter(function(o){return !o.ex}).length},0);
+  var nopt=t.legs.reduce(function(a,l){return a+(t.opts[l.id]||[]).length},0);
   var h='<h2>Vorbereitung</h2><p class="sub">Reise festlegen, Regeln setzen, Datenlage prüfen. Alle Eingaben werden im Browser gespeichert (1× pro Sekunde).</p>';
-  h+='<div class="kpis"><div class="kpi"><b>'+(days==null?'(fehlt)':days)+'</b><span>Tage bis zum ersten Abflug</span></div><div class="kpi"><b>'+t.legs.length+'</b><span>Etappen</span></div><div class="kpi"><b>'+nopt+'</b><span>echte Optionen erfasst</span></div><div class="kpi"><b>'+pc+' %</b><span>Bereitschaft ('+done+' von '+ck.length+')</span><div class="prog"><i style="width:'+pc+'%"></i></div></div></div>';
+  h+='<div class="kpis"><div class="kpi"><b>'+(days==null?'(fehlt)':days)+'</b><span>Tage bis zum ersten Abflug</span></div><div class="kpi"><b>'+t.legs.length+'</b><span>Etappen</span></div><div class="kpi"><b>'+nopt+'</b><span>Optionen erfasst</span></div><div class="kpi"><b>'+pc+' %</b><span>Bereitschaft ('+done+' von '+ck.length+')</span><div class="prog"><i style="width:'+pc+'%"></i></div></div></div>';
   h+='<h3>Etappen</h3><div class="grid w2">'+t.legs.map(function(l,i){return legCard(t,l,i)}).join('')+'</div><div class="hrow" style="margin-top:8px"><button class="btn sm" data-a="addleg">Etappe hinzufügen</button></div>';
   h+='<h3>Reise-Einstellungen</h3><div class="card"><div class="flds">'+
     fld('Name der Reise',inp('t:name',t.name))+
-    fld('Budget in € (leer = offen)',inp('bud:amount',t.budget.amount,'number','step="1" min="0"'))+
-    fld('Budget gilt',sel('bud:basis',t.budget.basis,[['offen','offen (beides zeigen)'],['ticket','je Ticket'],['reise','für die ganze Reise']]))+
-    fld('Preismodus für Rangfolge',sel('t:bagMode',t.bagMode,[['hold','mit 1 Koffer'],['hand','nur Handgepäck']]))+
-    fld('Pflicht-Zahlweg (leer = keiner)',inp('t:pay',t.pay,'text','placeholder="z. B. Klarna 30 Tage"'))+
-    '</div></div>';
+    fld('Budgetregel',sel('bud:basis',t.budget.basis,[['min','kein Limit: Preis minimieren'],['reise','Limit für ganze Reise'],['ticket','Limit je Ticket']]))+
+    fld('Limit in € (nur bei Limit)',inp('bud:amount',t.budget.amount,'number','step="1" min="0"'))+
+    fld('Preismodus',sel('t:bagMode',t.bagMode,[['hold','1 Aufgabegepäck + 1 Handgepäck'],['hand','nur Handgepäck']]))+
+    fld('Bevorzugter Zahlweg',inp('t:pay',t.pay,'text','placeholder="z. B. Klarna, später bezahlen"'))+
+    fld('Anschlusspuffer getrennte Tickets (Min)',inp('t:gapSep',t.gapSep,'number','min="0"'))+
+    fld('Anschlusspuffer ein Ticket (Min)',inp('t:gapSame',t.gapSame,'number','min="0"'))+
+    '</div><label class="fld" style="margin-top:8px">Notizen und Annahmen<textarea data-b="t:notes" rows="5">'+esc(t.notes)+'</textarea></label></div>';
   h+='<h3>Reise aus Kiwi-Link anlegen</h3><div class="card"><p class="sub">Liest Etappen, Daten, Zeitfenster und maximale Stopps aus dem Link. Flughafencodes werden aus dem Ortsnamen abgeleitet und sind editierbar.</p><textarea id="kiwiurl" rows="3" placeholder="https://www.kiwi.com/.../multicity/results/..."></textarea><div class="hrow" style="margin-top:6px"><button class="btn pri" data-a="kiwi">Reise anlegen</button></div></div>';
   h+='<h3>Checkliste</h3><div class="card">'+ck.map(function(c){return '<div class="todo'+(c[2]?' done':'')+'"><button class="ck'+(c[2]?' on':'')+(c[3]?' auto':'')+'" '+(c[3]?'disabled title="automatisch"':'data-a="chk" data-v="'+c[0]+'"')+'>'+(c[2]?'✓':'')+'</button><span class="tx">'+esc(c[1])+(c[3]?' '+pill('automatisch','info'):'')+'</span></div>'}).join('')+'</div>';
   h+='<h3>Hinweise</h3>'+hints(t,days);
@@ -389,10 +451,10 @@ function hints(t,days){
   var h='';
   if(days!=null&&days<=14&&days>=0)h+='<div class="note">Bezugspunkt erster Abflug: noch '+days+' Tage. Preise ändern sich kurzfristig, Preisstand mit Abrufzeit erfassen.</div>';
   var l3=t.legs[t.legs.length-1];
-  if(l3&&dUTC(l3.date)>=Date.UTC(2026,9,25)&&dUTC(t.legs[0].date)<Date.UTC(2026,9,25))h+='<div class="note n-info">Bezugspunkt Zeitzonen: Die Sommerzeit in Deutschland endet am 25.10.2026 (letzter Sonntag im Oktober). Etappen vor diesem Datum rechnen mit UTC+2, danach mit UTC+1. Marokko ist in der Tabelle (Tab 6) mit UTC+0 hinterlegt. <b>Annahme aus der Flugsuche-Vorlage, vor Nutzung prüfen.</b></div>';
-  if(t.url)h+='<div class="note n-info">Bezugspunkt Kiwi-Link: Zeitfenster, Stopps und Gepäck sind <b>interpretiert als</b> Abflug von–bis und Ankunft von–bis je Etappe (Gruppen getrennt durch "_"), maximale Stopps je Etappe und Gepäckparameter "'+esc((/bags=([^&]*)/.exec(t.url)||[])[1]||'')+'" (gelesen als 1 Handgepäck + 1 Aufgabegepäck). Bitte gegen die Kiwi-Oberfläche prüfen.</div>';
-  var real=t.legs.some(function(l){return (t.opts[l.id]||[]).some(function(o){return !o.ex})});
-  if(!real)h+='<div class="note n-bad">Keine echten Preise erfasst. Die Optionen in Tab 4 sind Beispiele (gelb markiert, Quelle BEISPIEL) und dienen nur zum Testen der Rangfolge.</div>';
+  if(l3&&dUTC(l3.date)>=Date.UTC(2026,9,25)&&dUTC(t.legs[0].date)<Date.UTC(2026,9,25))h+='<div class="note n-info">Bezugspunkt Zeitzonen: Die Sommerzeit in Deutschland endet am 25.10.2026. Etappen davor rechnen mit UTC+2, danach mit UTC+1. Marokko ist mit UTC+0 hinterlegt (Annahme aus der Flugsuche-Vorlage, vor Nutzung prüfen).</div>';
+  if(t.url)h+='<div class="note n-info">Bezugspunkt Kiwi-Link: Zeitfenster, Stopps und Gepäck sind <b>interpretiert als</b> Abflug von–bis und Ankunft von–bis je Etappe (Gruppen getrennt durch "_"), maximale Stopps je Etappe und Gepäckparameter "'+esc((/bags=([^&]*)/.exec(t.url)||[])[1]||'')+'" (gelesen als 1 Handgepäck + 1 Aufgabegepäck).</div>';
+  var miss=t.legs.filter(function(l){return !(t.opts[l.id]||[]).length});
+  if(miss.length)h+='<div class="note n-bad">Ohne Optionen: '+miss.map(function(l){return esc(l.from+'→'+l.to+' '+fmtDate(l.date))}).join('; ')+'. Die Entscheidung rechnet vorläufig nur über die Etappen mit Daten.</div>';
   return h||'<div class="sub">Keine Hinweise.</div>';
 }
 function legCard(t,l,i){
@@ -406,27 +468,61 @@ function legCard(t,l,i){
 
 /* Tab 2 */
 function tabQuellen(){
-  var t=T(),H='';
-  H+='<h2>Datenerhebung</h2><p class="sub">Je Quelle, Etappe und Gepäckmodus: Klick setzt "abgefragt" mit Zeitstempel, zweiter Klick "nicht verfügbar", dritter Klick löscht. Links der weiteren Flugseiten hier eintragen.</p>';
-  H+='<div class="legend">'+pill('✓ abgefragt','ok')+pill('– nicht verfügbar','info')+pill('leer = offen','warn')+'</div>';
-  H+='<div class="tw"><table><tr><th>Quelle</th><th>Link</th>'+t.legs.map(function(l,i){return '<th colspan="2">E'+(i+1)+' '+esc(l.from)+'→'+esc(l.to)+'<br><span class="sub" style="margin:0">Handgepäck | Koffer</span></th>'}).join('')+'<th></th></tr>';
+  var t=T(),H='<h2>Datenerhebung</h2><p class="sub">Suchvorgaben, Links, Kopierwege und Erfassungsstand je Quelle.</p>';
+  H+='<h3>A Suchvorgaben (für jedes Portal gleich)</h3>'+cbox('Feld: Chat oder Prompt für Unteragent, Position: Anfang',specText(t));
+  H+='<h3>B Links je Quelle und Etappe</h3><div class="note n-info">Belegstufe: Der Kiwi-Multicity-Link ist aus deinem Link abgeleitet (Struktur geprüft: VERIFIZIERT, Ortsnamen nur für FRA, AGA, CMN hinterlegt). Alle übrigen Linkmuster sind aus dem Gedächtnis gebaut und nicht getestet: UNSICHER. Bei Fehlern Suchmaske des Portals nutzen und Vorgaben aus A eintragen.</div>';
+  var km=kiwiMulti(t);
+  H+='<div class="tw"><table><tr><th>Quelle</th>'+t.legs.map(function(l,i){return '<th>E'+(i+1)+' '+esc(l.from)+'→'+esc(l.to)+'<br><span class="sub" style="margin:0">'+fmtDate(l.date)+'</span></th>'}).join('')+'<th>Einstellen (Filter)</th></tr>';
+  H+='<tr><td><b>Kiwi.com Multicity</b><br>'+pill('VERIFIZIERT','ok')+'</td><td colspan="'+t.legs.length+'">'+(km?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(km)+'">Alle '+t.legs.length+' Etappen in einer Suche öffnen</a> <button class="btn sm cp" data-a="copy" data-t="'+esc(km)+'">Link kopieren</button>':'(fehlt: Ortsnamen für diese Flughäfen nicht hinterlegt)')+'</td><td class="sub">Zeitfenster, Stopps und Gepäck stehen im Link. Einzelne Etappen mit Filter Airline nachprüfen.</td></tr>';
+  LINKS.forEach(function(L){H+='<tr><td><b>'+esc(L.n)+'</b><br>'+pill(L.lv,'warn')+'</td>'+t.legs.map(function(l){var u=l.from&&l.to&&l.date?L.f(l):'';return '<td>'+(u?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(u)+'">öffnen</a>':'')+'</td>'}).join('')+'<td class="sub">'+esc(L.tip)+'</td></tr>'});
+  HOME.forEach(function(L){H+='<tr><td><b>'+esc(L[0])+'</b><br>'+pill('nur Startseite','info')+'</td><td colspan="'+t.legs.length+'"><a class="btn sm" target="_blank" rel="noopener" href="'+esc(L[1])+'">Startseite öffnen</a></td><td class="sub">'+esc(L[2])+'</td></tr>'});
+  H+='</table></div>';
+  H+='<h3>C Text von Webseiten kopieren (günstiger und genauer als Screenshots)</h3><div class="legend">'+pill('O1 empfohlen: Strg+A, Strg+C','ok')+pill('O2: Als PDF speichern','warn')+pill('O3: Lesezeichen-Skript','cp')+pill('O4: Screenshot (nur Notlösung)','info')+'</div>'+
+   step(1,'Alle Treffer sichtbar machen','Ergebnisseite öffnen, "Mehr anzeigen" klicken, bei Bedarf Tarif oder Flugdetails aufklappen. Was nicht auf der Seite steht, steht nicht im Text.','var(--acc)')+
+   step(2,'O1: Alles markieren und kopieren','Strg+A, dann Strg+C (Mac: Cmd+A, Cmd+C). Handy: Text lange antippen, "Alles auswählen", "Kopieren".','var(--ok)')+
+   step(3,'Im Chat einfügen','Strg+V. Davor eine Zeile schreiben: Quelle, Etappe, Datum, Abrufzeit. Mehrere Seiten nacheinander in einer Nachricht möglich.','var(--copy)')+
+   step(4,'O2: Als PDF speichern','Strg+P, Ziel "Als PDF speichern". Das PDF enthält lesbaren Text und lässt sich hochladen. Seitenumbrüche können Zeilen trennen.','var(--warn)')+
+   step(5,'O3: Lesezeichen-Skript','Neues Lesezeichen anlegen, als Adresse den Text unten einfügen. Auf der Ergebnisseite anklicken: kopiert den sichtbaren Seitentext. Manche Seiten blockieren Skripte.','var(--info)')+
+   cbox('Feld: Adresse eines neuen Lesezeichens (Browser, Lesezeichen bearbeiten)','javascript:(function(){var t=document.body.innerText;navigator.clipboard.writeText(t).then(function(){alert("Kopiert: "+t.length+" Zeichen")},function(){alert("Kopieren blockiert")})})();')+
+   '<div class="note n-info">Einmal einen kopierten Text als Probe einfügen, dann baue ich den Einfüge-Parser für das Format dieser Seite (Tab 5, Import). Ohne Probe rate ich das Format nicht.</div>';
+  H+='<h3>D Erfassungsstand je Quelle</h3><p class="sub">Klick setzt "abgefragt" mit Zeitstempel, zweiter Klick "nicht verfügbar", dritter Klick löscht.</p><div class="legend">'+pill('✓ abgefragt','ok')+pill('– nicht verfügbar','info')+pill('leer = offen','warn')+'</div>';
+  H+='<div class="tw"><table><tr><th>Quelle</th><th>Link</th>'+t.legs.map(function(l,i){return '<th colspan="2">E'+(i+1)+' '+esc(l.from)+'→'+esc(l.to)+'<br><span class="sub" style="margin:0">Hand | Koffer</span></th>'}).join('')+'<th></th></tr>';
   t.src.forEach(function(s){
-    H+='<tr><td><input data-b="s:'+s.id+':name" value="'+esc(s.name)+'" style="width:150px"></td><td><input data-b="s:'+s.id+':url" value="'+esc(s.url)+'" placeholder="Link (fehlt, bitte liefern)" style="width:180px"></td>';
+    H+='<tr><td><input data-b="s:'+s.id+':name" value="'+esc(s.name)+'" style="width:150px"></td><td><input data-b="s:'+s.id+':url" value="'+esc(s.url)+'" placeholder="Link (fehlt)" style="width:160px"></td>';
     t.legs.forEach(function(l){['hand','hold'].forEach(function(m){var k=l.id+'_'+m,v=s.st[k];
       H+='<td><button class="cell'+(v==='x'?' x':v?' d':'')+'" data-a="st" data-s="'+s.id+'" data-k="'+k+'" title="'+esc(v&&v!=='x'?v:'')+'">'+(v==='x'?'–':v?'✓':'')+'</button></td>'})});
     H+='<td><button class="btn sm dg" data-a="dsrc" data-v="'+s.id+'">×</button></td></tr>';
   });
   H+='</table></div><div class="hrow" style="margin-top:8px"><button class="btn sm" data-a="addsrc">Quelle hinzufügen</button></div>';
-  var tot=t.src.length*t.legs.length*2,dn=0;t.src.forEach(function(s){Object.keys(s.st).forEach(function(k){if(s.st[k])dn++})});
-  H+='<div class="kpis"><div class="kpi"><b>'+dn+' / '+tot+'</b><span>Zellen bearbeitet</span></div></div>';
-  H+='<h3>Hinweise zur Erhebung</h3><div class="note n-info">Bezugspunkt Kiwi: je Etappe getrennt abfragen mit Gepäck 0 und 1, Nonstop-Filter und Airline-Filter, da Kiwi höchstens 15 Treffer je Abfrage zeigt. Quelle: Vorlage Flugsuche V2.</div>';
   return H;
 }
 
 /* Tab 3 */
+function tabPrio(){
+  var p=P(),t=T(),R=rank(t,p),H='<h2>Prioritäten und Profile</h2>';
+  H+='<div class="card"><b>So arbeitet die Entscheidung</b><ul style="margin:6px 0 0;padding-left:18px"><li>Ziel: <b>'+esc(OBJ.filter(function(o){return o[0]===p.obj})[0][1])+'</b>, unter den Nebenbedingungen unten.</li><li><b>Muss</b>: Kombinationen, die verletzen, entfallen.</li><li><b>Wunsch</b>: Gilt von oben nach unten. Bleibt keine Kombination übrig, wird zuerst die unterste Wunsch-Bedingung gelockert, dann die nächste. Nichts wird deswegen ausgeschlossen.</li><li>Reihenfolge ändern: Zeile ziehen oder ▲▼. Die Stufentabelle in Tab 6 zeigt, was jede Bedingung kostet.</li></ul></div>';
+  H+='<div class="hrow" style="margin-top:10px">'+fld('Profil',sel('prof',S.prof,S.profiles.map(function(x){return [x.id,x.name]})))+fld('Name',inp('pf:name',p.name))+fld('Ziel',sel('pf:obj',p.obj,OBJ))+'<button class="btn sm" data-a="dupprof">Duplizieren</button><button class="btn sm" data-a="resetprof">Auf Standard</button>'+(S.profiles.length>1?'<button class="btn sm dg" data-a="'+(S.pdel?'pfdel2':'pfdel')+'">'+(S.pdel?'Wirklich löschen?':'Löschen')+'</button>':'')+'</div>';
+  H+='<div class="legend">'+pill('Muss','bad')+pill('Wunsch','warn')+pill('aus (grau)','info')+'</div>';
+  p.cons.forEach(function(c,i){
+    var f=c.id.indexOf('f:')===0?catById(c.id.slice(2)):null,must=c.must;
+    H+='<div class="cr '+(must?'must':'soft')+(c.on?'':' off')+'" draggable="true" data-i="'+i+'"><span class="grip" title="ziehen">⠿</span><span class="rk">'+(i+1)+'</span>'+
+      '<label class="tgl"><input type="checkbox" data-b="con:'+i+':on"'+(c.on?' checked':'')+'> an</label>'+
+      '<span class="nm">'+esc(consName(c))+'</span><button class="mu '+(must?'m':'w')+'" data-a="cmust" data-i="'+i+'" title="Umschalten">'+(must?'Muss':'Wunsch')+'</button>'+
+      '<button class="btn sm" data-a="cmove" data-i="'+i+'" data-d="-1" aria-label="nach oben">▲</button><button class="btn sm" data-a="cmove" data-i="'+i+'" data-d="1" aria-label="nach unten">▼</button><button class="btn sm dg" data-a="cdel" data-i="'+i+'" aria-label="entfernen">×</button>'+
+      (CDEF[c.id]?'<span class="cvs sub">'+esc(CDEF[c.id].desc)+'</span>':'')+
+      (f?'<span class="cvs">'+f.vals.map(function(v){return '<button class="cv'+((c.allowed||[]).indexOf(v.k)>=0?' on':'')+'" data-a="callow" data-i="'+i+'" data-k="'+esc(v.k)+'">'+esc(v.l)+'</button>'}).join('')+'</span>':'')+'</div>';
+  });
+  var used={};p.cons.forEach(function(c){used[c.id]=1});
+  var opts=Object.keys(CDEF).filter(function(k){return !used[k]}).map(function(k){return [k,CDEF[k].name]}).concat(CAT().filter(function(f){return (f.kind==='in'||f.kind==='der')&&!used['f:'+f.id]}).map(function(f){return ['f:'+f.id,f.name]}));
+  H+='<div class="hrow" style="margin-top:8px"><select id="addcon">'+opts.map(function(o){return '<option value="'+esc(o[0])+'">'+esc(o[1])+'</option>'}).join('')+'</select><button class="btn pri" data-a="addcon">Nebenbedingung hinzufügen</button></div>';
+  H+='<div class="note n-info">Vorschau mit diesem Profil: '+(R.res.some(function(r){return !r.mf.length})?'günstigste Kombination '+eur((R.res.filter(function(r){return !r.mf.length})[0]||{}).tot):'keine zulässige Kombination')+' ('+R.res.filter(function(r){return !r.mf.length}).length+' zulässig von '+R.res.length+'). Bezugspunkt: nur Etappen mit Optionen.</div>';
+  return H;
+}
+
+/* Tab 4 */
 function tabMerk(){
-  var p=P(),cat=CAT(),H='<h2>Merkmale und Ausprägungen</h2><p class="sub">Jedes Merkmal mit allen Ausprägungen. Gewicht 0–20 (0 = ausgeblendet), Nutzwert 0–100 je Ausprägung, "ausschließen" setzt die Ausprägung als Muss-Kriterium. Änderungen gelten für das gewählte Profil.</p>';
-  H+='<div class="hrow">'+fld('Profil',sel('prof',S.prof,S.profiles.map(function(x){return [x.id,x.name]})))+'<button class="btn sm" data-a="dupprof">Profil duplizieren</button><button class="btn sm dg" data-a="resetprof">Profil auf Standard</button></div>';
+  var p=P(),cat=CAT(),H='<h2>Merkmale und Ausprägungen</h2><p class="sub">Alle Merkmale mit allen Ausprägungen. Gewichte (0–20) und Nutzwerte (0–100) gelten für das <b>Wertmodell</b> und als Tiebreaker-Anzeige. Nebenbedingungen und Reihenfolge stehen in Tab 3.</p>';
+  H+='<div class="hrow">'+fld('Profil',sel('prof',S.prof,S.profiles.map(function(x){return [x.id,x.name]})))+'</div>';
   H+='<div class="legend">'+pill('Eingabe','ok')+pill('abgeleitet','info')+pill('Zahl','warn')+pill('Ganze Reise','cp')+'</div>';
   GRP.forEach(function(g){
     var fs=cat.filter(function(f){return f.grp===g[0]});if(!fs.length)return;
@@ -436,26 +532,26 @@ function tabMerk(){
       H+='<details class="card stripe" style="--c:'+g[2]+'" '+(w>0?'open':'')+'><summary>'+esc(f.name)+' '+pill(f.kind==='in'?'Eingabe':f.kind==='der'?'abgeleitet':f.kind==='num'?'Zahl':'Ganze Reise',f.kind==='in'?'ok':f.kind==='der'?'info':f.kind==='num'?'warn':'cp')+' <span class="mono" id="wv-'+f.id+'">'+w+'</span></summary>';
       if(f.desc)H+='<p class="sub">'+esc(f.desc)+'</p>';
       H+='<label class="fld">Gewicht<input type="range" min="0" max="20" step="1" value="'+w+'" data-b="w:'+f.id+'" data-live="wv-'+f.id+'"></label>';
-      if(f.vals.length){H+='<div class="tw vals" style="margin-top:6px"><table><tr><th>Ausprägung</th><th>Nutzwert</th><th>ausschließen</th></tr>';
-        f.vals.forEach(function(v){H+='<tr><td>'+esc(v.l)+' <span class="mono sub">'+esc(v.k)+'</span></td><td><input type="number" min="0" max="100" value="'+effU(p,f,v.k)+'" data-b="u:'+f.id+':'+v.k+'"></td><td>'+(f.kind==='cmb'?'':'<input type="checkbox" data-b="x:'+f.id+':'+v.k+'"'+(isX(p,f,v.k)?' checked':'')+'>')+'</td></tr>'});
+      if(f.vals.length){H+='<div class="tw vals" style="margin-top:6px"><table><tr><th>Ausprägung</th><th>Schlüssel</th><th>Nutzwert</th></tr>';
+        f.vals.forEach(function(v){H+='<tr><td>'+esc(v.l)+'</td><td class="mono sub">'+esc(v.k)+'</td><td><input type="number" min="0" max="100" value="'+effU(p,f,v.k)+'" data-b="u:'+f.id+':'+v.k+'"></td></tr>'});
         H+='</table></div>'}
       if(f.custom)H+='<div class="hrow" style="margin-top:6px"><button class="btn sm dg" data-a="dcust" data-v="'+f.id+'">Merkmal löschen</button></div>';
       H+='</details>';
     });
     H+='</div>';
   });
-  H+='<h3>Eigenes Merkmal hinzufügen</h3><div class="card"><p class="sub">Für künftige Reisen: neues Merkmal mit allen Ausprägungen anlegen. Es erscheint danach in jeder Option als Auswahl und fließt in jedes Profil ein.</p><div class="flds">'+
-   fld('Name',inp('nf:name','', 'text','id="nf_name"'))+fld('Gruppe','<select id="nf_grp">'+GRP.filter(function(g){return g[0]!=='kombi'}).map(function(g){return '<option value="'+g[0]+'">'+esc(g[1])+'</option>'}).join('')+'</select>')+fld('Startgewicht (0–20)','<input id="nf_w" type="number" value="2" min="0" max="20">')+'</div>'+
+  H+='<h3>Eigenes Merkmal hinzufügen</h3><div class="card"><p class="sub">Für künftige Reisen: neues Merkmal mit allen Ausprägungen anlegen. Es erscheint danach in jeder Option als Auswahl und lässt sich in Tab 3 als Nebenbedingung verwenden.</p><div class="flds">'+
+   fld('Name','<input id="nf_name" type="text">')+fld('Gruppe','<select id="nf_grp">'+GRP.filter(function(g){return g[0]!=='kombi'}).map(function(g){return '<option value="'+g[0]+'">'+esc(g[1])+'</option>'}).join('')+'</select>')+fld('Startgewicht (0–20)','<input id="nf_w" type="number" value="2" min="0" max="20">')+'</div>'+
    '<label class="fld" style="margin-top:6px">Ausprägungen, je Zeile "Bezeichnung|Nutzwert 0–100"<textarea id="nf_vals" rows="4" placeholder="Hotel am Flughafen|90&#10;Hotel in der Stadt|60"></textarea></label><div class="hrow" style="margin-top:6px"><button class="btn pri" data-a="addfeat">Merkmal anlegen</button></div></div>';
   return H;
 }
 
-/* Tab 4 */
-function optCard(t,l,o){
+/* Tab 5 */
+function optCard(t,l,o,idx){
   var cat=CAT(),b=function(f){return 'o:'+l.id+':'+o.id+':'+f},fb=function(id){return 'o:'+l.id+':'+o.id+':f.'+id};
-  var Fm=cat.filter(function(f){return f.id==='m_mode'})[0],Fa=cat.filter(function(f){return f.id==='d_airline'})[0];
-  var h='<div class="oc'+(o.ex?' ex':'')+'" id="oc-'+o.id+'"><div class="fh"><b>'+esc(lab(Fa,val(o,l,Fa)))+' '+esc(o.flightno||'')+' <span class="mono">'+esc(o.dep||'--:--')+' → '+esc(o.arr||'--:--')+'</span>'+(o.ex?'<span class="tg">BEISPIEL</span>':'')+'</b><button class="btn sm" data-a="dupopt" data-l="'+l.id+'" data-v="'+o.id+'">Duplizieren</button><button class="btn sm dg" data-a="dopt" data-l="'+l.id+'" data-v="'+o.id+'">Löschen</button></div>';
-  h+='<div class="der" style="margin:6px 0">'+derStrip(o,l)+'</div>';
+  var Fm=catById('m_mode'),Fa=catById('d_airline');
+  var h='<div class="oc" id="oc-'+o.id+'"><div class="fh"><b>'+esc(lab(Fa,val(o,l,Fa)))+' '+esc(o.flightno||'')+' <span class="mono">'+esc(fmtDate(o.date||l.date).slice(0,6))+' '+esc(o.dep||'--:--')+' → '+esc(o.arr||'--:--')+(+o.plus>0?' +'+o.plus:'')+'</span> '+(o.fare?pill(o.fare,'info'):'')+(+o.span>1?pill('Durchgang E'+(idx+1)+'+E'+(idx+2),'cp'):'')+'</b><button class="btn sm" data-a="dupopt" data-l="'+l.id+'" data-v="'+o.id+'">Duplizieren</button><button class="btn sm dg" data-a="dopt" data-l="'+l.id+'" data-v="'+o.id+'">Löschen</button></div>';
+  h+='<div class="der" style="margin:6px 0">'+derStrip(o,legsView(t,idx,Math.max(1,+o.span||1)))+'</div>';
   h+='<details><summary>Basisdaten und Preise</summary><div class="flds">'+
     fld('Verkehrsmittel',sel(fb('m_mode'),val(o,l,Fm),Fm.vals.map(function(v){return [v.k,v.l]})))+
     fld('Airline',sel(fb('d_airline'),val(o,l,Fa),Fa.vals.map(function(v){return [v.k,v.l]})))+
@@ -465,7 +561,8 @@ function optCard(t,l,o){
     fld('Ankunft +Tage',inp(b('plus'),o.plus,'number','min="0" max="3"'))+fld('Dauer in Min (optional)',inp(b('dur'),o.dur,'number','min="0"'))+
     fld('Stopps',inp(b('stops'),o.stops,'number','min="0"'))+fld('Längster Umstieg in Min',inp(b('lay'),o.lay,'number','min="0"'))+
     fld('Preis nur Handgepäck €',inp(b('priceHand'),o.priceHand,'number','min="0" step="0.01"'))+fld('Preis mit 1 Koffer €',inp(b('priceHold'),o.priceHold,'number','min="0" step="0.01"'))+
-    fld('Anreisekosten € (zum Flughafen)',inp(b('access'),o.access,'number','min="0" step="0.01"'))+fld('Buchungsgruppe (gleiche = 1 Buchung)',inp(b('group'),o.group))+
+    fld('Anreisekosten € (zum Flughafen)',inp(b('access'),o.access,'number','min="0" step="0.01"'))+fld('Buchungsgruppe (gleiche = 1 Ticket)',inp(b('group'),o.group))+
+    (idx<t.legs.length-1?fld('Deckt Folge-Etappe mit ab',sel(b('span'),o.span||'1',[['1','nein'],['2','ja (Durchgangsticket)']])):'')+
     fld('Quelle',inp(b('source'),o.source))+fld('Link zur Option',inp(b('url'),o.url))+fld('Abrufzeit',inp(b('retrieved'),o.retrieved,'datetime-local')+'<button class="btn sm" type="button" data-a="now" data-l="'+l.id+'" data-v="'+o.id+'">jetzt</button>')+
     fld('Tarifname (z. B. Eco Classic)',inp(b('fare'),o.fare))+fld('Notiz',inp(b('note'),o.note))+'</div></details>';
   h+='<details><summary>Weitere Merkmale (Auswahl)</summary>';
@@ -475,61 +572,83 @@ function optCard(t,l,o){
 }
 function derStrip(o,l){
   var t=T(),p=P(),cat=CAT(),h='';
-  cat.filter(function(f){return f.kind==='der'}).forEach(function(f){var k=val(o,l,f);h+=pill(f.name+': '+lab(f,k),k==='?'?'info':isX(p,f,k)?'bad':effU(p,f,k)>=70?'ok':'warn')});
+  cat.filter(function(f){return f.kind==='der'}).forEach(function(f){var k=val(o,l,f);h+=pill(f.name+': '+lab(f,k),k==='?'?'info':effU(p,f,k)>=70?'ok':'warn')});
   var m=durMin(o,l),pr=price(o,'hand'),pk=price(o,'hold');
   h+=pill('Dauer '+fmtDur(m),m==null?'info':'cp')+pill('Hand '+eur(pr),pr==null?'info':'cp')+pill('Koffer '+eur(pk),pk==null?'info':'cp');
-  var v=viol(o,l,p,t);if(v.length)h+='<div class="note n-bad" style="margin:4px 0">Außerhalb der Regeln: '+v.map(esc).join('; ')+'</div>';
+  var bad=[],soft=[];p.cons.filter(function(c){return c.on}).forEach(function(c){if(optSat(o,l,c,t)===0)(c.must?bad:soft).push(consShort(c))});
+  if(bad.length)h+='<div class="note n-bad" style="margin:4px 0">Verletzt Muss: '+bad.map(esc).join('; ')+'</div>';
+  if(soft.length)h+='<div class="note" style="margin:4px 0">Verletzt Wunsch: '+soft.map(esc).join('; ')+'</div>';
   return h;
 }
 function tabOpt(){
-  var t=T(),H='<h2>Optionen erfassen</h2><p class="sub">Eine Karte je Flug oder Verbindung. Abgeleitete Merkmale (Tageszeit, Dauer, Zeitfenster, Stopps, Alter) werden automatisch berechnet. Fehlende Werte bleiben "(fehlt)" und werden nie geschätzt.</p>';
-  var cur=t.legs.filter(function(l){return l.id===S.legTab})[0]||t.legs[0];
+  var t=T(),H='<h2>Optionen erfassen</h2><p class="sub">Eine Karte je Flug oder Verbindung. Abgeleitete Merkmale werden berechnet. Fehlende Werte bleiben "(fehlt)" und werden nie geschätzt.</p>';
+  var cur=t.legs.filter(function(l){return l.id===S.legTab})[0]||t.legs[0],ci=t.legs.indexOf(cur);
   H+='<div class="tabs2">'+t.legs.map(function(l,i){return '<button class="btn'+(l.id===cur.id?' on':'')+'" data-a="legtab" data-v="'+l.id+'">E'+(i+1)+' '+esc(l.from)+'→'+esc(l.to)+' ('+(t.opts[l.id]||[]).length+')</button>'}).join('')+'</div>';
-  H+='<div class="hrow"><button class="btn pri" data-a="addopt" data-v="'+cur.id+'">Option hinzufügen</button><button class="btn sm dg" data-a="rmdemo">Beispiele entfernen</button></div>';
+  H+='<div class="hrow"><button class="btn pri" data-a="addopt" data-v="'+cur.id+'">Option hinzufügen</button></div>';
   var os=t.opts[cur.id]||[];
-  H+=os.length?os.map(function(o){return optCard(t,cur,o)}).join(''):'<div class="note n-info">Noch keine Option für diese Etappe. "Option hinzufügen" oder JSON-Import unten.</div>';
-  var tpl='[{"leg":1,"date":"2026-10-15","depAp":"FRA","arrAp":"AGA","dep":"06:10","arr":"09:50","plus":0,"stops":0,"lay":"","flightno":"","priceHand":"","priceHold":"","access":"","group":"K1","source":"Kiwi.com","url":"","retrieved":"'+nowIso()+'","f":{"d_airline":"ram","c_ticket":"dir","e_hold":"incl"}}]';
-  H+='<h3>Import mehrerer Optionen (JSON)</h3><div class="card"><p class="sub">Für Ergebnisse aus Unteragenten oder Portalen. "leg" = Nummer der Etappe (1, 2, 3). Merkmal-Schlüssel stehen in Tab 3 neben jeder Ausprägung.</p>'+cbox('Vorlage zum Einfügen in diesen Chat oder Unteragent-Prompt',tpl)+'<textarea id="impjson" rows="5" placeholder="[ {...}, {...} ]"></textarea><div class="hrow" style="margin-top:6px"><button class="btn pri" data-a="impopt">Importieren</button></div></div>';
+  H+=os.length?os.map(function(o){return optCard(t,cur,o,ci)}).join(''):'<div class="note n-info">Noch keine Option für diese Etappe. "Option hinzufügen" oder JSON-Import unten.</div>';
+  var tpl='[{"leg":1,"date":"2026-10-15","depAp":"FRA","arrAp":"CMN","dep":"06:10","arr":"09:50","plus":0,"stops":0,"lay":"","dur":"","flightno":"","fare":"","priceHand":"","priceHold":"","access":"","group":"K1","span":1,"source":"Kiwi.com","url":"","retrieved":"'+nowIso()+'","f":{"d_airline":"ram","c_cabin":"eco","c_ticket":"dir","e_hold":"incl"}}]';
+  H+='<h3>Import mehrerer Optionen (JSON)</h3><div class="card"><p class="sub">Für Ergebnisse aus Unteragenten oder Portalen. "leg" = Nummer der Etappe. "span":2 = Durchgangsticket über diese und die nächste Etappe. Merkmal-Schlüssel stehen in Tab 4.</p>'+cbox('Vorlage zum Einfügen in den Chat oder einen Unteragent-Prompt',tpl)+'<textarea id="impjson" rows="5" placeholder="[ {...}, {...} ]"></textarea><div class="hrow" style="margin-top:6px"><button class="btn pri" data-a="impopt">Importieren</button></div></div>';
   return H;
-}
-
-/* Tab 5 */
-function tabEnt(){
-  var t=T(),p=P(),R=rank(t,p),H='<h2>Entscheidung</h2><p class="sub">Rangfolge aller Kombinationen aus den Optionen je Etappe. Die Entscheidung liegt bei dir; die Rangliste zeigt Sachlage und Empfehlung nach dem gewählten Profil.</p>';
-  H+='<div class="hrow">'+fld('Profil',sel('prof',S.prof,S.profiles.map(function(x){return [x.id,x.name]})))+fld('Preismodus',sel('t:bagMode',t.bagMode,[['hold','mit 1 Koffer'],['hand','nur Handgepäck']]))+'<label class="fld" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" data-b="showviol"'+(S.showViol?' checked':'')+'> Regelverstöße einblenden</label></div>';
-  if(R.per.some(function(a,i){return (t.opts[t.legs[i].id]||[]).some(function(o){return o.ex})}))H+='<div class="note n-bad">Enthält Beispieloptionen (BEISPIEL). Das Ergebnis ist ein Test der Logik, keine Empfehlung.</div>';
-  if(R.capped)H+='<div class="note">Bezugspunkt Kombinationen: '+R.prod+' mögliche Kombinationen, je Etappe wurden die 10 bestbewerteten Optionen berücksichtigt.</div>';
-  var rows=R.res.filter(function(r){return S.showViol||!r.viol.length});
-  if(!R.res.length)return H+'<div class="note n-info">Für mindestens eine Etappe fehlen Optionen (Tab 4).</div>';
-  var best=R.res.filter(function(r){return !r.viol.length})[0];
-  if(best){
-    var cheap=R.res.filter(function(r){return !r.viol.length&&r.tot!=null}).sort(function(a,b){return a.tot-b.tot})[0];
-    H+='<div class="card stripe" style="--c:var(--ok)"><div class="fh"><b>Empfehlung aus Sachlage ('+esc(p.name)+')</b>'+pill('Wert '+Math.round(best.score),'ok')+(best.par?pill('Pareto-optimal (Preis und Wert)','cp'):'')+(cheap===best?pill('zugleich günstigste','ok'):'')+'</div>'+comboLine(best,t)+'<div>'+bpill(best.bk)+(best.gaps?pill(best.gaps+' Datenlücken','warn'):'')+'</div></div>';
-    if(cheap&&cheap!==best)H+='<div class="note n-info">Günstigste zulässige Kombination: '+eur(cheap.tot)+' (Wert '+Math.round(cheap.score)+'), Differenz zur Empfehlung '+eur(best.tot==null?null:best.tot-cheap.tot)+'.</div>';
-  }else H+='<div class="note n-bad">Keine Kombination erfüllt alle Regeln. Regelverstöße einblenden oder Regeln in Tab 3 lockern.</div>';
-  H+='<h3>Gewinner je Profil (Sensitivität)</h3><div class="tw"><table><tr><th>Profil</th><th>Gewinner</th><th class="n">Preis</th><th class="n">Wert</th></tr>'+S.profiles.map(function(q){var r=rank(t,q),b=r.res.filter(function(x){return !x.viol.length})[0];return '<tr><td>'+esc(q.name)+'</td><td>'+(b?b.c.map(function(x){return esc(lab(CAT().filter(function(f){return f.id==='d_airline'})[0],val(x.o,x.l,CAT().filter(function(f){return f.id==='d_airline'})[0])))+' '+esc(x.o.dep||'')}).join(' | '):'(keine)')+'</td><td class="n">'+(b?eur(b.tot):'')+'</td><td class="n">'+(b?Math.round(b.score):'')+'</td></tr>'}).join('')+'</table></div>';
-  H+='<h3>Rangliste ('+rows.length+')</h3><div class="tw"><table><tr><th>#</th><th>Kombination</th><th class="n">Hand</th><th class="n">Koffer</th><th class="n">Wert</th><th>Status</th></tr>';
-  rows.slice(0,25).forEach(function(r,i){
-    H+='<tr class="row'+(r===best?' best':'')+'" data-a="det" data-v="'+esc(r.key)+'"><td>'+(i+1)+'</td><td>'+comboLine(r,t,true)+'</td><td class="n">'+eur(r.ih)+'</td><td class="n">'+eur(r.ik)+'</td><td class="n"><b>'+Math.round(r.score)+'</b></td><td>'+bpill(r.bk)+(r.par?pill('Pareto','cp'):'')+(r.viol.length?pill('Regelverstoß','bad'):'')+(r.gaps?pill(r.gaps+' Lücken','warn'):'')+'</td></tr>';
-    if(S.det===r.key)H+='<tr><td></td><td colspan="5">'+detail(r,t,p)+'</td></tr>';
-  });
-  H+='</table></div>';
-  return H;
-}
-function comboLine(r,t,short){
-  var Fa=CAT().filter(function(f){return f.id==='d_airline'})[0];
-  return r.c.map(function(x,i){return '<div>'+(short?'':'<b>E'+(i+1)+' </b>')+esc(x.l.from)+'→'+esc(x.l.to)+' '+fmtDate(x.o.date||x.l.date).slice(0,6)+' <span class="mono">'+esc(x.o.dep||'--')+'–'+esc(x.o.arr||'--')+'</span> '+esc(lab(Fa,val(x.o,x.l,Fa)))+' '+esc(x.o.flightno||'')+' '+(x.o.ex?'<span class="tg">BEISPIEL</span>':'')+'</div>'}).join('');
-}
-function detail(r,t,p){
-  var cat=CAT().filter(function(f){return f.kind!=='cmb'&&f.kind!=='num'&&effW(p,f)>0});
-  var h='<div class="tw"><table><tr><th>Merkmal</th><th class="n">Gewicht</th>'+r.c.map(function(x,i){return '<th>E'+(i+1)+'</th>'}).join('')+'</tr>';
-  cat.forEach(function(f){h+='<tr><td>'+esc(f.name)+'</td><td class="n">'+effW(p,f)+'</td>'+r.c.map(function(x){var k=val(x.o,x.l,f);return '<td>'+esc(lab(f,k))+' <span class="mono sub">'+effU(p,f,k)+'</span></td>'}).join('')+'</tr>'});
-  h+='<tr><td><b>Etappenwert</b></td><td></td>'+r.c.map(function(x){return '<td><b>'+Math.round(x.sc)+'</b></td>'}).join('')+'</tr></table></div>';
-  if(r.viol.length)h+='<div class="note n-bad">'+r.viol.map(esc).join('; ')+'</div>';
-  return h;
 }
 
 /* Tab 6 */
+function mins(m){return m==null?'(fehlt)':Math.floor(m/60)+' h '+pad(m%60)+' min'}
+function comboLine(r,t,short){
+  var Fa=catById('d_airline');
+  return r.c.map(function(x,i){
+    var cn=r.conn[i];
+    return '<div>'+(short?'':'<b>E'+(x.i+1)+(x.s>1?'+'+(x.i+x.s):'')+' </b>')+esc(x.l.from)+'→'+esc(x.l.to)+' '+fmtDate(x.o.date||x.l.date).slice(0,6)+' <span class="mono">'+esc(x.o.dep||'--')+'–'+esc(x.o.arr||'--')+(+x.o.plus>0?'+'+x.o.plus:'')+'</span> '+esc(lab(Fa,val(x.o,x.l,Fa)))+' '+esc(x.o.flightno||'')+' '+(x.o.fare?'<span class="sub">'+esc(x.o.fare)+'</span>':'')+'</div>'+
+    (cn?'<div class="sub" style="margin:0">Anschluss '+mins(cn.g)+(cn.g<cn.rq?' (unter Puffer '+cn.rq+' Min)':'')+(cn.same?', ein Ticket':', getrennte Tickets')+'</div>':'');
+  }).join('');
+}
+function consChips(r,p,t){
+  return p.cons.filter(function(c){return c.on}).map(function(c){var s=r.sat[c.id];return s===0?pill((c.must?'Muss verletzt: ':'Wunsch verletzt: ')+consShort(c),c.must?'bad':'warn'):''}).join('');
+}
+function detail(r,t,p){
+  var cons=p.cons.filter(function(c){return c.on});
+  var h='<div class="tw"><table><tr><th>Nebenbedingung (Reihenfolge)</th><th>Art</th><th>Ergebnis</th></tr>'+cons.map(function(c,i){var s=r.sat[c.id];return '<tr><td>'+(i+1)+'. '+esc(consShort(c))+'</td><td>'+(c.must?'Muss':'Wunsch')+'</td><td>'+(s===0?pill('verletzt','bad'):s===2?pill('unbekannt, zählt als erfüllt','info'):pill('erfüllt','ok'))+'</td></tr>'}).join('')+'</table></div>';
+  return h;
+}
+function tabEnt(){
+  var t=T(),p=P(),R=rank(t,p),H='<h2>Entscheidung</h2><p class="sub">Ziel: <b>'+esc(OBJ.filter(function(o){return o[0]===p.obj})[0][1])+'</b>, unter den Nebenbedingungen aus Tab 3. Die Entscheidung liegt bei dir; die Tabellen zeigen Sachlage und Empfehlung.</p>';
+  H+='<div class="hrow">'+fld('Profil',sel('prof',S.prof,S.profiles.map(function(x){return [x.id,x.name]})))+fld('Preismodus',sel('t:bagMode',t.bagMode,[['hold','1 Aufgabegepäck + 1 Handgepäck'],['hand','nur Handgepäck']]))+'<label class="fld" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" data-b="showviol"'+(S.showViol?' checked':'')+'> unzulässige Kombinationen einblenden</label></div>';
+  if(R.missing.length)H+='<div class="note n-bad">Zwischenstand: Für '+R.missing.map(function(i){return 'E'+(i+1)+' '+esc(t.legs[i].from+'→'+t.legs[i].to)}).join(', ')+' fehlen Optionen. Die Rechnung läuft nur über die übrigen Etappen.</div>';
+  if(R.capped)H+='<div class="note">'+R.prod+' mögliche Kombinationen, je Etappe wurden die 10 bestbewerteten Optionen berücksichtigt.</div>';
+  // Etappen-Ranking
+  H+='<h3>Etappen-Ranking (je Etappe, nach Priorität und Preis)</h3>';
+  t.legs.forEach(function(l,i){
+    var a=R.per[i].slice().sort(function(x,y){return (x.mf.length?1:0)-(y.mf.length?1:0)||y.pre-x.pre||(x.pr==null?1e9:x.pr)-(y.pr==null?1e9:y.pr)});
+    if(!a.length){H+='<div class="note n-info">E'+(i+1)+' '+esc(l.from+'→'+l.to)+' '+fmtDate(l.date)+': keine Optionen.</div>';return}
+    H+='<div class="sub"><b>E'+(i+1)+' '+esc(l.from)+'→'+esc(l.to)+' '+fmtDate(l.date)+'</b> (Fenster Abflug '+l.depWin.join('–')+', Ankunft '+l.arrWin.join('–')+' Uhr, max. Stopps '+(l.maxStops===''?'egal':l.maxStops)+')</div><div class="tw"><table><tr><th>#</th><th>Verbindung</th><th class="n">Dauer</th><th class="n">Preis</th><th>Status</th></tr>';
+    a.slice(0,12).forEach(function(x,k){
+      var Fa=catById('d_airline'),fl=x.mf.map(function(id){return pill('Muss verletzt: '+consShort({id:id,allowed:(P().cons.filter(function(c){return c.id===id})[0]||{}).allowed}),'bad')}).join('')+x.wf.map(function(id){return pill('Wunsch verletzt: '+consShort({id:id,allowed:(P().cons.filter(function(c){return c.id===id})[0]||{}).allowed}),'warn')}).join('');
+      H+='<tr><td>'+(k+1)+'</td><td>'+esc(fmtDate(x.o.date||l.date).slice(0,6))+' <span class="mono">'+esc(x.o.dep||'--')+'–'+esc(x.o.arr||'--')+(+x.o.plus>0?'+'+x.o.plus:'')+'</span> '+esc(lab(Fa,val(x.o,x.l,Fa)))+' '+esc(x.o.flightno||'')+' '+(x.o.fare?'<span class="sub">'+esc(x.o.fare)+'</span> ':'')+(x.s>1?pill('Durchgang','cp'):'')+(+x.o.stops>0?pill(x.o.stops+' Stopp','info'):'')+'</td><td class="n">'+esc(fmtDur(durMin(x.o,x.l)))+'</td><td class="n">'+eur(x.pr)+'</td><td>'+(fl||pill('alle Bedingungen erfüllt','ok'))+'</td></tr>';
+    });
+    H+='</table></div>';
+  });
+  var feas=R.res.filter(function(r){return !r.mf.length}),best=feas[0];
+  H+='<h3>Kombinationen über alle Etappen</h3>';
+  if(!R.res.length)return H+'<div class="note n-info">Keine Kombination möglich: Optionen fehlen (Tab 5).</div>';
+  if(best){
+    var cheap=feas.filter(function(r){return r.tot!=null}).sort(function(a,b){return a.tot-b.tot})[0];
+    H+='<div class="card stripe" style="--c:var(--ok)"><div class="fh"><b>Empfehlung aus Sachlage ('+esc(p.name)+')</b>'+pill('Summe '+eur(best.tot),'ok')+pill('Reisezeit '+mins(best.dur),'cp')+pill('Stufe '+best.pre0+' von '+R.softs.length+' Wünschen','info')+(best.par?pill('Pareto (Preis und Wert)','cp'):'')+'</div>'+comboLine(best,t)+'<div>'+consChips(best,p,t)+(best.gaps?pill(best.gaps+' Datenlücken','warn'):'')+'</div></div>';
+    if(cheap&&cheap!==best)H+='<div class="note n-info">Günstigste zulässige Kombination ohne Rücksicht auf Wünsche: '+eur(cheap.tot)+', Differenz zur Empfehlung '+eur(best.tot==null?null:best.tot-cheap.tot)+'.</div>';
+  }else H+='<div class="note n-bad">Keine Kombination erfüllt alle Muss-Bedingungen. Unzulässige Kombinationen einblenden oder Muss in Tab 3 auf Wunsch setzen.</div>';
+  H+='<h3>Stufen der Lockerung: was jede Wunsch-Bedingung kostet</h3><div class="tw"><table><tr><th>Stufe</th><th>erfüllt bis hier</th><th class="n">Kombinationen</th><th class="n">günstigster Preis</th><th class="n">Mehrpreis zur Vorstufe</th></tr>'+R.levels.map(function(L,k){
+    var prev=k?R.levels[k-1].best:null,d=(L.best&&prev)?L.best.tot-prev.tot:null;
+    return '<tr'+(best&&L.j===best.pre0?' class="best"':'')+'><td>'+L.j+'</td><td>'+esc(L.name)+'</td><td class="n">'+L.n+'</td><td class="n">'+(L.best?eur(L.best.tot):'—')+'</td><td class="n">'+(d==null?'—':(d>=0?'+':'')+eur(d))+'</td></tr>'}).join('')+'</table></div><div class="sub">Lesart: Je Stufe gilt zusätzlich die nächste Wunsch-Bedingung. Der Mehrpreis zeigt, was sie gegenüber der Vorstufe kostet. Ob sie den Preis wert ist, entscheidest du (Reihenfolge in Tab 3).</div>';
+  H+='<h3>Gewinner je Profil</h3><div class="tw"><table><tr><th>Profil</th><th>Gewinner</th><th class="n">Preis</th><th class="n">Reisezeit</th></tr>'+S.profiles.map(function(q){var r=rank(t,q),b=r.res.filter(function(x){return !x.mf.length})[0];return '<tr><td>'+esc(q.name)+'</td><td>'+(b?b.c.map(function(x){return esc(x.l.from+'→'+x.l.to+' '+(x.o.dep||'--'))}).join(' | '):'(keine)')+'</td><td class="n">'+(b?eur(b.tot):'')+'</td><td class="n">'+(b?esc(mins(b.dur)):'')+'</td></tr>'}).join('')+'</table></div>';
+  var rows=R.res.filter(function(r){return S.showViol||!r.mf.length});
+  H+='<h3>Rangliste ('+rows.length+')</h3><div class="tw"><table><tr><th>#</th><th>Kombination</th><th class="n">Hand</th><th class="n">Koffer</th><th class="n">Zeit</th><th>Status</th></tr>';
+  rows.slice(0,25).forEach(function(r,i){
+    H+='<tr class="row'+(r===best?' best':'')+'" data-a="det" data-v="'+esc(r.key)+'"><td>'+(i+1)+'</td><td>'+comboLine(r,t,true)+'</td><td class="n">'+eur(r.ih)+'</td><td class="n">'+eur(r.ik)+'</td><td class="n">'+esc(mins(r.dur))+'</td><td>'+bpill(r.bk)+(r.par?pill('Pareto','cp'):'')+r.mf.map(function(id){return pill('Muss verletzt: '+consShort({id:id,allowed:(p.cons.filter(function(c){return c.id===id})[0]||{}).allowed}),'bad')}).join('')+consChips(r,p,t)+(r.gaps?pill(r.gaps+' Lücken','warn'):'')+'</td></tr>';
+    if(S.det===r.key)H+='<tr><td></td><td colspan="5">'+detail(r,t,p)+'</td></tr>';
+  });
+  return H+'</table></div>';
+}
+
+/* Tab 7 */
 function tabDaten(){
   var t=T(),H='<h2>Daten und Lernen</h2>';
   H+='<h3>Sicherung und Übernahme</h3><div class="card"><div class="hrow"><button class="btn cp" data-a="cpjson">Alles als JSON kopieren</button><button class="btn fl" data-a="dl">Datei laden: reise-entscheidungsfinder_'+nowIso().replace('T','_').replace(':','')+'.html</button></div><p class="sub">Der Datei-Download ist in der Artefakt-Ansicht blockiert. Dort JSON kopieren und lokal speichern. In der lokalen HTML-Datei funktioniert der Download.</p><textarea id="impall" rows="4" placeholder="Gesamt-JSON hier einfügen"></textarea><div class="hrow" style="margin-top:6px"><button class="btn" data-a="impall">JSON übernehmen (ersetzt alles)</button><button class="btn dg" data-a="'+(S.rst?'reset2':'reset')+'">'+(S.rst?'Wirklich zurücksetzen?':'Auf Auslieferungsstand zurücksetzen')+'</button></div></div>';
@@ -537,28 +656,27 @@ function tabDaten(){
   H+='<h3>Verbesserungsvorschläge aus deinen Daten</h3>'+suggest(t);
   H+='<h3>Feedback an das Werkzeug</h3><div class="card"><textarea id="fbtx" rows="3" placeholder="Was fehlt, was stört, welches Merkmal soll dazu?"></textarea><div class="hrow" style="margin-top:6px"><button class="btn" data-a="fb">Eintragen</button></div>'+S.fb.map(function(x){return '<div class="todo"><span class="mono sub">'+esc(x.t)+'</span><span class="tx">'+esc(x.x)+'</span></div>'}).join('')+'</div>';
   H+='<h3>Lernprotokoll</h3><div class="card">'+(S.log.length?S.log.slice(0,40).map(function(x){return '<div class="todo"><span class="mono sub">'+esc(x.t)+'</span><span class="tx">'+esc(x.x)+'</span></div>'}).join(''):'<span class="sub">Noch keine Einträge.</span>')+'</div>';
-  H+='<h3>Version</h3><div class="note n-info">V0.2 Vorbereitungs-Dashboard, Stand 09.10.2026. V0.1: Merkmalskatalog, 4 Profile, Optionen-Erfassung, Rangliste mit Sensitivität. Neu in V0.2: Merkmale Kabinenklasse und Verfügbarkeit im Tarif, Feld Tarifname (aus den Royal-Air-Maroc-Seiten). Merkmale gesamt: '+CAT().length+'. Das Werkzeug lernt nicht selbstständig; Verbesserungen entstehen nur über die hier dokumentierten Regeln, Gewichte und Feedback-Einträge.</div>';
+  H+='<h3>Version</h3><div class="note n-info">V0.3 Stand 09.10.2026. V0.1: Merkmalskatalog, Optionen, Rangliste. V0.2: Kabinenklasse, Verfügbarkeit, Tarifname. Neu in V0.3: Preisminimierung unter priorisierten Nebenbedingungen (Profile mit Drag und Drop), Durchgangstickets, Anschlusspuffer, Links und Suchvorgaben, Kopieranleitung, Royal-Air-Maroc-Daten. Merkmale gesamt: '+CAT().length+'. Das Werkzeug lernt nicht selbstständig; Verbesserungen entstehen nur über die hier dokumentierten Regeln, Reihenfolgen und Feedback-Einträge.</div>';
   return H;
 }
 function suggest(t){
-  var cat=CAT(),p=P(),all=[];t.legs.forEach(function(l){(t.opts[l.id]||[]).filter(function(o){return !o.ex}).forEach(function(o){all.push([o,l])})});
+  var cat=CAT(),p=P(),all=[];t.legs.forEach(function(l,i){(t.opts[l.id]||[]).forEach(function(o){all.push([o,legsView(t,i,Math.max(1,+o.span||1))])})});
   var out=[];
-  if(!all.length)out.push(['info','Noch keine echten Optionen. Analyse der Datenlücken startet nach dem ersten Import.']);
+  if(!all.length)out.push(['info','Noch keine Optionen. Analyse der Datenlücken startet nach dem ersten Import.']);
   else{
-    var gaps={};all.forEach(function(x){cat.forEach(function(f){if(f.kind==='cmb'||f.kind==='num')return;if(effW(p,f)>0&&val(x[0],x[1],f)==='?')gaps[f.name]=(gaps[f.name]||0)+1})});
-    Object.keys(gaps).sort(function(a,b){return gaps[b]-gaps[a]}).slice(0,5).forEach(function(k){out.push(['warn','"'+k+'" fehlt bei '+gaps[k]+' von '+all.length+' Optionen. Quelle ergänzen oder Gewicht auf 0 setzen, sonst zählt der Neutralwert 50.'])});
+    var gaps={};all.forEach(function(x){cat.forEach(function(f){if(f.kind==='cmb'||f.kind==='num')return;var used=effW(p,f)>0||p.cons.some(function(c){return c.on&&c.id==='f:'+f.id});if(used&&val(x[0],x[1],f)==='?')gaps[f.name]=(gaps[f.name]||0)+1})});
+    Object.keys(gaps).sort(function(a,b){return gaps[b]-gaps[a]}).slice(0,6).forEach(function(k){out.push(['warn','"'+k+'" fehlt bei '+gaps[k]+' von '+all.length+' Optionen. Quelle ergänzen oder Gewicht und Nebenbedingung entfernen; unbekannt zählt als erfüllt.'])});
     var old=all.filter(function(x){return DER.p_age(x[0],x[1])==='old'||DER.p_age(x[0],x[1])==='?'}).length;
     if(old)out.push(['warn',old+' Optionen ohne frischen Preisstand (älter als 72 h oder ohne Abrufzeit).']);
   }
-  var w=cat.filter(function(f){return effW(p,f)===0}).length;out.push(['info',w+' Merkmale haben im Profil "'+p.name+'" Gewicht 0 und beeinflussen die Rangfolge nicht.']);
-  var wins={};S.profiles.forEach(function(q){var r=rank(t,q).res.filter(function(x){return !x.viol.length})[0];if(r)wins[r.key]=1});
-  if(Object.keys(wins).length>1)out.push(['warn','Die Profile liefern verschiedene Gewinner. Die Entscheidung hängt von der Gewichtung ab (Tab 5, Sensitivität).']);
+  var wins={};S.profiles.forEach(function(q){var r=rank(t,q).res.filter(function(x){return !x.mf.length})[0];if(r)wins[r.key]=1});
+  if(Object.keys(wins).length>1)out.push(['warn','Die Profile liefern verschiedene Gewinner. Die Entscheidung hängt von Ziel und Prioritäten ab (Tab 6, Gewinner je Profil).']);
   else if(Object.keys(wins).length===1)out.push(['ok','Alle Profile führen zum selben Gewinner (robustes Ergebnis).']);
-  out.push(['info','Workflow: Sobald dieselbe Abfrage zum dritten Mal läuft, als Skill oder geplante Aufgabe anlegen. JSON-Import (Tab 4) ist dafür die Schnittstelle für Unteragenten.']);
+  out.push(['info','Workflow: Sobald dieselbe Abfrage zum dritten Mal läuft, als Skill oder geplante Aufgabe anlegen. JSON-Import (Tab 5) ist die Schnittstelle für Unteragenten.']);
   return out.map(function(x){return '<div class="note '+(x[0]==='ok'?'n-ok':x[0]==='info'?'n-info':'')+'">'+esc(x[1])+'</div>'}).join('');
 }
 
-var TABS={start:tabStart,quellen:tabQuellen,merk:tabMerk,opt:tabOpt,ent:tabEnt,daten:tabDaten};
+var TABS={start:tabStart,quellen:tabQuellen,prio:tabPrio,merk:tabMerk,opt:tabOpt,ent:tabEnt,daten:tabDaten};
 function render(){
   var y=window.scrollY;
   $('#app').innerHTML=head()+'<main>'+TABS[S.tab]()+'</main>';
@@ -570,23 +688,25 @@ function findOpt(t,l,id){return (t.opts[l]||[]).filter(function(o){return o.id==
 function setB(b,v,el){
   var t=T(),p=b.split(':'),k=p[0];
   if(k==='cur'){S.cur=v;S.legTab=null;S.det=null;return 'r'}
-  if(k==='prof'){S.prof=v;return 'r'}
+  if(k==='prof'){S.prof=v;S.pdel=false;return 'r'}
   if(k==='showviol'){S.showViol=el.checked;return 'r'}
-  if(k==='t'){t[p[1]]=v;if(p[1]==='bagMode'||p[1]==='pay')return 'r';return 'r'}
+  if(k==='t'){t[p[1]]=v;return 'r'}
   if(k==='bud'){t.budget[p[1]]=v;return 'r'}
+  if(k==='pf'){P()[p[1]]=v;return 'r'}
+  if(k==='con'){P().cons[+p[1]].on=el.checked;return 'r'}
   if(k==='l'){var l=t.legs.filter(function(x){return x.id===p[1]})[0],f=p[2];
     if(f==='dw0')l.depWin[0]=+v;else if(f==='dw1')l.depWin[1]=+v;else if(f==='aw0')l.arrWin[0]=+v;else if(f==='aw1')l.arrWin[1]=+v;else l[f]=(f==='from'||f==='to')?v.toUpperCase():v;return 'r'}
-  if(k==='o'){var o=findOpt(t,p[1],p[2]),f=p.slice(3).join(':');
-    if(f.indexOf('f.')===0){o.f=o.f||{};o.f[f.slice(2)]=v}else o[f]=(f==='depAp'||f==='arrAp')?v.toUpperCase():v;
-    if(o.ex&&f!=='note')o.ex=o.ex;return 'o:'+o.id+':'+p[1]}
+  if(k==='o'){var o=findOpt(t,p[1],p[2]),f2=p.slice(3).join(':');
+    if(f2.indexOf('f.')===0){o.f=o.f||{};o.f[f2.slice(2)]=v}else o[f2]=(f2==='depAp'||f2==='arrAp')?v.toUpperCase():v;
+    return f2==='span'?'r':'o:'+o.id+':'+p[1]}
   if(k==='w'){P().w[p[1]]=+v;logEv('Gewicht '+p[1]+' = '+v+' (Profil '+P().name+')');return 'r'}
   if(k==='u'){var pr=P();pr.u[p[1]]=pr.u[p[1]]||{};pr.u[p[1]][p[2]]=+v;return 'r'}
-  if(k==='x'){var pr2=P();pr2.x[p[1]]=pr2.x[p[1]]||[];var i=pr2.x[p[1]].indexOf(p[2]);if(el.checked&&i<0)pr2.x[p[1]].push(p[2]);if(!el.checked&&i>=0)pr2.x[p[1]].splice(i,1);return 'r'}
   if(k==='s'){var s=t.src.filter(function(x){return x.id===p[1]})[0];s[p[2]]=v;return 'n'}
   return 'n';
 }
+function moveCons(a,b){var arr=P().cons;if(b<0||b>=arr.length||a===b)return;var it=arr.splice(a,1)[0];arr.splice(b,0,it);logEv('Priorität geändert: '+consShort(it)+' auf Platz '+(b+1));save();render()}
 function act(a,el){
-  var t=T(),v=el.getAttribute('data-v');
+  var t=T(),v=el.getAttribute('data-v'),ci=+el.getAttribute('data-i');
   switch(a){
     case 'tab':S.tab=v;break;
     case 'copy':copyTxt(el.getAttribute('data-t'));return;
@@ -596,19 +716,25 @@ function act(a,el){
     case 'addleg':t.legs.push({id:uid('l'),from:'',to:'',date:'',depWin:[0,24],arrWin:[0,24],maxStops:'',imp:'1'});break;
     case 'dleg':t.legs=t.legs.filter(function(l){return l.id!==v});delete t.opts[v];break;
     case 'chk':t.chk[v]=!t.chk[v];break;
-    case 'st':var s=t.src.filter(function(x){return x.id===el.getAttribute('data-s')})[0],kk=el.getAttribute('data-k'),c=s.st[kk];s.st[kk]=!c?nowIso():c==='x'?'':'x';if(c&&c!=='x')s.st[kk]='x';break;
+    case 'st':var s=t.src.filter(function(x){return x.id===el.getAttribute('data-s')})[0],kk=el.getAttribute('data-k'),c=s.st[kk];s.st[kk]=!c?nowIso():c==='x'?'':'x';break;
     case 'addsrc':t.src.push({id:uid('s'),name:'Neue Quelle',url:'',st:{}});break;
     case 'dsrc':t.src=t.src.filter(function(x){return x.id!==v});break;
     case 'legtab':S.legTab=v;break;
-    case 'addopt':(t.opts[v]=t.opts[v]||[]).push({id:uid('o_'),date:(t.legs.filter(function(l){return l.id===v})[0]||{}).date,depAp:(t.legs.filter(function(l){return l.id===v})[0]||{}).from,arrAp:(t.legs.filter(function(l){return l.id===v})[0]||{}).to,dep:'',arr:'',plus:0,stops:'',lay:'',dur:'',priceHand:'',priceHold:'',access:'',group:'',source:'',url:'',retrieved:nowIso(),flightno:'',note:'',f:{}});break;
+    case 'addopt':var lg=t.legs.filter(function(l){return l.id===v})[0];(t.opts[v]=t.opts[v]||[]).push({id:uid('o_'),date:lg.date,depAp:lg.from,arrAp:lg.to,dep:'',arr:'',plus:0,stops:'',lay:'',dur:'',priceHand:'',priceHold:'',access:'',group:'',span:'1',source:'',url:'',retrieved:nowIso(),flightno:'',fare:'',note:'',f:{}});break;
     case 'dupopt':var L=el.getAttribute('data-l'),src=findOpt(t,L,v),cp=JSON.parse(JSON.stringify(src));cp.id=uid('o_');t.opts[L].push(cp);break;
     case 'dopt':var L2=el.getAttribute('data-l');t.opts[L2]=t.opts[L2].filter(function(o){return o.id!==v});break;
     case 'now':findOpt(t,el.getAttribute('data-l'),v).retrieved=nowIso();break;
-    case 'rmdemo':t.legs.forEach(function(l){t.opts[l.id]=(t.opts[l.id]||[]).filter(function(o){return !o.ex})});logEv('Beispieloptionen entfernt');break;
     case 'impopt':try{var arr=JSON.parse($('#impjson').value);if(!Array.isArray(arr))arr=[arr];var n=0;arr.forEach(function(x){var l=t.legs[(+x.leg||1)-1];if(!l)return;delete x.leg;x.id=uid('o_');x.f=x.f||{};(t.opts[l.id]=t.opts[l.id]||[]).push(x);n++});logEv(n+' Optionen importiert');toast(n+' Optionen importiert')}catch(e){toast('JSON nicht lesbar: '+e.message);return}break;
     case 'det':S.det=S.det===v?null:v;break;
     case 'dupprof':var pp=P(),c2=JSON.parse(JSON.stringify(pp));c2.id=uid('p_');c2.name=pp.name+' (Kopie)';S.profiles.push(c2);S.prof=c2.id;logEv('Profil dupliziert: '+pp.name);break;
-    case 'resetprof':var base=defaultProfiles(),cur=P(),bi=base.filter(function(b){return b.id===cur.id})[0]||base[0];cur.w=bi.w;cur.u={};cur.x=bi.x;logEv('Profil zurückgesetzt: '+cur.name);break;
+    case 'resetprof':var base=defaultProfiles(),cur=P(),bi=base.filter(function(b){return b.id===cur.id})[0]||base[0];cur.w=JSON.parse(JSON.stringify(bi.w));cur.u={};cur.cons=JSON.parse(JSON.stringify(bi.cons));cur.obj=bi.obj;logEv('Profil zurückgesetzt: '+cur.name);break;
+    case 'pfdel':S.pdel=true;break;
+    case 'pfdel2':var del=S.prof;S.profiles=S.profiles.filter(function(x){return x.id!==del});S.prof=S.profiles[0].id;S.pdel=false;logEv('Profil gelöscht');break;
+    case 'cmust':var cc=P().cons[ci];cc.must=!cc.must;logEv('Bedingung '+consShort(cc)+': '+(cc.must?'Muss':'Wunsch'));break;
+    case 'cmove':moveCons(ci,ci+(+el.getAttribute('data-d')));return;
+    case 'cdel':var rm=P().cons.splice(ci,1)[0];logEv('Nebenbedingung entfernt: '+consShort(rm));break;
+    case 'callow':var c3=P().cons[ci],kq=el.getAttribute('data-k');c3.allowed=c3.allowed||[];var ix=c3.allowed.indexOf(kq);if(ix>=0)c3.allowed.splice(ix,1);else c3.allowed.push(kq);break;
+    case 'addcon':var id=$('#addcon').value;if(!id)return;var nc={id:id,on:true,must:false};if(id.indexOf('f:')===0){var f0=catById(id.slice(2));nc.allowed=f0.vals.filter(function(x){return x.k!=='?'&&x.u>=60}).map(function(x){return x.k})}P().cons.push(nc);logEv('Nebenbedingung hinzugefügt: '+consShort(nc));break;
     case 'addfeat':var nm=$('#nf_name').value.trim(),vs=$('#nf_vals').value.split('\n').map(function(l){return l.trim()}).filter(Boolean).map(function(l,i){var q=l.split('|');return {k:'v'+i,l:q[0],u:num(q[1])==null?50:num(q[1])}});
       if(!nm||vs.length<2){toast('Name und mindestens 2 Ausprägungen nötig');return}
       S.custom.push({id:uid('x_'),name:nm,grp:$('#nf_grp').value,w:+$('#nf_w').value||0,vals:vs});logEv('Eigenes Merkmal: '+nm);toast('Merkmal angelegt');break;
@@ -634,8 +760,14 @@ document.addEventListener('change',function(e){
   var el=e.target,b=el.getAttribute&&el.getAttribute('data-b');if(!b)return;
   var r=setB(b,el.type==='checkbox'?el.checked:el.value,el);save();
   if(r==='r')render();
-  else if(r&&r.indexOf('o:')===0){var q=r.split(':'),t=T(),l=t.legs.filter(function(x){return x.id===q[2]})[0],o=findOpt(t,q[2],q[1]),c=document.getElementById('oc-'+q[1]);if(c&&o){c.querySelector('.der').innerHTML=derStrip(o,l)}}
+  else if(r&&r.indexOf('o:')===0){var q=r.split(':'),t=T(),l=t.legs.filter(function(x){return x.id===q[2]})[0],o=findOpt(t,q[2],q[1]),c=document.getElementById('oc-'+q[1]);if(c&&o){var idx=t.legs.indexOf(l);c.querySelector('.der').innerHTML=derStrip(o,legsView(t,idx,Math.max(1,+o.span||1)))}}
 });
+/* Drag und Drop der Prioritätsliste */
+var dragI=null;
+document.addEventListener('dragstart',function(e){var r=e.target.closest&&e.target.closest('.cr');if(!r)return;dragI=+r.getAttribute('data-i');try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(dragI))}catch(x){}r.classList.add('drag')});
+document.addEventListener('dragover',function(e){var r=e.target.closest&&e.target.closest('.cr');if(!r||dragI==null)return;e.preventDefault();document.querySelectorAll('.cr.over').forEach(function(x){x.classList.remove('over')});r.classList.add('over')});
+document.addEventListener('drop',function(e){var r=e.target.closest&&e.target.closest('.cr');if(!r||dragI==null)return;e.preventDefault();var to=+r.getAttribute('data-i'),from=dragI;dragI=null;moveCons(from,to)});
+document.addEventListener('dragend',function(){dragI=null;document.querySelectorAll('.cr.drag,.cr.over').forEach(function(x){x.classList.remove('drag');x.classList.remove('over')})});
 load();render();
 })();
 </script>
