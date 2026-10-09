@@ -2,7 +2,7 @@
 
 ## Kanon (Stand 2026-10-09, V1.0.0)
 - **Repo:** `gty7wkh2m2-byte/token`, Branch `claude/epic-lamport-gdityd` (kein PR angelegt; Entscheidung offen: Entwurfs-PR O1 empfohlen).
-- **Werkzeug:** `notizblock/notizblock_AKTUELL.html` (Kanon, Git = Versionen). Artefakt-Link: siehe Nachtrag.
+- **Werkzeug:** `notizblock/notizblock_AKTUELL.html` (Kanon, Git = Versionen). Artefakt (Fassung aus `scripts/fragment.mjs`, Fähigkeiten sample + downloads): https://claude.ai/artifact/4rmFzV72JxwvLfKyEJKeKp
 - **Entscheidungsdatei:** `notizblock/entscheidungen_2026-10-09_2236.html`, Artefakt https://claude.ai/artifact/2ukztfz9d5rYBVs5F9VqRe (V2 bearbeitbar).
 - **Bauplan:** Backend des Werkzeugs (kanonisch, E12 O2); Spiegel `docs/BAUPLAN_AKTUELL.md`.
 - **Regeln:** `CLAUDE.md`; Skills `.claude/skills/notizblock-*`; Prompts `prompts/`; Validierung `scripts/`.
@@ -16,7 +16,7 @@
 
 ## Nachträge
 ### 2026-10-09 · Phase 0–3
-- Plan V1–V4, Phase 0/0b, V1-Bau, Repo-Gerüst, Validierung, Auslieferung in einem Chat. Artefakt-Links und Prüfergebnis: siehe Chat-Bericht und `docs/BAUPLAN_AKTUELL.md` › Baustand.
+- Plan V1–V4, Phase 0/0b, V1-Bau, Repo-Gerüst, Validierung, Auslieferung in einem Chat. Werkzeug-Artefakt https://claude.ai/artifact/4rmFzV72JxwvLfKyEJKeKp (V1.0.0), Entscheidungs-Artefakt https://claude.ai/artifact/2ukztfz9d5rYBVs5F9VqRe (V2). Prüfergebnis: 0 Fehler, kein Überlauf, Autosave ok, 20 Screenshots.
 
 ## Folgechat-Prompt (Copybox)
 ```

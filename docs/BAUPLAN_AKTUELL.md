@@ -418,7 +418,7 @@ token/
 | 1b Repo-Gerüst | 🟢 | CLAUDE.md, .claude/settings.json, 3 Skills, 3 Prompts, 3 Scripts, Docs |
 | 1b Outlook-Schnellweg (Zapier) | 🟡 wartet auf dich | Outlook-Konto in Zapier verbinden |
 | 2 Validierung | 🟢 | `scripts/validate.mjs`: 0 Fehler, kein Überlauf, Autosave ok (Prüfbericht im Chat) |
-| 3 Auslieferung | 🟢 | Push + Artefakt (Link im Handover-Nachtrag) |
+| 3 Auslieferung | 🟢 | Push (Commit 8f787e6) + Artefakt https://claude.ai/artifact/4rmFzV72JxwvLfKyEJKeKp |
 | 4 Ausbau | 🔴 Folgechats | Routine, db, A6, PWA, B3/B7, Cloudflare, Alt-Projekte |
 
 Abweichungen gegenüber Plan: JSDOM-Smoke durch Chromium-Headless ersetzt (strenger, bereits installiert); Kalender-Drag auf Tag umgesetzt, Wochen-/Tagesansicht als Listen; L3-Dreispalten als Backend-Schalter „Baum als dritte Spalte“ ab 1200 px.

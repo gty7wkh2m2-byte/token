@@ -22,7 +22,7 @@ Projektregeln für jede Claude-Code-Sitzung in diesem Repository. Stand 2026-10-
 ## Validierungspflicht (vor jedem Commit der Werkzeugdatei)
 1. `node scripts/validate.mjs notizblock/notizblock_AKTUELL.html` → 0 Fehler, kein Überlauf, alle Ansichten rendern.
 2. `node scripts/screenshots.mjs notizblock/notizblock_AKTUELL.html` → mobil + Desktop, hell + dunkel.
-3. Artefakt-Fassung erzeugen: `node scripts/fragment.mjs notizblock/notizblock_AKTUELL.html > /tmp/notizblock_fragment.html` und diese Datei auf die bestehende Artefakt-URL veröffentlichen (Fähigkeiten: `sample`, `downloads`).
+3. Artefakt-Fassung erzeugen: `node scripts/fragment.mjs notizblock/notizblock_AKTUELL.html > /tmp/notizblock_fragment.html` und diese Datei auf die bestehende Artefakt-URL https://claude.ai/artifact/4rmFzV72JxwvLfKyEJKeKp veröffentlichen (Fähigkeiten: `sample`, `downloads`).
 
 ## Rückschreibpflicht
 - Jeder Bauauftrag endet mit: Bauplan-Status im Werkzeug (Backend › Bauplan) aktualisiert, Update-Paket in `notizblock/pakete/` abgelegt, `docs/BAUPLAN_AKTUELL.md` aus dem Backend-Export neu geschrieben, Changelog-Eintrag, kurzer Bericht mit Kontrollblock.
