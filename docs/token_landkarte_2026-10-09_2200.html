@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Token-Landkarte Claude Code</title>
+</head>
+<body>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: ein Spaltenlauf, Übersicht oben (Ebenen-Matrix), darunter nummerierte Karten je Ort, Copyboxen, Kontrollblock. */
+:root{
+  --bg:#f5f7f6; --surface:#ffffff; --fg:#1b2420; --muted:#5b6660; --line:#d6ddd9;
+  --accent:#0f766e; --accent-soft:#d9f0ec;
+  --green:#15803d; --green-soft:#dcf5e3; --amber:#b45309; --amber-soft:#fdeed6;
+  --red:#b91c1c; --red-soft:#fde3e3; --violet:#6d28d9; --violet-soft:#ebe3fb;
+  --blue:#1d4ed8; --blue-soft:#dde8fd; --info:#0369a1; --info-soft:#dbeefb;
+  --code-bg:#f0f3f2;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#121816; --surface:#1a211e; --fg:#e6ebe8; --muted:#9aa6a0; --line:#2f3a35;
+  --accent:#4fd1c5; --accent-soft:#163b37;
+  --green:#4ade80; --green-soft:#14331f; --amber:#fbbf24; --amber-soft:#3a2a0c;
+  --red:#f87171; --red-soft:#3b1515; --violet:#c4b5fd; --violet-soft:#2a1f45;
+  --blue:#93c5fd; --blue-soft:#172a4a; --info:#7dd3fc; --info-soft:#0f2a3a;
+  --code-bg:#0f1513; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#121816; --surface:#1a211e; --fg:#e6ebe8; --muted:#9aa6a0; --line:#2f3a35;
+  --accent:#4fd1c5; --accent-soft:#163b37;
+  --green:#4ade80; --green-soft:#14331f; --amber:#fbbf24; --amber-soft:#3a2a0c;
+  --red:#f87171; --red-soft:#3b1515; --violet:#c4b5fd; --violet-soft:#2a1f45;
+  --blue:#93c5fd; --blue-soft:#172a4a; --info:#7dd3fc; --info-soft:#0f2a3a;
+  --code-bg:#0f1513; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.45;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 48px}
+h1{font-size:1.65rem;margin:0 0 4px;text-wrap:balance}
+h2{font-size:1.2rem;margin:0;text-wrap:balance}
+h3{font-size:1rem;margin:0}
+p{margin:0}
+a{color:var(--accent)}
+code,.mono{font-family:var(--mono);font-size:.86em}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 14px;color:var(--muted);font-size:.85rem;margin-top:6px}
+.meta b{color:var(--fg)}
+section{margin-top:28px}
+.sec-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-left:12px;border-left:5px solid var(--accent)}
+.sec-head .num{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+.sec-head.c-green{border-color:var(--green)} .sec-head.c-amber{border-color:var(--amber)} .sec-head.c-red{border-color:var(--red)} .sec-head.c-violet{border-color:var(--violet)} .sec-head.c-blue{border-color:var(--blue)} .sec-head.c-info{border-color:var(--info)}
+.lead{color:var(--muted);font-size:.9rem;margin-bottom:10px}
+/* Pills */
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:1px 9px;font-size:.76rem;font-weight:600;letter-spacing:.01em;white-space:nowrap;border:1px solid transparent}
+.p-green{background:var(--green-soft);color:var(--green)} .p-amber{background:var(--amber-soft);color:var(--amber)} .p-red{background:var(--red-soft);color:var(--red)} .p-violet{background:var(--violet-soft);color:var(--violet)} .p-blue{background:var(--blue-soft);color:var(--blue)} .p-info{background:var(--info-soft);color:var(--info)} .p-wait{background:transparent;border-color:var(--amber);color:var(--amber)}
+.file{display:inline-flex;align-items:center;gap:6px;white-space:normal;word-break:break-all;max-width:100%;background:var(--green-soft);color:var(--green);border-radius:999px;padding:2px 10px;font-family:var(--mono);font-size:.8rem;font-weight:500}
+/* Legend */
+.legend{display:flex;flex-wrap:wrap;gap:8px 12px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:.85rem}
+.legend span.k{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+.legend code{white-space:normal;word-break:break-word}
+.reqs .pill{white-space:normal;text-align:left}
+/* Tables */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;background:var(--code-bg)}
+tr:last-child td{border-bottom:0}
+td.cur{box-shadow:inset 4px 0 0 var(--red)}
+/* Ebenen matrix */
+.matrix{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.eb{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;border-top:4px solid var(--violet);min-width:0}
+.eb .tag{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.eb h3{margin:2px 0 8px;font-size:.98rem}
+.eb ul{margin:0;padding-left:16px;font-size:.86rem}
+.eb li{margin:3px 0}
+.arrow{color:var(--muted);font-size:.8rem;margin-top:6px}
+/* Cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;padding:12px 14px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.card.s-green{border-left-color:var(--green)} .card.s-amber{border-left-color:var(--amber)} .card.s-red{border-left-color:var(--red)} .card.s-violet{border-left-color:var(--violet)} .card.s-blue{border-left-color:var(--blue)} .card.s-info{border-left-color:var(--info)}
+.card.cur{outline:2px solid var(--red);outline-offset:2px}
+.card-top{display:flex;align-items:flex-start;gap:10px}
+.circle{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--fg);color:var(--bg);display:grid;place-items:center;font-family:var(--mono);font-size:.78rem;font-weight:600}
+.card-top h3{flex:1 1 auto;line-height:1.3}
+.card ul{margin:0;padding-left:16px;font-size:.88rem}
+.card li{margin:3px 0}
+.card .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.src{font-size:.76rem;color:var(--muted);font-family:var(--mono);word-break:break-all}
+.chk{display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--muted);margin-top:auto;padding-top:4px;border-top:1px dashed var(--line)}
+.chk input{width:16px;height:16px;accent-color:var(--green)}
+/* Steps */
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;border-top:4px solid var(--blue);min-width:0}
+.step.ph1{border-top-color:var(--green)} .step.ph2{border-top-color:var(--accent)} .step.ph3{border-top-color:var(--violet)} .step.ph4{border-top-color:var(--amber)} .step.ph5{border-top-color:var(--info)}
+.step .k{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.step h3{margin:2px 0 6px;font-size:.95rem}
+.step p{font-size:.86rem}
+.step .act{font-weight:600}
+/* Copybox */
+.cb{border:2px solid var(--blue);border-radius:10px;background:var(--surface);overflow:hidden;min-width:0}
+.cb-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--blue-soft);flex-wrap:wrap}
+.cb-head .where{font-size:.82rem;color:var(--fg)}
+.cb-head .where b{color:var(--blue)}
+.cb pre{margin:0;padding:12px;max-height:340px;overflow:auto;font-family:var(--mono);font-size:.8rem;line-height:1.45;background:var(--code-bg);white-space:pre}
+button{font-family:var(--sans);font-size:.8rem;font-weight:600;border:0;border-radius:999px;padding:5px 12px;cursor:pointer;background:var(--blue);color:#fff}
+button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.ghost{background:transparent;color:var(--blue);border:1px solid var(--blue)}
+button.ok{background:var(--green)}
+.cbs{display:grid;gap:14px}
+details{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:0 12px}
+details summary{cursor:pointer;padding:10px 0;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}
+details summary::before{content:"▸";color:var(--muted);transition:transform .15s}
+details[open] summary::before{transform:rotate(90deg)}
+details .body{padding:0 0 12px}
+/* Control block */
+.ctrl{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:860px){.ctrl{grid-template-columns:3fr 2fr}}
+.prompt{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:.92rem;line-height:1.7;min-width:0}
+mark{border-radius:4px;padding:0 3px;background:var(--green-soft);color:var(--fg)}
+mark.a{background:var(--accent-soft)} mark.v{background:var(--violet-soft)} mark.b{background:var(--blue-soft)} mark.y{background:var(--amber-soft)}
+mark sup{font-family:var(--mono);font-size:.65em;color:var(--muted)}
+.reqs{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+/* Misc */
+.note{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.88rem}
+.note ul{margin:4px 0 0;padding-left:16px}
+textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;padding:8px;font-family:var(--sans);font-size:.9rem;background:var(--surface);color:var(--fg);resize:vertical}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;flex:1 1 120px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:6px 14px;border-radius:999px;font-size:.85rem;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<header>
+  <h1>Token-Landkarte Claude Code</h1>
+  <div class="meta">
+    <span><b>Version</b> V1</span>
+    <span><b>Stand</b> 2026-10-09</span>
+    <span><b>Herkunft</b> Claude Code Cloud-Session, Repo gty7wkh2m2-byte/token, Branch claude/admiring-bell-9v0upp</span>
+    <span><b>Quellenbasis</b> code.claude.com/docs, support.claude.com, abgerufen 2026-10-09</span>
+    <span><b>Datei</b> <span class="file">docs/token_landkarte_2026-10-09_2200.html</span></span>
+  </div>
+  <div class="toolbar">
+    <span class="pill p-info">Fortschritt Maßnahmen</span>
+    <div class="bar" aria-hidden="true"><i id="progbar" style="width:0%"></i></div>
+    <span id="progtxt" class="mono" style="font-size:.8rem;color:var(--muted)">0 / 0</span>
+    <button class="ghost" id="btnExport">JSON-Export anzeigen</button>
+    <button class="ghost" id="btnReset">Haken zurücksetzen</button>
+  </div>
+  <pre id="exportBox" hidden style="margin-top:8px;padding:10px;background:var(--code-bg);border-radius:8px;font-size:.78rem;max-height:160px;overflow:auto"></pre>
+</header>
+
+<section>
+  <div class="legend">
+    <span class="k"><span class="pill p-green">grün</span> sofort umsetzbar / empfohlen · auch: Datei</span>
+    <span class="k"><span class="pill p-amber">gelb</span> unter Bedingung / Option / wartet auf Bestätigung</span>
+    <span class="k"><span class="pill p-red">rot</span> Klärung nötig / nicht möglich / aktuelle Position</span>
+    <span class="k"><span class="pill p-violet">violett</span> neutral-kategorial (Ebenen, Orte)</span>
+    <span class="k"><span class="pill p-blue">blau</span> Kopieren (Copybox, Kopierknopf)</span>
+    <span class="k"><span class="pill p-info">Info</span> Hinweis, Messwert, Quelle</span>
+    <span class="k">Quellenmarker: <code>[W:Domain]</code> Web/Docs · <code>[T]</code> Toolbeobachtung dieser Session · <code>[I:hoch/mittel]</code> Inferenz · <code>[U]</code> Nutzerangabe</span>
+  </div>
+</section>
+
+<!-- ============ 0 ÜBERBLICK ============ -->
+<section id="s0">
+  <div class="sec-head c-violet"><span class="num">0</span><h2>Überblick: Wo lebt welches Wissen</h2></div>
+  <p class="lead">Deine fünf Kontext-Ebenen A–E aus den Gesamtanweisungen, abgebildet auf konkrete Orte in Claude Code. Eine-Quelle-Regel: jede Information an genau einem Ort.</p>
+  <div class="matrix">
+    <div class="eb"><div class="tag">Ebene A</div><h3>Dauerhaftes Projektwissen</h3>
+      <ul><li><span class="file">./CLAUDE.md</span> im Repo, unter 200 Zeilen</li><li><span class="file">.claude/rules/*.md</span> mit <code>paths:</code> nur bei Bedarf geladen</li><li>claude.ai Projektkontext (Kanon, Handover, Vorlagen)</li></ul>
+      <div class="arrow">→ Karten 1–5</div></div>
+    <div class="eb"><div class="tag">Ebene B</div><h3>Dauerhafte Verhaltensregeln</h3>
+      <ul><li><span class="file">~/.claude/CLAUDE.md</span> global, nur Code-relevante Regeln</li><li>claude.ai Präferenzen (Chat)</li><li>Skills für Abläufe, Hooks für deterministische Regeln</li></ul>
+      <div class="arrow">→ Karten 6–8, 20–21</div></div>
+    <div class="eb"><div class="tag">Ebene C</div><h3>Aktueller Status</h3>
+      <ul><li>Steuerungs-/Trackerdatei im Repo <span class="file">docs/</span></li><li>Auto-Memory <span class="file">~/.claude/projects/&lt;projekt&gt;/memory/MEMORY.md</span>, erste 200 Zeilen je Session geladen</li><li>Statuszeile: Kontext-% und Limits live</li></ul>
+      <div class="arrow">→ Karten 7, 13</div></div>
+    <div class="eb"><div class="tag">Ebene D</div><h3>Aktuelle Einzelaufgabe</h3>
+      <ul><li>Prompt im Chat / Session</li><li>Sitzungsbefehle: <code>/clear</code>, <code>/compact</code>, <code>/rewind</code>, <code>/btw</code>, <code>/context</code></li><li>Modell/Effort an Phasengrenzen, nicht mitten im Chat</li></ul>
+      <div class="arrow">→ Karten 25–30</div></div>
+    <div class="eb"><div class="tag">Ebene E</div><h3>Rohdaten</h3>
+      <ul><li>Dateien im Repo, nie vollständig lesen: Grep, Auszug, Skript</li><li>Unteragent mit <code>model: haiku</code> für Logs, Tests, Doku</li><li>MCP/Konnektoren nur bei Freigabe, Tool Search lässt Schemata deferred</li></ul>
+      <div class="arrow">→ Karten 17–24</div></div>
+  </div>
+</section>
+
+<!-- ============ 1 WISSENSQUELLEN ============ -->
+<section id="s1">
+  <div class="sec-head c-info"><span class="num">1</span><h2>Wissensquellen: wo das Wissen herkommt</h2></div>
+  <p class="lead">Recherche-Stufe 1 reicht: offizielle Docs decken alles ab. Reihenfolge = Lesereihenfolge. Alle abgerufen 2026-10-09.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>#</th><th>Quelle</th><th>Deckt ab</th><th>Belegstufe</th></tr></thead>
+    <tbody>
+      <tr><td>Q1</td><td><a href="https://code.claude.com/docs/en/costs">code.claude.com/docs/en/costs</a></td><td>Kostentreiber, <code>/usage</code>, <code>/compact</code>, Subagent-Empfehlungen, Modellwahl</td><td><span class="pill p-green">VERIFIZIERT</span></td></tr>
+      <tr><td>Q2</td><td><a href="https://code.claude.com/docs/en/context-window">…/context-window</a></td><td>Was beim Start geladen wird, Verhalten nach Kompaktierung, <code>/context</code></td><td><span class="pill p-green">VERIFIZIERT</span></td></tr>
+      <tr><td>Q3</td><td><a href="https://code.claude.com/docs/en/memory">…/memory</a></td><td>CLAUDE.md-Hierarchie, <code>.claude/rules/</code>, Auto-Memory, <code>/doctor prompt-audit</code></td><td><span class="pill p-green">VERIFIZIERT</span></td></tr>
+      <tr><td>Q4</td><td><a href="https://code.claude.com/docs/en/prompt-caching">…/prompt-caching</a></td><td>Was den Cache ungültig macht, TTL 1h / 5min</td><td><span class="pill p-green">VERIFIZIERT</span></td></tr>
+      <tr><td>Q5</td><td><a href="https://code.claude.com/docs/en/model-config">…/model-config</a></td><td>Modell-Aliasse, <code>opusplan</code>, Effort, Thinking, Auto-Compact-Fenster</td><td><span class="pill p-green">VERIFIZIERT</span></td></tr>
+      <tr><td>Q6</td><td><a href="https://code.claude.com/docs/en/settings-reference">…/settings-reference</a> · <a href="https://code.claude.com/docs/en/env-vars">…/env-vars</a></td><td>Alle Settings-Schlüssel und Umgebungsvariablen</td><td><span class="pill p-green">VERIFIZIERT</span></td></tr>
+      <tr><td>Q7</td><td><a href="https://code.claude.com/docs/en/sub-agents">…/sub-agents</a> · <a href="https://code.claude.com/docs/en/skills">…/skills</a> · <a href="https://code.claude.com/docs/en/hooks">…/hooks</a></td><td>Unteragenten, Skills, Hooks: Frontmatter-Felder, Kontextisolation</td><td><span class="pill p-green">VERIFIZIERT</span></td></tr>
+      <tr><td>Q8</td><td><a href="https://code.claude.com/docs/en/mcp">…/mcp</a> · <a href="https://code.claude.com/docs/en/statusline">…/statusline</a> · <a href="https://code.claude.com/docs/en/permission-modes">…/permission-modes</a></td><td>MCP-Scopes, Tool Search, Statuszeile, Permission-Modi</td><td><span class="pill p-green">VERIFIZIERT</span></td></tr>
+      <tr><td>Q9</td><td><a href="https://code.claude.com/docs/en/best-practices">…/best-practices</a></td><td>Anthropic-Arbeitsmuster: Explore → Plan → Implement, <code>/clear</code>-Regeln</td><td><span class="pill p-green">VERIFIZIERT</span></td></tr>
+      <tr><td>Q10</td><td><a href="https://code.claude.com/docs/en/claude-code-on-the-web">…/claude-code-on-the-web</a> · <a href="https://code.claude.com/docs/en/headless">…/headless</a> · <a href="https://code.claude.com/docs/en/cli-reference">…/cli-reference</a></td><td>Cloud-Sessions, <code>claude -p</code>, Flags</td><td><span class="pill p-green">VERIFIZIERT</span></td></tr>
+      <tr><td>Q11</td><td><a href="https://support.claude.com/en/articles/11145838-using-claude-code-with-your-pro-or-max-plan">support.claude.com, Pro/Max-Plan</a></td><td>5-Stunden- und Wochenlimit, geteilt über Chat und Code</td><td><span class="pill p-green">VERIFIZIERT</span></td></tr>
+      <tr><td>Q12</td><td>In Claude Code selbst: <code>/context</code>, <code>/usage</code>, <code>/doctor</code>, <code>/status</code></td><td>Eigene Messwerte statt Schätzung</td><td><span class="pill p-info">Messung</span></td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- ============ 2 MASSNAHMEN ============ -->
+<section id="s2">
+  <div class="sec-head c-green"><span class="num">2</span><h2>Maßnahmenkatalog nach Ort</h2></div>
+  <p class="lead">Je Karte: Ort/Datei, Handlung, Hebel, Quelle. Haken speichern lokal im Browser (Autosave). Hebel = geschätzte Wirkung auf Kontext und Nutzungslimit <code>[I:mittel]</code>, keine eigene Messung.</p>
+
+  <h3 style="margin:14px 0 8px"><span class="pill p-violet">Ort 1</span> Repo: <code>./CLAUDE.md</code> und <code>.claude/rules/</code></h3>
+  <div class="cards">
+    <div class="card s-green" data-id="m1"><div class="card-top"><span class="circle">1</span><h3>CLAUDE.md unter 200 Zeilen halten</h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel hoch</span></div>
+      <ul><li><b>Prüffrage je Zeile:</b> „Würde Entfernen zu Fehlern führen?“ Wenn nein: streichen.</li><li>Wird bei jedem Turn mitgesendet und nach Kompaktierung neu gelesen.</li><li>Blockkommentare <code>&lt;!-- … --&gt;</code> werden entfernt, kosten nichts: Wartungsnotizen dort.</li></ul>
+      <div class="src">[W:code.claude.com memory, best-practices 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+    <div class="card s-green" data-id="m2"><div class="card-top"><span class="circle">2</span><h3>Regeln in <code>.claude/rules/*.md</code> mit <code>paths:</code></h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel hoch</span></div>
+      <ul><li>Regeln ohne <code>paths:</code> laden beim Start, mit <code>paths:</code> nur wenn passende Datei berührt wird.</li><li><b>Anlegen:</b> z. B. <code>html-werkzeuge.md</code> mit <code>paths: ["**/*.html"]</code> für HTML-Prüfkette.</li><li>Globale Variante: <span class="file">~/.claude/rules/</span>.</li></ul>
+      <div class="src">[W:code.claude.com memory 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+    <div class="card s-green" data-id="m3"><div class="card-top"><span class="circle">3</span><h3>Abschnitt „Compact Instructions“ in CLAUDE.md</h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel mittel</span></div>
+      <ul><li>Dauerhafte Vorgabe, was eine Kompaktierung behalten muss (Entscheidungen, offene Punkte, Dateinamen).</li><li>Einmalig: <code>/compact Fokus auf …</code>.</li></ul>
+      <div class="src">[W:code.claude.com costs 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+    <div class="card s-amber" data-id="m4"><div class="card-top"><span class="circle">4</span><h3><code>@import</code> organisiert, spart nicht</h3></div>
+      <div class="row"><span class="pill p-amber">Irrtum vermeiden</span><span class="pill p-info">Hebel 0</span></div>
+      <ul><li>Imports werden beim Start vollständig expandiert, max. 4 Ebenen.</li><li><b>Folge:</b> Auslagern per Import senkt Kontext nicht. Nur <code>.claude/rules/</code> mit <code>paths:</code> oder Skills laden bedarfsweise.</li></ul>
+      <div class="src">[W:code.claude.com memory 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> zur Kenntnis</label></div>
+    <div class="card s-green" data-id="m5"><div class="card-top"><span class="circle">5</span><h3><code>/doctor prompt-audit</code> regelmäßig</h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel mittel</span></div>
+      <ul><li>Schlägt Kürzungen an CLAUDE.md und Regeln vor, ohne sie anzuwenden.</li><li><code>/doctor</code> markiert Inhalte, die Claude aus dem Code ableiten kann (ab v2.1.206).</li></ul>
+      <div class="src">[W:code.claude.com memory 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+  </div>
+
+  <h3 style="margin:18px 0 8px"><span class="pill p-violet">Ort 2</span> Global: <code>~/.claude/CLAUDE.md</code>, Auto-Memory</h3>
+  <div class="cards">
+    <div class="card s-green" data-id="m6"><div class="card-top"><span class="circle">6</span><h3>Verhaltensregeln (Ebene B) einmal global</h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel hoch</span></div>
+      <ul><li>Nur Code-relevante Regeln: Sprache, Format, Prüfkette, Dateinamen-Schema, Token-Regeln.</li><li>Nicht die vollen Chat-Präferenzen duplizieren.</li><li><b>Nur lokal am Rechner anlegbar</b>, nicht aus einer Cloud-Session: Copybox C7.</li></ul>
+      <div class="src">[W:code.claude.com memory 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+    <div class="card s-amber" data-id="m7"><div class="card-top"><span class="circle">7</span><h3>Auto-Memory kurz halten</h3></div>
+      <div class="row"><span class="pill p-amber">beobachten</span><span class="pill p-info">Hebel mittel</span></div>
+      <ul><li><code>MEMORY.md</code>: erste 200 Zeilen bzw. 25 KB werden jede Session geladen, Themen-Dateien bei Bedarf.</li><li>Steuern über <code>/memory</code>; abschalten: <code>CLAUDE_CODE_DISABLE_AUTO_MEMORY=1</code>.</li><li>Unteragenten erhalten das Haupt-Memory nicht.</li></ul>
+      <div class="src">[W:code.claude.com memory 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+    <div class="card s-amber" data-id="m8"><div class="card-top"><span class="circle">8</span><h3><code>includeGitInstructions: false</code></h3></div>
+      <div class="row"><span class="pill p-amber">Option</span><span class="pill p-info">Hebel klein</span></div>
+      <ul><li>Entfernt eingebaute Commit/PR-Anweisungen aus dem Kontext.</li><li>Nur sinnvoll, wenn Commit-Stil ohnehin in CLAUDE.md steht.</li></ul>
+      <div class="src">[W:code.claude.com how-claude-code-works 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> entschieden</label></div>
+  </div>
+
+  <h3 style="margin:18px 0 8px"><span class="pill p-violet">Ort 3</span> <code>.claude/settings.json</code> (Repo) und <code>~/.claude/settings.json</code> (global)</h3>
+  <div class="cards">
+    <div class="card s-green" data-id="m9"><div class="card-top"><span class="circle">9</span><h3><code>permissions.allow</code> Liste</h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel mittel (Züge)</span></div>
+      <ul><li>Weniger Rückfragen = weniger Züge = weniger Turns gegen das Limit.</li><li>Syntax: <code>"Bash(git diff *)"</code>, Leerzeichen vor <code>*</code>.</li><li>Skill <code>/fewer-permission-prompts</code> wertet Transkripte aus und schreibt die Liste.</li></ul>
+      <div class="src">[W:code.claude.com model-config, headless 2026-10-09] [T: Skill in dieser Session vorhanden]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+    <div class="card s-green" data-id="m10"><div class="card-top"><span class="circle">10</span><h3><code>effortLevel</code> pro Projekt</h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel hoch (Output)</span></div>
+      <ul><li>Werte: low, medium (Standard auf 5.5-Modellen), high, xhigh. <code>max</code> nicht in settings.</li><li>Docs: low für kleine Edits, medium kostenbewusst, high bei Fehlersuche mit Verifikation.</li><li>Auf Opus 5.5 / Sonnet 5.5 / Haiku 5.5 / Fable 5.1 bricht Effort-Wechsel den Cache nicht.</li></ul>
+      <div class="src">[W:code.claude.com model-config, prompt-caching 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+    <div class="card s-green" data-id="m11"><div class="card-top"><span class="circle">11</span><h3>Toolausgaben kappen</h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel hoch</span></div>
+      <ul><li><code>BASH_MAX_OUTPUT_LENGTH</code> Standard 30000 Zeichen, Setting <code>bashOutputMaxChars</code> überschreibt. Rest landet in Datei, wird bei Bedarf gelesen.</li><li><code>MAX_MCP_OUTPUT_TOKENS</code> Standard 25000.</li><li>Ergänzend Regel in CLAUDE.md: Ausgaben immer durch <code>head</code>/<code>grep</code> filtern (Compute before Context).</li></ul>
+      <div class="src">[W:code.claude.com env-vars, tools-reference, mcp 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+    <div class="card s-amber" data-id="m12"><div class="card-top"><span class="circle">12</span><h3>Auto-Compact-Fenster steuern</h3></div>
+      <div class="row"><span class="pill p-amber">Option</span><span class="pill p-info">Hebel mittel</span></div>
+      <ul><li><code>autoCompactWindow</code> Setting, <code>/autocompact 500k</code>, oder <code>CLAUDE_CODE_AUTO_COMPACT_WINDOW</code> (100k bis 1M).</li><li>Kleineres Fenster = frühere Kompaktierung = weniger Tokens je Turn, aber Kompaktierung bricht den Cache.</li><li>Cloud-Sessions: Variable in der Umgebung setzen, nicht im Chat.</li></ul>
+      <div class="src">[W:code.claude.com model-config, env-vars, claude-code-on-the-web 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> entschieden</label></div>
+    <div class="card s-green" data-id="m14"><div class="card-top"><span class="circle">13</span><h3>Statuszeile = echter Zähler fürs Cockpit</h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel: ersetzt Schätzung</span></div>
+      <ul><li><code>statusLine</code> ruft ein Skript, bekommt JSON: <code>context_window.used_percentage</code>, <code>remaining_percentage</code>, Cache-Zähler, <code>rate_limits.five_hour</code> / <code>seven_day</code>.</li><li><b>Folge:</b> Token-Prozent und 5h/7d-Limit live statt geschätzt. Copybox C4.</li></ul>
+      <div class="src">[W:code.claude.com statusline 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+    <div class="card s-amber" data-id="m15"><div class="card-top"><span class="circle">14</span><h3>Hooks: filtern, blocken, nachladen</h3></div>
+      <div class="row"><span class="pill p-amber">Phase 3</span><span class="pill p-info">Hebel hoch</span></div>
+      <ul><li><b>PreToolUse</b> <code>updatedInput</code>: Testläufe automatisch durch <code>grep</code>/<code>head</code> leiten (Docs-Beispiel).</li><li><b>SessionStart</b> mit Matcher <code>compact</code>: Kurzkanon nach Kompaktierung erneut einspeisen (max. 10000 Zeichen).</li><li><b>PreCompact</b>: Steuerungsdatei vor Kompaktierung schreiben lassen.</li><li>Deterministische Regeln gehören in Hooks, nicht in CLAUDE.md-Prosa.</li></ul>
+      <div class="src">[W:code.claude.com hooks, costs, context-window, best-practices 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+    <div class="card s-amber" data-id="m16"><div class="card-top"><span class="circle">15</span><h3>Skill-Listing begrenzen</h3></div>
+      <div class="row"><span class="pill p-amber">Option</span><span class="pill p-info">Hebel mittel</span></div>
+      <ul><li>Jede Skill-Beschreibung steht in jedem Turn im Kontext (bis 1536 Zeichen je Skill).</li><li><code>skillOverrides</code> → <code>name-only</code> oder <code>off</code> für ungenutzte Skills; <code>disableBundledSkills</code>; <code>skillListingBudgetFraction</code>.</li><li>Diese Session: über 30 Skill-Beschreibungen geladen, viele themenfremd (Spotify, Flugsuche, pptx) <code>[T]</code>.</li></ul>
+      <div class="src">[W:code.claude.com settings-reference, skills 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> entschieden</label></div>
+    <div class="card s-green" data-id="m17"><div class="card-top"><span class="circle">16</span><h3>Hintergrundverbrauch abstellen</h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel klein bis mittel</span></div>
+      <ul><li><code>CLAUDE_CODE_GOAL_CHECKIN_MINUTES=0</code>: keine Leerlauf-Check-ins.</li><li>Geplante Aufgaben und Loops: Intervall gegen Cache-TTL (1h) prüfen, sonst jede Auslösung = Vollpreis.</li></ul>
+      <div class="src">[W:code.claude.com costs, prompt-caching 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+  </div>
+
+  <h3 style="margin:18px 0 8px"><span class="pill p-violet">Ort 4</span> Unteragenten: <code>.claude/agents/*.md</code></h3>
+  <div class="cards">
+    <div class="card s-green" data-id="m20"><div class="card-top"><span class="circle">17</span><h3>Haiku-Unteragent für Massenausgabe</h3></div>
+      <div class="row"><span class="pill p-green">Phase 3</span><span class="pill p-info">Hebel hoch</span></div>
+      <ul><li>Eigener Kontext, nur Zusammenfassung kehrt zurück. Für Tests, Logs, Doku-Durchsicht, Dateisuche.</li><li>Frontmatter: <code>model: haiku</code>, <code>tools:</code> Allowlist, <code>maxTurns</code>, <code>omitClaudeMd</code>.</li><li>Deine Dreifach-Bedingung bleibt: hohes Volumen + Wortlaut danach unnötig + Sitzung läuft weiter. Copybox C5.</li></ul>
+      <div class="src">[W:code.claude.com sub-agents, costs 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+    <div class="card s-green" data-id="m21"><div class="card-top"><span class="circle">18</span><h3>Eingebaute Explore/Plan-Agenten nutzen</h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel mittel</span></div>
+      <ul><li>Explore: nur lesen, überspringt CLAUDE.md und Git-Status. Plan: nur lesen.</li><li><b>Prompt-Formel:</b> „Explore-Agent: finde X in Y, nur Pfade und Zeilen zurück.“</li><li>Agent-Teams kosten laut Docs etwa 7× Tokens im Planmodus.</li></ul>
+      <div class="src">[W:code.claude.com sub-agents, costs 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> zur Kenntnis</label></div>
+    <div class="card s-amber" data-id="m22"><div class="card-top"><span class="circle">19</span><h3><code>CLAUDE_CODE_SUBAGENT_MODEL</code></h3></div>
+      <div class="row"><span class="pill p-amber">Option</span><span class="pill p-info">Hebel mittel</span></div>
+      <ul><li>Setzt Standardmodell aller Unteragenten; mit <code>_FORCE=1</code> auch für explizit konfigurierte.</li></ul>
+      <div class="src">[W:code.claude.com sub-agents 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> entschieden</label></div>
+  </div>
+
+  <h3 style="margin:18px 0 8px"><span class="pill p-violet">Ort 5</span> Skills: <code>.claude/skills/&lt;name&gt;/SKILL.md</code></h3>
+  <div class="cards">
+    <div class="card s-green" data-id="m23"><div class="card-top"><span class="circle">20</span><h3>Wiederkehrende Abläufe als Skills</h3></div>
+      <div class="row"><span class="pill p-green">Phase 3</span><span class="pill p-info">Hebel hoch</span></div>
+      <ul><li>Nur <code>description</code> (+<code>when_to_use</code>, zusammen max. 1536 Zeichen) bleibt im Kontext, Körper lädt beim Aufruf.</li><li><code>disable-model-invocation: true</code>: auch die Beschreibung bleibt draußen bis <code>/name</code>. Ideal für <code>/handover</code>, <code>/cockpit</code>, <code>/pruefkette</code>.</li><li>Skills statt <code>.claude/commands/</code> (Docs-Empfehlung). Copybox C6.</li></ul>
+      <div class="src">[W:code.claude.com skills 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+    <div class="card s-amber" data-id="m24"><div class="card-top"><span class="circle">21</span><h3><code>context: fork</code> für laute Skills</h3></div>
+      <div class="row"><span class="pill p-amber">Option</span><span class="pill p-info">Hebel mittel</span></div>
+      <ul><li>Skill läuft in Unteragent, Felder <code>agent</code>, <code>model</code>, <code>effort</code>. Z. B. HTML-Prüfkette mit Screenshots.</li><li><code>allowed-tools</code> genehmigt Tools für den Aufruf-Turn vor.</li></ul>
+      <div class="src">[W:code.claude.com skills 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> entschieden</label></div>
+  </div>
+
+  <h3 style="margin:18px 0 8px"><span class="pill p-violet">Ort 6</span> MCP und Konnektoren: <code>.mcp.json</code>, <code>~/.claude.json</code>, claude.ai-Konnektoren</h3>
+  <div class="cards">
+    <div class="card s-red" data-id="m26"><div class="card-top"><span class="circle">22</span><h3>Konnektoren für Code-Sessions reduzieren</h3></div>
+      <div class="row"><span class="pill p-red">Klärung</span><span class="pill p-info">Hebel hoch</span></div>
+      <ul><li>Tool Search ist Standard: nur Toolnamen + Server-Anweisungen laden beim Start, Schemata bei Bedarf. Trotzdem: jeder Name kostet.</li><li>Diese Session: über 200 MCP-Toolnamen aus Gmail, Calendar, Drive, Zapier, Reclaim, Spotify, Crypto.com, Have I Been Pwned, Notion, Whimsical <code>[T]</code>. Für Repo-Arbeit ungenutzt.</li><li><b>Entscheidung offen:</b> welche Konnektoren in Code-Sessions bleiben. Ort: claude.ai-Konnektoreinstellungen (Zugriffsstufe „bei Bedarf“), nicht Repo.</li></ul>
+      <div class="src">[W:code.claude.com mcp 2026-10-09] [T]</div>
+      <label class="chk"><input type="checkbox"> entschieden</label></div>
+    <div class="card s-green" data-id="m27"><div class="card-top"><span class="circle">23</span><h3>CLI vor MCP</h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel mittel</span></div>
+      <ul><li><code>gh</code>, <code>gcloud</code>, <code>aws</code> über Bash: kein Tool-Listing im Kontext.</li><li>Cloud-Session hier: <code>gh</code> nicht verfügbar, GitHub-MCP vorgegeben <code>[T]</code>.</li></ul>
+      <div class="src">[W:code.claude.com costs 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> zur Kenntnis</label></div>
+    <div class="card s-amber" data-id="m28"><div class="card-top"><span class="circle">24</span><h3>Projekt-MCP: <code>alwaysLoad: false</code>, Server abschalten</h3></div>
+      <div class="row"><span class="pill p-amber">Option</span><span class="pill p-info">Hebel mittel</span></div>
+      <ul><li><code>.mcp.json</code> je Server <code>alwaysLoad</code>; <code>disabledMcpjsonServers</code> in settings; <code>/mcp</code> Toggle.</li><li><code>--disallowedTools "mcp__*"</code> entfernt Definitionen ganz (nur nackter Name, nicht <code>Bash(rm *)</code>-Form).</li><li>Beschreibungen werden bei 2048 Zeichen gekappt.</li></ul>
+      <div class="src">[W:code.claude.com mcp, cli-reference 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> entschieden</label></div>
+  </div>
+
+  <h3 style="margin:18px 0 8px"><span class="pill p-violet">Ort 7</span> Sitzungsverhalten: Befehle und Modellwahl</h3>
+  <div class="cards">
+    <div class="card s-green" data-id="m29"><div class="card-top"><span class="circle">25</span><h3><code>/clear</code> zwischen Aufgaben, <code>/rename</code> davor</h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel hoch</span></div>
+      <ul><li>Leert Kontext kostenlos; <code>/resume &lt;name&gt;</code> holt zurück.</li><li>Nach zwei fehlgeschlagenen Korrekturen: <code>/clear</code> und besserer Prompt statt dritter Versuch.</li><li>Cloud (Web): kein <code>/clear</code>, stattdessen neue Session.</li></ul>
+      <div class="src">[W:code.claude.com costs, best-practices, claude-code-on-the-web 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> zur Kenntnis</label></div>
+    <div class="card s-green" data-id="m30"><div class="card-top"><span class="circle">26</span><h3><code>/rewind</code> vor <code>/compact</code>, <code>/btw</code> für Nebenfragen</h3></div>
+      <div class="row"><span class="pill p-green">sofort</span><span class="pill p-info">Hebel hoch</span></div>
+      <ul><li><code>/rewind</code> (Esc Esc) springt auf gecachten Präfix zurück, billiger als Kompaktierung; „Summarize from here“ als Teilkompaktierung.</li><li><code>/btw</code>: Antwort geht nie in den Verlauf.</li><li><code>/context</code> zeigt Aufteilung + Vorschläge; <code>/usage</code> zeigt Cache-Zeile und Verbrauch je Skill/Agent/MCP.</li></ul>
+      <div class="src">[W:code.claude.com best-practices, prompt-caching, context-window, costs 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> zur Kenntnis</label></div>
+    <div class="card s-green" data-id="m31"><div class="card-top"><span class="circle">27</span><h3>Cache nicht brechen</h3></div>
+      <div class="row"><span class="pill p-green">Regel</span><span class="pill p-info">Hebel hoch (Limit)</span></div>
+      <ul><li><b>Bricht:</b> <code>/model</code>, <code>opusplan</code>-Planwechsel, Fast Mode an, MCP-Server zu-/abschalten, <code>/compact</code>, Update von Claude Code, viele Bilder.</li><li><b>Bricht nicht:</b> Dateiedits, Permission-Modus, Skill-Aufruf, <code>/rewind</code>, Unteragenten.</li><li>CLAUDE.md-Edits greifen erst nach <code>/clear</code>, <code>/compact</code> oder Neustart.</li><li>TTL: 1 h auf Abo im Planlimit, 5 min mit API-Key. Pause länger als TTL = alles neu verarbeitet.</li></ul>
+      <div class="src">[W:code.claude.com prompt-caching 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> zur Kenntnis</label></div>
+    <div class="card s-green" data-id="m33"><div class="card-top"><span class="circle">28</span><h3>Modellrouting je Phase</h3></div>
+      <div class="row"><span class="pill p-green">Regel</span><span class="pill p-info">Hebel hoch (Limit)</span></div>
+      <ul><li>Docs: Sonnet für den Großteil des Codings, Opus für Architektur und mehrstufiges Reasoning, Haiku für einfache Unteragenten.</li><li>Alias <code>opusplan</code>: Opus im Planmodus, Sonnet in Ausführung, aber jeder Moduswechsel bricht den Cache. Alternative: Plan in einer Session, Bau in neuer Session mit <code>--model sonnet</code>.</li><li>Standardmodell per <code>model</code> in settings oder <code>ANTHROPIC_DEFAULT_MODEL</code>.</li></ul>
+      <div class="src">[W:code.claude.com costs, model-config, prompt-caching 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> zur Kenntnis</label></div>
+    <div class="card s-amber" data-id="m34"><div class="card-top"><span class="circle">29</span><h3>Mechanische Batches headless</h3></div>
+      <div class="row"><span class="pill p-amber">Option</span><span class="pill p-info">Hebel mittel</span></div>
+      <ul><li><code>claude -p "…" --bare --model haiku --max-turns 5</code>: ohne Hooks, Skills, MCP, CLAUDE.md. <code>--bare</code> braucht <code>ANTHROPIC_API_KEY</code> (API-Abrechnung, getrennt vom Abo).</li><li><code>--output-format json</code> liefert Nutzung und <code>total_cost_usd</code>; <code>--max-budget-usd</code> als Deckel.</li></ul>
+      <div class="src">[W:code.claude.com headless, cli-reference 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> entschieden</label></div>
+    <div class="card s-amber" data-id="m35"><div class="card-top"><span class="circle">30</span><h3>Planmodus als Projektstandard</h3></div>
+      <div class="row"><span class="pill p-amber">Option</span><span class="pill p-info">Hebel mittel</span></div>
+      <ul><li><code>permissions.defaultMode: "plan"</code> in <code>.claude/settings.json</code>: Erkunden → Plan → Bau, keine Fehlbauten.</li><li>Für Einsatz-Diffs überspringen (Best Practices).</li></ul>
+      <div class="src">[W:code.claude.com permission-modes, best-practices 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> entschieden</label></div>
+  </div>
+
+  <h3 style="margin:18px 0 8px"><span class="pill p-violet">Ort 8</span> Cloud: Claude Code on the web</h3>
+  <div class="cards">
+    <div class="card s-amber" data-id="m36"><div class="card-top"><span class="circle">31</span><h3>Umgebung konfigurieren</h3></div>
+      <div class="row"><span class="pill p-amber">Phase 4</span><span class="pill p-info">Hebel mittel</span></div>
+      <ul><li>Setup-Skript wird nur gecacht, wenn es in ca. 5 min fertig ist. SessionStart-Hook per Skill <code>/session-start-hook</code> anlegbar <code>[T]</code>.</li><li>Umgebungsvariablen (z. B. <code>CLAUDE_CODE_AUTO_COMPACT_WINDOW</code>, <code>BASH_MAX_OUTPUT_LENGTH</code>) in der Umgebung, nicht im Chat.</li><li>Cloud-Sessions teilen das Nutzungslimit mit allem anderen; Leerlauf lässt Session verfallen.</li><li>Repo-<code>.claude/agents/</code> wird automatisch übernommen. Laden von <code>.claude/settings.json</code> in Cloud: <span class="pill p-amber">UNSICHER</span>, Docs-Abschnitt nicht gelesen.</li></ul>
+      <div class="src">[W:code.claude.com claude-code-on-the-web 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> erledigt</label></div>
+  </div>
+
+  <h3 style="margin:18px 0 8px"><span class="pill p-violet">Ort 9</span> claude.ai: Präferenzen und Projektanweisungen</h3>
+  <div class="cards">
+    <div class="card s-red" data-id="m37"><div class="card-top"><span class="circle">32</span><h3>Präferenzen-Grundlast senken</h3></div>
+      <div class="row"><span class="pill p-red">Klärung</span><span class="pill p-info">Hebel hoch (jeder Turn, jeder Chat)</span></div>
+      <ul><li>Die Gesamtanweisungen werden in jedem Turn jeder Oberfläche mitgesendet, auch in Code-Sessions. Umfang hier: ca. 24.000 Zeichen ≈ 6.000–8.000 Token <code>[I:mittel, Schätzung 3,5 Zeichen/Token]</code>.</li><li>Gecacht, solange nicht editiert. Jede Änderung = Cache-Neuaufbau in allen laufenden Chats.</li><li><b>Option O1:</b> Kern (Format, Ton, Entscheidungsregeln) in Präferenzen, Rest (Cockpit-Details, Dateinamen, Handover-Mechanik) als Kanon-Datei im Projektkontext. <b>Option O2:</b> Code-Teile (Prüfkette, Oberflächen) nach <code>~/.claude/CLAUDE.md</code> verschieben und aus Präferenzen streichen. Empfehlung aus Sachlage: O1 + O2.</li></ul>
+      <div class="src">[I:mittel] [W:code.claude.com prompt-caching 2026-10-09]</div>
+      <label class="chk"><input type="checkbox"> entschieden</label></div>
+  </div>
+</section>
+
+<!-- ============ 3 UMSETZUNGSPLAN ============ -->
+<section id="s3">
+  <div class="sec-head c-blue"><span class="num">3</span><h2>Umsetzungsplan in Phasen</h2></div>
+  <p class="lead">Reihenfolge: messen → Repo-Gerüst → global → Werkzeuge → Konnektoren/Präferenzen → messen. Modell je Phase genannt. Aktuelle Position rot umrandet.</p>
+  <div class="steps">
+    <div class="step ph1" style="outline:2px solid var(--red);outline-offset:2px"><div class="k">P0 · heute · Modell: egal, kein Bau</div><h3>Baseline messen</h3>
+      <p><span class="act">Ausführen</span> in einer lokalen Code-Session: <code>/context</code>, <code>/usage</code>, <code>/status</code>. Werte in <span class="file">docs/token_tracker.md</span> notieren (Kontext-% beim Start, Anteil MCP/Skills/Memory).</p></div>
+    <div class="step ph2"><div class="k">P1 · dieser Chat / Folgechat · Modell: Sonnet, Effort medium</div><h3>Repo-Gerüst anlegen</h3>
+      <p><span class="act">Erstellen</span> aus Copyboxen C1–C4: <span class="file">CLAUDE.md</span>, <span class="file">.claude/rules/token-oekonomie.md</span>, <span class="file">.claude/rules/html-werkzeuge.md</span>, <span class="file">.claude/settings.json</span>, <span class="file">.claude/statusline.sh</span>. Committen, pushen.</p></div>
+    <div class="step ph2"><div class="k">P2 · lokal am Rechner · Modell: ohne Claude</div><h3>Globale Ebene B</h3>
+      <p><span class="act">Einfügen</span> C7 in <span class="file">~/.claude/CLAUDE.md</span>. <span class="act">Ausführen</span> <code>/doctor prompt-audit</code>. Danach <code>/clear</code>, damit Änderung greift.</p></div>
+    <div class="step ph3"><div class="k">P3 · Folgechat · Modell: Sonnet</div><h3>Werkzeuge bauen</h3>
+      <p><span class="act">Erstellen</span> <span class="file">.claude/agents/explorer-haiku.md</span> (C5), <span class="file">.claude/skills/handover/SKILL.md</span> (C6), Hooks PreCompact + SessionStart(compact). <span class="act">Testen</span> je Werkzeug einmal, Ergebnis im Tracker.</p></div>
+    <div class="step ph4"><div class="k">P4 · claude.ai Einstellungen · Modell: ohne Claude</div><h3>Konnektoren und Präferenzen</h3>
+      <p><span class="act">Entscheiden</span> Karte 22 (welche Konnektoren in Code-Sessions) und Karte 32 (O1/O2). <span class="act">Umstellen</span> Konnektoren auf „bei Bedarf“. <span class="act">Verschieben</span> Code-Regeln aus Präferenzen nach <code>~/.claude/CLAUDE.md</code>.</p></div>
+    <div class="step ph5"><div class="k">P5 · nach 5 Arbeitssitzungen · Modell: Haiku für Doku</div><h3>Messen und Regressionstest</h3>
+      <p><span class="act">Vergleichen</span> <code>/context</code> und <code>/usage</code> gegen Baseline P0. <span class="act">Prüfen</span> 3 typische Aufgaben alt/neu auf Qualität und Vollständigkeit (deine Regel 12). <span class="act">Eintragen</span> Ergebnis in Tracker, Landkarte → V2.</p></div>
+  </div>
+</section>
+
+<!-- ============ 4 COPYBOXEN ============ -->
+<section id="s4">
+  <div class="sec-head c-blue"><span class="num">4</span><h2>Copyboxen: einsatzfertige Dateien</h2></div>
+  <p class="lead">Nur dokumentierte Schlüssel verwendet. Platzhalter in spitzen Klammern. Vor erstem Einsatz: <code>/doctor</code> ausführen, meldet ungültige Settings.</p>
+  <div class="cbs">
+
+    <div class="cb"><div class="cb-head"><span class="where"><b>C1</b> · Datei <span class="file">CLAUDE.md</span> im Repo-Root · komplett neu anlegen</span><button data-copy="c1">Kopieren</button></div>
+<pre id="c1"># Projekt token
+
+Zweck: Werkzeugdateien (HTML, einzeln, inline) und Steuerungsdateien bauen und prüfen.
+
+## Arbeitsregeln
+- Antworten knapp, Bullets, Deutsch. Keine Em-Dashes.
+- Vor Volllesen einer Datei: grep/head auf den Treffer-Ausschnitt. Dateien ueber 300 Zeilen nur in Abschnitten lesen.
+- Toolausgaben filtern: Tests und Builds durch `| tail -40` oder `| grep -E "error|FAIL|passed"` leiten.
+- Dateinamen: `basisname_JJJJ-MM-TT_HHMM.ext`, Zeitzone Europe/Berlin. Neuester Zeitstempel = kanonisch.
+- Additiv arbeiten: nichts still entfernen, Entferntes im Commit-Text listen.
+- Vor jedem Commit: Pruefkette aus .claude/rules/html-werkzeuge.md (gilt nur bei HTML-Aenderungen).
+
+## Verzeichnisse
+- docs/            Landkarte, Tracker, Handover (Ebene C)
+- .claude/rules/   bedarfsweise geladene Regeln
+- .claude/agents/  Unteragenten (haiku fuer Massenausgabe)
+- .claude/skills/  /handover, /cockpit
+
+## Compact Instructions
+Beim Kompaktieren behalten: getroffene Entscheidungen (O1/O2/...), offene Punkte, zuletzt geaenderte Dateinamen mit Pfad, naechster Schritt. Verwerfen: Rohausgaben von Tests und Builds, vollstaendige Dateiinhalte.
+
+&lt;!-- Wartungsnotiz, wird nicht in den Kontext geladen: Datei unter 200 Zeilen halten, /doctor prompt-audit monatlich. --&gt;</pre></div>
+
+    <div class="cb"><div class="cb-head"><span class="where"><b>C2</b> · Datei <span class="file">.claude/rules/token-oekonomie.md</span> · lädt immer (kein paths:), deshalb kurz</span><button data-copy="c2">Kopieren</button></div>
+<pre id="c2"># Token-Oekonomie
+
+- Compute before Context: Zaehlen, Filtern, Berechnen per Skript, nur Ergebnis in den Chat.
+- Dateien &gt; 50 KB: nie vollstaendig lesen. Erst `grep -n`, dann `sed -n 'A,Bp'`.
+- Hohes Ausgabevolumen (Tests, Logs, Doku-Durchsicht) an Unteragent `explorer-haiku` delegieren, nur Zusammenfassung zurueck.
+- Bereits gelieferte Dateien nicht erneut vollstaendig ausgeben, nur Aenderungen nennen.
+- Keine Websuche fuer Bau, Code oder bekanntes Wissen.</pre></div>
+
+    <div class="cb"><div class="cb-head"><span class="where"><b>C3</b> · Datei <span class="file">.claude/rules/html-werkzeuge.md</span> · lädt nur, wenn eine .html-Datei berührt wird</span><button data-copy="c3">Kopieren</button></div>
+<pre id="c3">---
+paths:
+  - "**/*.html"
+---
+# HTML-Werkzeugdateien
+
+- Eine Datei, alles inline, keine externen Abhaengigkeiten ausser Google Fonts.
+- Pflichtbloecke: EMBEDDED_DATA (JSON), localStorage-Autosave 1x/Sekunde, Self-Download mit Zeitstempel, Herkunftsanzeige, JSON-Export, sichtbare Version. Kein Passwort.
+- Farben: gruen = Dateien/Download, blau = Kopieren, sonst Ampel. Legende sichtbar.
+- Pruefkette vor Auslieferung, Ergebnis als eine Zeile melden:
+  1. JSON.parse auf EMBEDDED_DATA
+  2. Syntaxcheck (node --check fuer extrahiertes JS)
+  3. JSDOM-Smoke: Seite laden, 0 Konsolenfehler
+  4. Screenshots mobil (400px) und Desktop (1280px) mit Playwright
+  5. Interaktionstest: ein Klick je Knopf-Typ
+  6. Autosave-Test: Wert setzen, neu laden, Wert vorhanden
+- Lange Pruefausgaben nicht in den Chat: nur Fehlerzahl und erste 3 Fehler.</pre></div>
+
+    <div class="cb"><div class="cb-head"><span class="where"><b>C4a</b> · Datei <span class="file">.claude/settings.json</span> im Repo · Statuszeile, Permissions, Effort, Ausgabegrenzen</span><button data-copy="c4a">Kopieren</button></div>
+<pre id="c4a">{
+  "effortLevel": "medium",
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(grep *)",
+      "Bash(rg *)",
+      "Bash(sed -n *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(ls *)",
+      "Bash(node --check *)"
+    ]
+  },
+  "env": {
+    "BASH_MAX_OUTPUT_LENGTH": "15000",
+    "MAX_MCP_OUTPUT_TOKENS": "10000",
+    "CLAUDE_CODE_GOAL_CHECKIN_MINUTES": "0"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash .claude/statusline.sh"
+  }
+}</pre></div>
+
+    <div class="cb"><div class="cb-head"><span class="where"><b>C4b</b> · Datei <span class="file">.claude/statusline.sh</span> · danach <code>chmod +x</code> · braucht <code>jq</code></span><button data-copy="c4b">Kopieren</button></div>
+<pre id="c4b">#!/usr/bin/env bash
+# Statuszeile: Modell | Kontext-% | 5h-Limit | 7d-Limit
+# Feldnamen context_window.* laut Docs statusline (2026-10-09).
+# Feldnamen unter rate_limits.* bitte einmal mit `jq .` auf der Eingabe pruefen (UNSICHER).
+input=$(cat)
+model=$(echo "$input" | jq -r '.model.display_name // "?"')
+ctx=$(echo "$input" | jq -r '.context_window.used_percentage // "?"')
+h5=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // "?"')
+d7=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // "?"')
+printf '%s | Kontext %s%% | 5h %s%% | 7d %s%%' "$model" "$ctx" "$h5" "$d7"</pre></div>
+
+    <div class="cb"><div class="cb-head"><span class="where"><b>C4c</b> · Ergänzung in <span class="file">.claude/settings.json</span> · Schlüssel <code>hooks</code> · Phase 3 · Struktur laut Docs, vor Einsatz mit <code>/doctor</code> prüfen</span><button data-copy="c4c">Kopieren</button></div>
+<pre id="c4c">"hooks": {
+  "SessionStart": [
+    {
+      "matcher": "compact",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "cat docs/kurzkanon.md"
+        }
+      ]
+    }
+  ],
+  "PreCompact": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "echo \"Vor Kompaktierung: Entscheidungen, offene Punkte und naechsten Schritt in docs/token_tracker.md eintragen.\""
+        }
+      ]
+    }
+  ]
+}</pre></div>
+
+    <div class="cb"><div class="cb-head"><span class="where"><b>C5</b> · Datei <span class="file">.claude/agents/explorer-haiku.md</span> · Phase 3</span><button data-copy="c5">Kopieren</button></div>
+<pre id="c5">---
+name: explorer-haiku
+description: Durchsucht Dateien, Logs und Testausgaben und liefert nur Pfade, Zeilennummern und eine Zusammenfassung unter 200 Woertern. Fuer hohes Ausgabevolumen, dessen Wortlaut danach nicht gebraucht wird.
+model: haiku
+tools: Read, Grep, Glob, Bash
+maxTurns: 15
+omitClaudeMd: true
+---
+Du bist ein Suchagent. Aufgabe: die gestellte Frage mit minimalem Rueckgabetext beantworten.
+
+Regeln:
+- Nie ganze Dateien zurueckgeben. Nur `pfad:zeile` plus maximal 2 Zeilen Kontext je Treffer.
+- Testausgaben: nur Anzahl bestanden/fehlgeschlagen und die ersten 3 Fehlermeldungen.
+- Abschluss immer mit: "Ergebnis:" + maximal 5 Bullets.
+- Keine Vorschlaege, keine Umsetzung, keine Dateiaenderungen.</pre></div>
+
+    <div class="cb"><div class="cb-head"><span class="where"><b>C6</b> · Datei <span class="file">.claude/skills/handover/SKILL.md</span> · Phase 3 · nur per <code>/handover</code>, kostet sonst 0 Kontext</span><button data-copy="c6">Kopieren</button></div>
+<pre id="c6">---
+name: handover
+description: Schreibt die rollende Uebergabedatei docs/PROJEKT_Handover_AKTUELL.md additiv fort und erzeugt den Folgechat-Prompt.
+disable-model-invocation: true
+---
+Ablauf, nummeriert, ohne Rueckfragen:
+
+1. Lies docs/PROJEKT_Handover_AKTUELL.md, falls vorhanden (sonst anlegen: Kanon vorne, datierte Nachtraege hinten).
+2. Pruefe den gesamten Chat auf: Entscheidungen (O1/O2/...), Empfehlungen, Zwischenstaende, nicht uebernommene Ergebnisse, geaenderte Dateien mit Pfad.
+3. Haenge einen datierten Nachtrag an (Europe/Berlin, Format JJJJ-MM-TT HH:MM). Nichts Bestehendes loeschen.
+4. Nenne die aktuell gueltige Werkzeugdatei mit vollem Pfad; wenn sie in diesem Chat geaendert wurde, pruefe, dass sie committed ist.
+5. Gib den Folgechat-Prompt in einem Codeblock aus: Ziel, Stand, naechster Schritt, zu lesende Dateien, Modellempfehlung.
+6. Melde in einer Zeile: Datei geschrieben, Anzahl Nachtraege, naechster Schritt.</pre></div>
+
+    <div class="cb"><div class="cb-head"><span class="where"><b>C7</b> · Datei <span class="file">~/.claude/CLAUDE.md</span> · lokal am Rechner · Ebene B, nur Code-relevant · ergänzt, nicht ersetzt</span><button data-copy="c7">Kopieren</button></div>
+<pre id="c7"># Globale Arbeitsregeln (Claude Code)
+
+## Sprache und Form
+- Deutsch, knapp, Bullets, keine Em-Dashes, keine Anrede. Fachbegriffe beim ersten Auftreten kurz erklaeren.
+- Jede Antwort endet mit: naechster konkreter Schritt (X -&gt; Y, sonst Z) und offenen Punkten.
+- Ergebnisse, die erhalten bleiben muessen, vollstaendig in Datei; im Chat nur Kurzfassung und Entscheidungen.
+
+## Token
+- Vor Volllesen: grep/sed-Ausschnitt. Toolausgaben filtern. Keine Websuche fuer Bau oder Code.
+- Massenausgabe an Unteragent mit model: haiku, nur Zusammenfassung zurueck.
+- Modell, Effort und MCP-Server nicht mitten in der Sitzung wechseln (Cache). Wechsel an Phasengrenzen.
+
+## Entscheidungen
+- Optionen als O1/O2/O3 mit Empfehlung ("aus Sachlage" / "aus Verhalten"). Bei "bau direkt": nach Empfehlung bauen, Entscheidung dokumentieren.
+- Bekannte Tendenzen: additiv &gt; loeschend, zusammenfuehren &gt; Parallel-Dateien, automatisch &gt; manuell, Originaltreue &gt; Bereinigung.
+- Stopp nur bei unumkehrbarem Schritt mit Frist oder Datenverlust.
+
+## Dateien
+- Namen: basisname_JJJJ-MM-TT_HHMM.ext, Europe/Berlin. Platzhalter fertig berechnen.
+- Additiv: nichts still entfernen, Entferntes explizit listen.
+
+## Compact Instructions
+Behalten: Entscheidungen, offene Punkte, geaenderte Pfade, naechster Schritt. Verwerfen: Rohausgaben.</pre></div>
+
+    <div class="cb"><div class="cb-head"><span class="where"><b>C8</b> · Folgechat-Prompt für Phase P1 · neue Code-Session im Repo, Modell Sonnet, Effort medium</span><button data-copy="c8">Kopieren</button></div>
+<pre id="c8">Phase P1 Token-Landkarte V1, Repo token. Lies nur docs/token_landkarte_2026-10-09_2200.html Abschnitt 4 (Copyboxen C1 bis C4b), nichts anderes.
+Erstelle daraus exakt diese Dateien: CLAUDE.md, .claude/rules/token-oekonomie.md, .claude/rules/html-werkzeuge.md, .claude/settings.json, .claude/statusline.sh (chmod +x).
+Lege docs/token_tracker.md an mit Tabelle: Datum | Sitzung | Kontext-% Start | Anteil MCP | Anteil Skills | Anteil Memory | Notiz. Erste Zeile: Baseline (Werte: fehlt, bitte liefern).
+Fuehre /doctor aus, behebe gemeldete Settings-Fehler. Committe mit Nachricht "P1: Repo-Geruest Token-Oekonomie V1", pushe auf den vorgegebenen Branch.
+Antwort: eine Zeile je Datei (angelegt/geaendert), /doctor-Ergebnis, naechster Schritt P2.</pre></div>
+
+  </div>
+</section>
+
+<!-- ============ 5 IRRTÜMER ============ -->
+<section id="s5">
+  <div class="sec-head c-amber"><span class="num">5</span><h2>Was nicht spart, obwohl es so wirkt</h2></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Annahme</th><th>Sachlage</th><th>Quelle</th></tr></thead>
+    <tbody>
+      <tr><td>Kurze Prompts sparen viel</td><td>Grundlast (System, Tools, CLAUDE.md, Skills, Präferenzen) dominiert jeden Turn; präzise Prompts sparen Fehlversuche, das ist der Hebel</td><td>[W:costs 2026-10-09]</td></tr>
+      <tr><td><code>@import</code> in CLAUDE.md lagert aus</td><td>Wird beim Start vollständig expandiert</td><td>[W:memory 2026-10-09]</td></tr>
+      <tr><td>Kompaktieren ist gratis</td><td>Bricht den Prompt-Cache; <code>/rewind</code> auf gecachten Präfix ist billiger</td><td>[W:prompt-caching 2026-10-09]</td></tr>
+      <tr><td>Unteragenten sparen immer</td><td>Eigene Requests zählen aufs Limit; Teams ca. 7× Tokens im Planmodus. Nur bei hohem Volumen + verzichtbarem Wortlaut</td><td>[W:sub-agents, costs 2026-10-09]</td></tr>
+      <tr><td>Thinking abschalten spart auf 5.5-Modellen</td><td><code>MAX_THINKING_TOKENS=0</code> ohne Wirkung auf Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable; Hebel ist <code>effortLevel</code></td><td>[W:model-config 2026-10-09]</td></tr>
+      <tr><td>API-Caching / Batches senken claude.ai-Nutzung</td><td>Getrennte Abrechnung; <code>--bare</code> und <code>-p</code> mit API-Key laufen auf API-Kosten</td><td>[W:headless 2026-10-09] [U]</td></tr>
+      <tr><td>Fast Mode ist günstiger</td><td>Höherer Tarif, Aktivieren bricht Cache</td><td>[W:prompt-caching 2026-10-09]</td></tr>
+      <tr><td>Großes 1M-Fenster = weniger Sorgen</td><td>Mehr Kontext je Turn = mehr Verbrauch je Turn; Haiku 5.5 kostet über 100K Eingabe mehr je Token</td><td>[W:model-config 2026-10-09]</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- ============ 6 WARTESCHLANGE ============ -->
+<section id="s6">
+  <div class="sec-head c-red"><span class="num">6</span><h2>Warteschlange: deine angefangenen Vorhaben</h2></div>
+  <p class="lead">Angekündigt, noch nicht geliefert. Hier eintragen (lokal gespeichert), im Folgeprompt einfügen. Jedes Vorhaben wird einer Karte oder einem neuen Ort zugeordnet, Landkarte → V2.</p>
+  <textarea id="queue" placeholder="Vorhaben 1: …&#10;Vorhaben 2: …"></textarea>
+  <div class="toolbar"><button data-copy="queue">Eintrag kopieren</button><span class="pill p-wait">wartet auf Eingabe</span></div>
+</section>
+
+<!-- ============ 7 HINWEISE ============ -->
+<section id="s7">
+  <div class="sec-head c-info"><span class="num">7</span><h2>Hinweise</h2></div>
+  <div class="note"><ul>
+    <li><b>UNSICHER (Karte 13, C4b):</b> exakte Feldnamen unter <code>rate_limits.*</code> in der Statuszeilen-Eingabe. Prüfen mit einem Skript, das <code>jq .</code> der Eingabe in eine Datei schreibt.</li>
+    <li><b>UNSICHER (Karte 31):</b> wie <code>.claude/settings.json</code> in Cloud-Sessions geladen wird. Docs-Abschnitt „settings in cloud sessions“ nicht gelesen.</li>
+    <li><b>UNSICHER:</b> <code>/cost</code> als aktueller Befehl; Docs nennen <code>/usage</code>. Schlüssel <code>autoCompactEnabled</code> existiert, Typ/Default nicht bestätigt.</li>
+    <li><b>Schätzung (Karte 32):</b> Umfang der Präferenzen in Token, Faktor 3,5 Zeichen/Token, keine Messung. Messbar über <code>/context</code> in einer Code-Session.</li>
+    <li><b>Hebel-Angaben</b> in Abschnitt 2 sind Inferenz <code>[I:mittel]</code>, keine Messwerte. Baseline P0 liefert echte Zahlen.</li>
+    <li><b>Nicht enthalten:</b> API-seitige Mechanismen (Message Batches, Prompt-Caching-Parameter, Gateways), da getrennt von claude.ai-Abrechnung. Auf Wunsch eigene Karte.</li>
+    <li><b>Interpretiert als:</b> „von ir“ = „von mir“; „mit code“ = Claude Code (CLI, Web, Cowork), „projekten“ = claude.ai Projekte, „claude anweisungen“ = Präferenzen und Projektanweisungen.</li>
+    <li><b>Instrumente dieser Antwort:</b> Unteragent claude-code-guide für Docs-Recherche (Grund: Quellenpflicht, Volumen; Tokenfolge: Detailrecherche außerhalb des Hauptkontexts). Funktioniert hat: belegte Faktenliste mit URLs in einem Durchgang.</li>
+  </ul></div>
+</section>
+
+<!-- ============ 8 KONTROLLBLOCK ============ -->
+<section id="s8">
+  <div class="sec-head c-green"><span class="num">8</span><h2>Kontrollblock</h2></div>
+  <div class="ctrl">
+    <div class="prompt">
+      <mark class="a">ich will den chat hier nutzen um mit code maximal token zu sparen und alles effizienter zu machen, wie mache ich das?<sup>1</sup></mark> <mark class="b">wo hole ich das wissen dazu her?<sup>2</sup></mark> <mark class="v">mach landkarte mit allen vorschlägen,<sup>3</sup></mark> <mark>wie implementiere ich dieses wissen? wo? in repository? code? projekten? claude anweisungen? etc...<sup>4</sup></mark> <mark class="y">sei so konkret wie möglich in hinblick auumsetzung<sup>5</sup></mark> es folgen noch angefangene vorhaben von ir zum thema<sup>6</sup>
+    </div>
+    <div class="reqs">
+      <span class="pill p-green">1 Wie sparen → Abschnitt 2, 32 Karten, Abschnitt 5 Irrtümer</span>
+      <span class="pill p-green">2 Wissensquellen → Abschnitt 1, 12 Quellen mit Datum</span>
+      <span class="pill p-green">3 Landkarte → diese Datei, Abschnitt 0 Ebenen-Matrix</span>
+      <span class="pill p-green">4 Wo implementieren → Orte 1–9, je Karte Datei/Pfad</span>
+      <span class="pill p-green">5 Konkret → Abschnitt 3 Phasen, Abschnitt 4 Copyboxen C1–C8</span>
+      <span class="pill p-wait">6 Angefangene Vorhaben → Abschnitt 6, wartet auf Eingabe</span>
+    </div>
+  </div>
+  <div class="note" style="margin-top:12px"><b>Vollständigkeit:</b> Anforderungen 1–5 erfüllt. 6 offen, Grund: Eingabe angekündigt, noch nicht erfolgt. Nächster Schritt: Vorhaben liefern → Zuordnung zu Karten, V2 → sonst P0/P1 starten mit Copybox C8.</div>
+</section>
+
+<section id="s9">
+  <div class="sec-head c-violet"><span class="num">9</span><h2>Feedback</h2></div>
+  <p class="lead">Korrekturen, fehlende Orte, falsche Zuordnungen. Lokal gespeichert, per Knopf in den Chat kopieren.</p>
+  <textarea id="feedback" placeholder="Karte X: … / Fehlt: … / Falsch: …"></textarea>
+  <div class="toolbar"><button data-copy="feedback">Feedback kopieren</button></div>
+</section>
+
+</div>
+<div class="toast" id="toast">Kopiert</div>
+
+<script id="EMBEDDED_DATA" type="application/json">
+{"tool":"Token-Landkarte Claude Code","version":"V1","stand":"2026-10-09","quellen_abgerufen":"2026-10-09","orte":9,"karten":32,"copyboxen":8,"phasen":6,"offen":["Karte 22 Konnektoren","Karte 32 Praeferenzen O1/O2","Abschnitt 6 Warteschlange"]}
+</script>
+<script>
+(function(){
+  var KEY='token_landkarte_v1';
+  var state={};
+  try{ state=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ state={}; }
+  var boxes=document.querySelectorAll('.card[data-id] input[type=checkbox]');
+  var dirty=false;
+  function render(){
+    var n=0;
+    boxes.forEach(function(b){ var id=b.closest('.card').getAttribute('data-id'); b.checked=!!state[id]; if(b.checked)n++; });
+    var pct=boxes.length?Math.round(100*n/boxes.length):0;
+    document.getElementById('progbar').style.width=pct+'%';
+    document.getElementById('progtxt').textContent=n+' / '+boxes.length+' ('+pct+'%)';
+    ['queue','feedback'].forEach(function(k){ var el=document.getElementById(k); if(el && typeof state[k]==='string' && el.value!==state[k]) el.value=state[k]; });
+  }
+  boxes.forEach(function(b){ b.addEventListener('change',function(){ state[b.closest('.card').getAttribute('data-id')]=b.checked; dirty=true; render(); }); });
+  ['queue','feedback'].forEach(function(k){ var el=document.getElementById(k); if(el) el.addEventListener('input',function(){ state[k]=el.value; dirty=true; }); });
+  setInterval(function(){ if(!dirty)return; dirty=false; try{ state._saved=new Date().toISOString(); localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} },1000);
+  function toast(t){ var el=document.getElementById('toast'); el.textContent=t; el.classList.add('on'); setTimeout(function(){el.classList.remove('on');},1400); }
+  function copyText(txt){
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){toast('Kopiert');},function(){fallback(txt);}); } else fallback(txt);
+  }
+  function fallback(txt){ var ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');toast('Kopiert');}catch(e){toast('Bitte manuell markieren');} document.body.removeChild(ta); }
+  document.querySelectorAll('[data-copy]').forEach(function(btn){ btn.addEventListener('click',function(){ var el=document.getElementById(btn.getAttribute('data-copy')); if(!el)return; copyText(el.tagName==='TEXTAREA'?el.value:el.textContent); }); });
+  document.getElementById('btnExport').addEventListener('click',function(){
+    var box=document.getElementById('exportBox');
+    var meta=JSON.parse(document.getElementById('EMBEDDED_DATA').textContent);
+    box.textContent=JSON.stringify({meta:meta,state:state,exported:new Date().toISOString()},null,2);
+    box.hidden=!box.hidden;
+  });
+  document.getElementById('btnReset').addEventListener('click',function(){
+    var btn=this;
+    if(btn.getAttribute('data-arm')==='1'){ state={}; dirty=true; render(); btn.textContent='Haken zurücksetzen'; btn.removeAttribute('data-arm'); toast('Zurückgesetzt'); }
+    else { btn.setAttribute('data-arm','1'); btn.textContent='Wirklich? Noch einmal klicken'; setTimeout(function(){ btn.removeAttribute('data-arm'); btn.textContent='Haken zurücksetzen'; },3000); }
+  });
+  render();
+})();
+</script>
+
+</body>
+</html>
