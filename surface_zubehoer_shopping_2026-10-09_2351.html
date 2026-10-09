@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Surface Zubehör Cockpit</title>
+</head>
+<body>
+<style>
+/* Layout: eine Spalte, nummerierte Schrittkarten, sticky Schrittleiste oben, Bedarfskarten mit Status-Rand */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --surface2:#eaeef3; --fg:#1a2230; --muted:#5a6676; --line:#d3d9e2;
+  --accent:#0f62a8; --accent-fg:#ffffff;
+  --g:#1e7f49; --g-bg:#e2f3e8; --y:#9c6a12; --y-bg:#fbf0d6; --r:#bf3535; --r-bg:#fae1e1;
+  --p:#5f44b5; --p-bg:#ebe6f8; --b:#2561c9; --b-bg:#e1eafb; --i:#4b5563; --i-bg:#e9ecf0;
+  --font:"Segoe UI","Segoe UI Variable Text",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --mono:"Cascadia Mono","Consolas",ui-monospace,Menlo,monospace;
+  --radius:10px; --shadow:0 1px 2px rgba(20,30,50,.08);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#11161d; --surface:#1a2129; --surface2:#222b35; --fg:#e7ecf2; --muted:#9aa6b5; --line:#2d3845;
+  --accent:#6fb3ff; --accent-fg:#0b1118;
+  --g:#5ad38a; --g-bg:#16301f; --y:#f0c060; --y-bg:#33280f; --r:#ff7b7b; --r-bg:#3a1a1a;
+  --p:#b9a3ff; --p-bg:#261f3d; --b:#8db4ff; --b-bg:#17233a; --i:#b6bfc9; --i-bg:#242b33;
+  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#11161d; --surface:#1a2129; --surface2:#222b35; --fg:#e7ecf2; --muted:#9aa6b5; --line:#2d3845;
+  --accent:#6fb3ff; --accent-fg:#0b1118;
+  --g:#5ad38a; --g-bg:#16301f; --y:#f0c060; --y-bg:#33280f; --r:#ff7b7b; --r-bg:#3a1a1a;
+  --p:#b9a3ff; --p-bg:#261f3d; --b:#8db4ff; --b-bg:#17233a; --i:#b6bfc9; --i-bg:#242b33;
+  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.45;padding-inline:16px;padding-block:0 48px}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.2}
+h1{font-size:20px;font-weight:650}
+h2{font-size:16px;font-weight:650}
+h3{font-size:14px;font-weight:650}
+p{margin:0}
+a{color:var(--accent)}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;max-width:100%}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+textarea{width:100%;min-height:80px;resize:vertical}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+/* Kopf */
+.head{display:flex;flex-direction:column;gap:8px;padding-block:14px 0}
+.head .row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.origin{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px}
+.origin b{color:var(--fg);font-weight:600}
+.ver{font-family:var(--mono);font-size:12px;background:var(--p-bg);color:var(--p);padding:2px 8px;border-radius:999px}
+.save{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--i-bg);color:var(--i)}
+.save.ok{background:var(--g-bg);color:var(--g)}
+.save.dirty{background:var(--y-bg);color:var(--y)}
+/* Schrittleiste */
+.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:8px;display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--line)}
+.steps a{text-decoration:none;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12px;display:inline-flex;gap:6px;align-items:center}
+.steps a .n{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--accent);color:var(--accent-fg);font-size:11px;font-weight:700}
+.steps a .st{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.steps a.done .st{background:var(--g)}
+.steps a.part .st{background:var(--y)}
+/* Karten */
+.card{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card.g{border-left-color:var(--g)} .card.y{border-left-color:var(--y)} .card.r{border-left-color:var(--r)} .card.p{border-left-color:var(--p)} .card.b{border-left-color:var(--b)} .card.i{border-left-color:var(--i)}
+.card.current{outline:2px solid var(--r);outline-offset:2px}
+.card-h{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center}
+.num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-fg);font-weight:700;font-size:13px;flex:none}
+.pill{display:inline-block;font-size:11px;font-weight:650;letter-spacing:.03em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.pill.g{background:var(--g-bg);color:var(--g)} .pill.y{background:var(--y-bg);color:var(--y)} .pill.r{background:var(--r-bg);color:var(--r)}
+.pill.p{background:var(--p-bg);color:var(--p)} .pill.b{background:var(--b-bg);color:var(--b)} .pill.i{background:var(--i-bg);color:var(--i)}
+.sub{color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 16px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:12px;font-weight:600}
+.field .hint{font-size:11px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12px;background:var(--surface);cursor:pointer;user-select:none}
+.chip input{margin:0;accent-color:var(--accent)}
+.chip:has(input:checked){border-color:var(--accent);background:var(--b-bg);color:var(--b)}
+ul{margin:0;padding-left:18px}
+li{margin:2px 0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.legend .lg::before{background:var(--g)} .legend .ly::before{background:var(--y)} .legend .lr::before{background:var(--r)} .legend .lp::before{background:var(--p)} .legend .lb::before{background:var(--b)} .legend .li::before{background:var(--i)}
+/* Buttons */
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:600;display:inline-flex;gap:6px;align-items:center;text-decoration:none;white-space:nowrap}
+.btn:hover{background:var(--surface2)}
+.btn.green{background:var(--g);border-color:var(--g);color:var(--accent-fg)}
+.btn.blue{background:var(--b);border-color:var(--b);color:var(--accent-fg)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--r);border-color:var(--r)}
+.btn.small{padding:3px 8px;font-size:11px}
+.btnrow{display:flex;flex-wrap:wrap;gap:6px}
+/* Bedarfskarten */
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.need{display:flex;flex-direction:column;gap:10px}
+.need details{border-top:1px solid var(--line);padding-top:8px}
+.need summary{cursor:pointer;font-weight:600;font-size:13px;list-style:none;display:flex;gap:8px;align-items:center}
+.need summary::before{content:"▸";color:var(--muted);transition:transform .15s}
+.need details[open] summary::before{transform:rotate(90deg)}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;font-size:13px}
+.kv b{font-weight:600;color:var(--muted)}
+.price{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
+.reason{background:var(--surface2);border-radius:6px;padding:8px 10px;font-size:13px}
+.sel{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;background:var(--surface2);border-radius:6px;padding:10px}
+.sel .field.wide{grid-column:1/-1}
+/* Tabellen */
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:520px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:650}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.bar{height:10px;border-radius:999px;background:var(--surface2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--g)}
+.bar.over i{background:var(--r)}
+/* Copybox */
+.copy{border:2px solid var(--b);border-radius:8px;background:var(--surface);display:flex;flex-direction:column;min-width:0}
+.copy .bar-h{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;background:var(--b-bg);color:var(--b);font-size:12px;font-weight:650;border-radius:6px 6px 0 0}
+.copy pre{margin:0;padding:10px;font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto}
+.toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+.toast.show{opacity:1}
+.done-list li{color:var(--muted)}
+.note{font-size:12px;color:var(--muted)}
+.tag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.kpi div{background:var(--surface2);border-radius:6px;padding:8px 10px}
+.kpi b{display:block;font-size:18px;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.kpi span{font-size:11px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:480px){ .kv{grid-template-columns:1fr} .steps a .t{display:none} }
+</style>
+
+<div class="wrap">
+
+<!-- KOPF: Herkunft, Version, Autosave -->
+<header class="head">
+  <div class="row">
+    <h1>Surface Zubehör Cockpit</h1>
+    <span class="ver" id="verPill">V1</span>
+    <span class="save" id="saveState">Autosave: bereit</span>
+  </div>
+  <div class="origin" id="origin"></div>
+  <div class="legend" aria-label="Farblegende">
+    <span class="lg">grün: Pflicht / funktioniert / Datei-Download</span>
+    <span class="ly">gelb: empfohlen / unter Bedingung</span>
+    <span class="lr">rot: Klärung nötig / Budget überschritten / aktuelle Position</span>
+    <span class="lp">lila: Version / Kategorie</span>
+    <span class="lb">blau: Kopieren / Auswahl aktiv</span>
+    <span class="li">grau: optional / nicht nötig / Info</span>
+  </div>
+</header>
+
+<!-- SCHRITTLEISTE -->
+<nav class="steps" id="stepsNav">
+  <a href="#s1"><span class="n">1</span><span class="t">Gerät</span><span class="st"></span></a>
+  <a href="#s2"><span class="n">2</span><span class="t">Präferenzen</span><span class="st"></span></a>
+  <a href="#s3"><span class="n">3</span><span class="t">Bedarf &amp; Auswahl</span><span class="st"></span></a>
+  <a href="#s4"><span class="n">4</span><span class="t">Einkaufsliste</span><span class="st"></span></a>
+  <a href="#s5"><span class="n">5</span><span class="t">Export &amp; Übergabe</span><span class="st"></span></a>
+  <a href="#s6"><span class="n">6</span><span class="t">Notizen</span><span class="st"></span></a>
+</nav>
+
+<!-- ÜBERSICHT -->
+<section class="card p" id="s0">
+  <div class="card-h"><h2>Überblick</h2><span class="pill p">Status</span></div>
+  <div class="kpi">
+    <div><b id="kGeraet">–</b><span>Gerät</span></div>
+    <div><b id="kPflicht">0</b><span>Pflicht offen</span></div>
+    <div><b id="kEmpf">0</b><span>Empfohlen offen</span></div>
+    <div><b id="kGekauft">0</b><span>gekauft</span></div>
+    <div><b id="kSumme">0 €</b><span>Summe ausgewählt + gekauft</span></div>
+    <div><b id="kBudget">–</b><span>Budget</span></div>
+  </div>
+  <p class="sub">Ablauf: <b>1 Gerät wählen → 2 Präferenzen beantworten → 3 Bedarfsliste prüfen und Produkte eintragen → 4 Einkaufsliste gegen Budget → 5 Export / Übergabe für Preisrecherche</b>. Alles wird automatisch im Browser gespeichert (localStorage, 1×/Sekunde) und ist per Download mit Zeitstempel sicherbar.</p>
+</section>
+
+<!-- SCHRITT 1: GERÄT -->
+<section class="card g" id="s1">
+  <div class="card-h"><span class="num">1</span><h2>Gerät wählen</h2><span class="pill g" id="s1pill">offen</span></div>
+  <div class="grid">
+    <div class="field">
+      <label for="device">Surface-Modell</label>
+      <select id="device"></select>
+      <span class="hint">Bestimmt Tastatur-, Stift- und Ladekompatibilität in Schritt 3.</span>
+    </div>
+    <div class="field" id="deviceOtherWrap" hidden>
+      <label for="deviceOther">Modell manuell</label>
+      <input id="deviceOther" placeholder="z. B. Surface Laptop Studio 2">
+    </div>
+    <div class="field">
+      <label for="deviceStorage">Speicher / RAM (optional)</label>
+      <input id="deviceStorage" placeholder="z. B. 256 GB / 16 GB">
+      <span class="hint">Relevant für externe SSD und microSD-Bedarf.</span>
+    </div>
+  </div>
+  <div class="kv" id="deviceFacts"></div>
+</section>
+
+<!-- SCHRITT 2: PRÄFERENZEN -->
+<section class="card y" id="s2">
+  <div class="card-h"><span class="num">2</span><h2>Präferenzen</h2><span class="pill y" id="s2pill">offen</span></div>
+
+  <div class="field">
+    <label>Nutzung (Mehrfachauswahl)</label>
+    <div class="chips" id="useChips"></div>
+  </div>
+
+  <div class="grid">
+    <div class="field">
+      <label for="budget">Gesamtbudget Zubehör (€)</label>
+      <input id="budget" type="number" min="0" step="10" placeholder="z. B. 300">
+    </div>
+    <div class="field">
+      <label for="priceWeight">Preis vs. Qualität</label>
+      <select id="priceWeight">
+        <option value="guenstig">günstig: unteres Ende der Preisspanne</option>
+        <option value="ausgewogen" selected>ausgewogen: Mitte</option>
+        <option value="qualitaet">Qualität: oberes Ende, Original bevorzugt</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="brand">Marke</label>
+      <select id="brand">
+        <option value="egal" selected>egal, Preis-Leistung entscheidet</option>
+        <option value="original">Microsoft-Original bevorzugt</option>
+        <option value="dritt">Drittanbieter bevorzugt (günstig)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="used">Gebraucht / Refurbished</label>
+      <select id="used">
+        <option value="ja" selected>ja, wenn deutlich günstiger</option>
+        <option value="nur_original">nur bei Original-Zubehör</option>
+        <option value="nein">nein, nur neu</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="penUse">Stift-Intensität</label>
+      <select id="penUse">
+        <option value="keine">keine</option>
+        <option value="gelegentlich" selected>gelegentlich (Anmerkungen, Unterschrift)</option>
+        <option value="taeglich">täglich (Notizen, Skizzen)</option>
+        <option value="intensiv">intensiv (Zeichnen, viele Seiten)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="monitor">Monitor am Arbeitsplatz</label>
+      <select id="monitor">
+        <option value="keiner" selected>keiner vorhanden</option>
+        <option value="hdmi">vorhanden, Anschluss HDMI</option>
+        <option value="dp">vorhanden, Anschluss DisplayPort</option>
+        <option value="usbc">vorhanden, USB-C / Thunderbolt</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="audio">Kopfhörer vorhanden</label>
+      <select id="audio">
+        <option value="keine" selected>keine</option>
+        <option value="kabel">nur Kabel, 3,5-mm-Klinke</option>
+        <option value="bt">Bluetooth vorhanden</option>
+        <option value="usbc">USB-C-Kopfhörer vorhanden</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="color">Farbe / Design (optional)</label>
+      <input id="color" placeholder="z. B. schwarz, Platin, egal">
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Händler, die in Suchlinks erscheinen sollen</label>
+    <div class="chips" id="shopChips"></div>
+    <span class="hint">idealo und geizhals sind Preisvergleiche (zeigen mehrere Händler). Kleinanzeigen und eBay nur bei Gebraucht = ja sinnvoll.</span>
+  </div>
+
+  <div class="field">
+    <label>Bereits vorhanden (wird als „nicht nötig“ markiert)</label>
+    <div class="chips" id="haveChips"></div>
+  </div>
+</section>
+
+<!-- SCHRITT 3: BEDARF & AUSWAHL -->
+<section class="card r" id="s3">
+  <div class="card-h"><span class="num">3</span><h2>Bedarf &amp; Auswahl</h2><span class="pill r" id="s3pill">offen</span></div>
+  <div class="filters">
+    <span class="sub">Anzeigen:</span>
+    <label class="chip"><input type="radio" name="flt" value="relevant" checked> Pflicht + empfohlen</label>
+    <label class="chip"><input type="radio" name="flt" value="alle"> alle inkl. optional</label>
+    <label class="chip"><input type="radio" name="flt" value="offen"> nur offene Entscheidungen</label>
+    <label class="chip"><input type="radio" name="flt" value="gewaehlt"> ausgewählt + gekauft</label>
+  </div>
+  <p class="sub">Je Karte: <b>Warum</b> (abgeleitet aus Gerät + Präferenzen), <b>Worauf achten</b>, <b>Kompatibilität</b>, <b>Preisspanne</b> (Schätzung, Stand 10/2026, unverifiziert bis zur Preisrecherche), <b>Suchlinks</b>, <b>Auswahlfelder</b>.</p>
+  <div class="need" id="needList"></div>
+</section>
+
+<!-- SCHRITT 4: EINKAUFSLISTE -->
+<section class="card b" id="s4">
+  <div class="card-h"><span class="num">4</span><h2>Einkaufsliste &amp; Budget</h2><span class="pill b" id="s4pill">offen</span></div>
+  <div class="kv">
+    <b>Schätzung Pflicht + empfohlen</b><span class="price" id="estLine">–</span>
+    <b>Eingetragen (ausgewählt + gekauft)</b><span class="price" id="sumLine">–</span>
+    <b>Budget</b><span class="price" id="budgetLine">–</span>
+  </div>
+  <div class="bar" id="budgetBar"><i style="width:0%"></i></div>
+  <div class="tw"><table id="shopTable">
+    <thead><tr><th>Nr</th><th>Zubehör</th><th>Status</th><th>Produkt</th><th>Händler</th><th class="num">Preis €</th><th>Link</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+</section>
+
+<!-- SCHRITT 5: EXPORT & ÜBERGABE -->
+<section class="card g" id="s5">
+  <div class="card-h"><span class="num">5</span><h2>Export &amp; Übergabe</h2><span class="pill g" id="s5pill">bereit</span></div>
+  <div class="btnrow">
+    <button class="btn green" id="btnDownloadHtml">⬇ HTML mit Stand speichern</button>
+    <button class="btn green" id="btnDownloadJson">⬇ JSON exportieren</button>
+    <button class="btn blue" id="btnCopyJson">⧉ JSON kopieren</button>
+    <label class="btn"><input type="file" id="importJson" accept="application/json" hidden> ⬆ JSON importieren</label>
+    <button class="btn danger ghost" id="btnReset">Zurücksetzen</button>
+  </div>
+  <p class="note">Download-Knöpfe funktionieren in der lokal geöffneten Datei. In der claude.ai-Artefakt-Ansicht sind Downloads blockiert: dort <b>JSON kopieren</b> nutzen und in die nächste Nachricht einfügen.</p>
+  <div class="field">
+    <label>Übergabe-Prompt für die Preisrecherche (Folgechat oder nächste Nachricht)</label>
+    <span class="hint">Einfügen in: neue Nachricht im Chat. Enthält Gerät, Präferenzen, Bedarf mit Status und bereits gewählte Produkte.</span>
+    <div class="copy"><div class="bar-h"><span>Übergabe-Prompt</span><button class="btn blue small" data-copy="handover">⧉ Kopieren</button></div><pre id="handover"></pre></div>
+  </div>
+</section>
+
+<!-- SCHRITT 6: NOTIZEN / UPDATE-FELD -->
+<section class="card i" id="s6">
+  <div class="card-h"><span class="num">6</span><h2>Notizen &amp; Update-Feld</h2><span class="pill i">Info</span></div>
+  <div class="field">
+    <label for="notes">Notiz-/Update-Feld (wird beim nächsten Upload als Aufgabenliste abgearbeitet)</label>
+    <textarea id="notes" placeholder="z. B. Kategorie XY fehlt; Preisspanne Stift anpassen; Händler Z ergänzen"></textarea>
+  </div>
+  <details>
+    <summary>Erledigt-Liste</summary>
+    <ul class="done-list" id="doneList"></ul>
+  </details>
+  <details>
+    <summary>Changelog</summary>
+    <ul id="changelog"></ul>
+  </details>
+  <details>
+    <summary>Entferntes (additiv-only Protokoll)</summary>
+    <ul id="removedList"><li>V1: nichts entfernt (Erstfassung).</li></ul>
+  </details>
+</section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script id="EMBEDDED_STATE" type="application/json">{}</script>
+<script>
+/* ===================== EMBEDDED_DATA ===================== */
+const EMBEDDED_DATA = {
+  meta: {
+    tool: "Surface Zubehör Cockpit",
+    version: "V1",
+    created: "2026-10-09 23:51 Europe/Berlin",
+    file: "surface_zubehoer_shopping_2026-10-09_2351.html",
+    source: "Claude Code Session, Repository gty7wkh2m2-byte/token, Branch claude/serene-dijkstra-i6p0ic",
+    priceNote: "Preisspannen = Schätzung [I:mittel], Stand 10/2026, keine Websuche je Produkt. Verifizierung in Schritt Preisrecherche nach Übergabe.",
+    storageKey: "surface_zubehoer_cockpit_v1"
+  },
+  changelog: [
+    "V1 (2026-10-09): Erstfassung. Gerätewahl (11 Modelle), Präferenz-Fragebogen, 20 Zubehörkategorien mit Regeln, Suchlinks für 7 Händler, Einkaufsliste mit Budgetbalken, JSON/HTML-Export, Übergabe-Prompt, Autosave."
+  ],
+  shops: [
+    { id: "amazon", name: "Amazon.de", url: q => "https://www.amazon.de/s?k=" + q },
+    { id: "idealo", name: "idealo", url: q => "https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=" + q },
+    { id: "geizhals", name: "geizhals", url: q => "https://geizhals.de/?fs=" + q },
+    { id: "microsoft", name: "Microsoft Store", url: q => "https://www.microsoft.com/de-de/search/shop?q=" + q },
+    { id: "mediamarkt", name: "MediaMarkt", url: q => "https://www.mediamarkt.de/de/search.html?query=" + q },
+    { id: "ebay", name: "eBay", url: q => "https://www.ebay.de/sch/i.html?_nkw=" + q },
+    { id: "kleinanzeigen", name: "Kleinanzeigen", url: q => "https://www.kleinanzeigen.de/s-" + q.replace(/\+/g, "-") + "/k0" }
+  ],
+  uses: [
+    { id: "notizen", label: "Handschriftliche Notizen" },
+    { id: "texte", label: "Viel tippen (Texte, Mails)" },
+    { id: "zeichnen", label: "Zeichnen / Illustration" },
+    { id: "medien", label: "Lesen, Video, Streaming" },
+    { id: "reisen", label: "Viel unterwegs / Reisen" },
+    { id: "homeoffice", label: "Schreibtisch / Homeoffice" },
+    { id: "praesentation", label: "Präsentieren (Beamer, Fremdmonitor)" },
+    { id: "studium", label: "Studium / Seminar" },
+    { id: "foto", label: "Fotos / Kamera-Speicherkarten" }
+  ],
+  /* Gerätedaten. kb = Tastaturfamilie, pen = Stiftfamilie, sc = Surface Connect, jack = 3,5-mm-Klinke, sd = microSD-Slot, usbc = Anzahl USB-C, psu = Netzteil im Lieferumfang */
+  devices: [
+    { id: "pro12", name: "Surface Pro 12 Zoll (2025, Snapdragon X Plus)", kb: "pro12", pen: "slim", sc: false, jack: false, sd: false, usbc: 2, usbcSpec: "USB-C 3.2 (kein Thunderbolt)", psu: "unsicher: je nach Markt ohne Netzteil ausgeliefert, Lieferumfang prüfen", watt: "45 W USB-C PD" },
+    { id: "pro11", name: "Surface Pro 11 (2024, 13 Zoll, Snapdragon X)", kb: "pro8plus", pen: "slim", sc: true, jack: false, sd: false, usbc: 2, usbcSpec: "USB4 / Thunderbolt-kompatibel (USB-C)", psu: "ja, Surface Connect 39 W oder 65 W", watt: "65 W" },
+    { id: "pro10", name: "Surface Pro 10 for Business (2024, 13 Zoll, Intel Core Ultra)", kb: "pro8plus", pen: "slim", sc: true, jack: false, sd: false, usbc: 2, usbcSpec: "Thunderbolt 4 (USB-C)", psu: "ja, Surface Connect 65 W", watt: "65 W" },
+    { id: "pro9", name: "Surface Pro 9 (2022, 13 Zoll)", kb: "pro8plus", pen: "slim", sc: true, jack: false, sd: false, usbc: 2, usbcSpec: "Thunderbolt 4 (Intel) bzw. USB-C 3.2 (5G-Variante)", psu: "ja, Surface Connect 65 W", watt: "65 W" },
+    { id: "pro8", name: "Surface Pro 8 (2021, 13 Zoll)", kb: "pro8plus", pen: "slim", sc: true, jack: true, sd: false, usbc: 2, usbcSpec: "Thunderbolt 4 (USB-C)", psu: "ja, Surface Connect 65 W", watt: "65 W" },
+    { id: "prox", name: "Surface Pro X (2019/2020, 13 Zoll, ARM)", kb: "prox", pen: "slim", sc: true, jack: false, sd: false, usbc: 2, usbcSpec: "USB-C 3.2", psu: "ja, Surface Connect 65 W", watt: "65 W" },
+    { id: "pro7", name: "Surface Pro 7 / 7+ (2019/2021, 12,3 Zoll)", kb: "pro37", pen: "classic", sc: true, jack: true, sd: true, usbc: 1, usbcSpec: "USB-C 3.1 + 1× USB-A", psu: "ja, Surface Connect 65 W", watt: "65 W" },
+    { id: "go4", name: "Surface Go 4 (2023, 10,5 Zoll)", kb: "go", pen: "classic", sc: true, jack: true, sd: true, usbc: 1, usbcSpec: "USB-C 3.1", psu: "ja, Surface Connect 24 W", watt: "24 W bis 39 W" },
+    { id: "go3", name: "Surface Go 3 (2021, 10,5 Zoll)", kb: "go", pen: "classic", sc: true, jack: true, sd: true, usbc: 1, usbcSpec: "USB-C 3.1", psu: "ja, Surface Connect 24 W", watt: "24 W bis 39 W" },
+    { id: "go2", name: "Surface Go 2 (2020, 10,5 Zoll)", kb: "go", pen: "classic", sc: true, jack: true, sd: true, usbc: 1, usbcSpec: "USB-C 3.1", psu: "ja, Surface Connect 24 W", watt: "24 W bis 39 W" },
+    { id: "other", name: "anderes Modell (manuell eintragen)", kb: "unbekannt", pen: "unbekannt", sc: null, jack: null, sd: null, usbc: null, usbcSpec: "unbekannt", psu: "unbekannt", watt: "unbekannt" }
+  ],
+  kbNames: {
+    pro12: "Surface Pro 12-Zoll-Keyboard (nur dieses Modell, mit oder ohne Slim Pen im Bundle)",
+    pro8plus: "Surface Pro Signature Keyboard oder Surface Pro Flex Keyboard (Pro 8, 9, 10, 11; Pro X Signature Keyboard ebenfalls kompatibel)",
+    prox: "Surface Pro X Signature Keyboard oder Surface Pro Signature Keyboard (Pro 8/9-Generation)",
+    pro37: "Surface Pro Type Cover / Signature Type Cover (Pro 3 bis 7+); nicht kompatibel mit Pro 8 und neuer",
+    go: "Surface Go Type Cover / Signature Type Cover (Go 1 bis 4)",
+    unbekannt: "Kompatibilität manuell prüfen (fehlt, bitte liefern)"
+  },
+  penNames: {
+    slim: "Surface Slim Pen 2 bzw. Surface Slim Pen (flache Bauform, lädt magnetisch in der Tastaturmulde oder an der Geräterückseite beim 12-Zoll-Modell)",
+    classic: "Surface Pen (runde Bauform, AAAA-Batterie, haftet magnetisch seitlich); Slim Pen 2 funktioniert ebenfalls, lädt aber nur mit separatem Ladegerät",
+    unbekannt: "Kompatibilität manuell prüfen (fehlt, bitte liefern)"
+  },
+  /* Zubehörkategorien. price = [min,max] € Schätzung. ex = Beispiele (o = Original, d = Drittanbieter). q = Suchbegriff-Vorlage ({dev} = Gerätename kurz) */
+  categories: [
+    { id: "tastatur", group: "Eingabe", name: "Tastatur / Type Cover", q: "{dev} Keyboard Tastatur", price: [40, 200],
+      criteria: ["Deutsches Layout (QWERTZ) prüfen", "Original: Trackpad, Hintergrundbeleuchtung, Stiftmulde mit Ladung (Signature / Flex)", "Flex Keyboard (Pro 8 bis 11): abnehmbar per Bluetooth, deutlich teurer", "Drittanbieter: meist Bluetooth-Hülle mit Tastatur, kein Stift-Laden, oft schwerer"],
+      ex: [{ t: "o", n: "Surface Pro Signature Keyboard", p: [150, 200] }, { t: "o", n: "Surface Pro Flex Keyboard", p: [400, 480] }, { t: "o", n: "Surface Pro 12-Zoll-Keyboard", p: [140, 180] }, { t: "o", n: "Surface Go Signature Type Cover", p: [100, 150] }, { t: "d", n: "Bluetooth-Tastaturhülle (z. B. Inateck, Brydge-Restbestände)", p: [40, 100] }] },
+    { id: "stift", group: "Eingabe", name: "Stift", q: "{dev} Pen Stift", price: [30, 140],
+      criteria: ["Microsoft Pen Protocol (MPP) 2.0 für Neigung und Druckstufen", "Slim Pen 2: haptisches Feedback nur auf unterstützten Geräten (Pro 8 und neuer)", "Laden: Slim Pen in Tastaturmulde; klassischer Surface Pen mit AAAA-Batterie", "Drittanbieter (z. B. Renaisser, Metapen): günstiger, meist USB-C-Ladung, kein haptisches Feedback"],
+      ex: [{ t: "o", n: "Surface Slim Pen 2", p: [110, 140] }, { t: "o", n: "Surface Pen (klassisch)", p: [80, 110] }, { t: "d", n: "Renaisser Raphael 520 / 530", p: [40, 60] }, { t: "d", n: "Metapen M1 / M2", p: [30, 50] }] },
+    { id: "maus", group: "Eingabe", name: "Maus (Bluetooth)", q: "Bluetooth Maus", price: [15, 100],
+      criteria: ["Bluetooth statt USB-Dongle (spart den einzigen USB-Port)", "Flach und leicht für die Tasche: Surface Arc, Logitech Pebble", "Ergonomisch für den Schreibtisch: Logitech MX Anywhere, Microsoft Ergonomic"],
+      ex: [{ t: "o", n: "Surface Arc Mouse", p: [70, 90] }, { t: "d", n: "Logitech Pebble Mouse 2 M350s", p: [20, 30] }, { t: "d", n: "Logitech MX Anywhere 3S", p: [70, 90] }, { t: "d", n: "Microsoft Bluetooth Mouse", p: [20, 30] }] },
+    { id: "ext_tastatur", group: "Eingabe", name: "Externe Tastatur (Schreibtisch)", q: "Bluetooth Tastatur QWERTZ kompakt", price: [25, 120],
+      criteria: ["Nur sinnvoll bei festem Arbeitsplatz mit Monitor", "Bluetooth Multi-Device, wenn zusätzlich PC/Handy", "QWERTZ-Layout prüfen"],
+      ex: [{ t: "d", n: "Logitech K380s / MX Keys Mini", p: [35, 110] }, { t: "o", n: "Microsoft Bluetooth Keyboard", p: [40, 60] }] },
+    { id: "netzteil", group: "Strom", name: "Netzteil", q: "{dev} Netzteil Ladegerät USB-C PD", price: [20, 90],
+      criteria: ["USB-C Power Delivery mit mindestens der Gerätewattzahl (siehe Gerätefakten)", "Surface Connect nur per Original-Netzteil oder Surface-Connect-Kabel von Drittanbietern", "GaN-Netzteil (kompakt, kühl) für Reisen; 2 Ports erlauben Handy gleichzeitig"],
+      ex: [{ t: "o", n: "Microsoft Surface 65-W-Netzteil (Surface Connect)", p: [70, 90] }, { t: "d", n: "Anker / Ugreen 65 W GaN USB-C", p: [25, 45] }, { t: "d", n: "Surface-Connect-auf-USB-C-Kabel (Drittanbieter)", p: [15, 25] }] },
+    { id: "kabel", group: "Strom", name: "USB-C-Kabel (Laden + Daten)", q: "USB-C Kabel 100W 2m", price: [8, 25],
+      criteria: ["Mindestens 60 W, besser 100 W (E-Marker) für Zukunftssicherheit", "Länge 1 bis 2 m", "Für Monitor am USB-C: USB 3.2 / Thunderbolt-fähiges Kabel, nicht reines Ladekabel"],
+      ex: [{ t: "d", n: "Anker / Ugreen USB-C 100 W, 2 m", p: [8, 20] }] },
+    { id: "powerbank", group: "Strom", name: "Powerbank mit USB-C PD", q: "Powerbank 20000mAh 65W USB-C PD", price: [35, 80],
+      criteria: ["Ausgang mindestens 45 W PD, sonst lädt das Surface unter Last nicht", "20.000 mAh entspricht etwa einer vollen Ladung", "Handgepäck-Grenze: unter 100 Wh"],
+      ex: [{ t: "d", n: "Anker 737 / Ugreen 145 W / Baseus Blade", p: [40, 80] }] },
+    { id: "huelle", group: "Schutz", name: "Hülle / Sleeve", q: "{dev} Hülle Sleeve", price: [15, 50],
+      criteria: ["Sleeve für die Tasche: Maß an Bildschirmdiagonale (10,5 / 12 / 13 Zoll) und mit Type Cover prüfen", "Folio-Case mit Kickstand-Ausschnitt, wenn Stift und Tastatur dran bleiben sollen", "Stift-Schlaufe oder Fach"],
+      ex: [{ t: "d", n: "tomtoc / Inateck Sleeve 13 Zoll", p: [20, 40] }, { t: "d", n: "MoKo / Fintie Folio-Case", p: [15, 30] }] },
+    { id: "displayschutz", group: "Schutz", name: "Displayschutz", q: "{dev} Displayschutz Folie", price: [10, 45],
+      criteria: ["Glas: Kratzschutz, glatt, spiegelnd; günstig", "Matte Papier-Folie (z. B. Paperlike): Schreibgefühl, weniger Reflexion, leicht unschärfer, nutzt Stiftspitzen schneller ab", "Passende Größe und Aussparung für Kamera/Windows-Hello"],
+      ex: [{ t: "d", n: "Paperlike / Bersem matte Folie", p: [25, 45] }, { t: "d", n: "Spigen / JETech Panzerglas", p: [10, 20] }] },
+    { id: "reinigung", group: "Schutz", name: "Reinigungsset", q: "Display Reinigungsset Mikrofaser", price: [5, 15],
+      criteria: ["Mikrofasertuch + alkoholfreier Reiniger", "Kein Glasreiniger (greift Beschichtung an)"],
+      ex: [{ t: "d", n: "Whoosh / Mikrofaser-Set", p: [5, 15] }] },
+    { id: "stiftspitzen", group: "Schutz", name: "Ersatz-Stiftspitzen", q: "{pen} Ersatzspitzen Tip Kit", price: [10, 25],
+      criteria: ["Nur für den gewählten Stift (Slim Pen 2 Tips vs. Surface Pen Tip Kit)", "Bei matter Folie Verschleiß deutlich höher"],
+      ex: [{ t: "o", n: "Microsoft Surface Pen Tip Kit / Slim Pen 2 Tips", p: [15, 25] }, { t: "d", n: "Drittanbieter-Spitzen", p: [8, 15] }] },
+    { id: "hub", group: "Anschlüsse", name: "USB-C-Hub (mobil)", q: "USB-C Hub HDMI 4K USB-A SD PD 100W", price: [20, 60],
+      criteria: ["HDMI 4K60 (nicht nur 4K30), 2× USB-A, SD/microSD, USB-C PD-Durchleitung", "Für Präsentationen: HDMI + VGA-Fallback", "Kurzes Kabel, flach, kein Lüfter"],
+      ex: [{ t: "d", n: "Anker 7-in-1 / Ugreen Revodok", p: [25, 50] }] },
+    { id: "dock", group: "Anschlüsse", name: "Dockingstation (Schreibtisch)", q: "Thunderbolt 4 Dock USB-C Docking Station", price: [60, 350],
+      criteria: ["Surface Dock 2 / Thunderbolt 4 Dock (Original): Surface Connect bzw. Thunderbolt, teuer", "USB-C-Dock mit Stromversorgung (ab 65 W) ersetzt Netzteil am Schreibtisch", "Thunderbolt-Dock nur sinnvoll bei Thunderbolt-fähigem Gerät (Pro 8, 9 Intel, 10, 11)", "Alternative: Monitor mit USB-C-Hub-Funktion (ein Kabel für Bild + Strom)"],
+      ex: [{ t: "o", n: "Microsoft Surface Thunderbolt 4 Dock", p: [300, 350] }, { t: "o", n: "Surface Dock 2", p: [250, 300] }, { t: "d", n: "Anker / Ugreen / Dell USB-C-Dock mit 65 W+", p: [60, 200] }] },
+    { id: "monitorkabel", group: "Anschlüsse", name: "Monitor-Kabel / Adapter", q: "USB-C auf HDMI 2.0 Kabel 4K60", price: [8, 25],
+      criteria: ["Abhängig vom Monitoranschluss: USB-C auf HDMI, USB-C auf DisplayPort oder USB-C auf USB-C", "4K60 angeben, sonst nur 30 Hz", "Entfällt bei Hub oder Dock"],
+      ex: [{ t: "d", n: "Ugreen / Cable Matters USB-C auf HDMI 2.0", p: [10, 20] }] },
+    { id: "microsd", group: "Anschlüsse", name: "microSD-Karte", q: "microSDXC 256GB A2 U3", price: [20, 40],
+      criteria: ["Nur bei Geräten mit Slot (Go-Reihe, Pro 7)", "A2 / U3 / V30 für App-Nutzung, nicht nur Mediendaten", "Marken: SanDisk, Samsung, Kingston"],
+      ex: [{ t: "d", n: "SanDisk Extreme / Samsung EVO Plus 256 GB", p: [20, 35] }] },
+    { id: "audio", group: "Anschlüsse", name: "Kopfhörer / Audio-Adapter", q: "USB-C auf 3,5mm Klinke Adapter DAC", price: [8, 250],
+      criteria: ["Geräte ohne 3,5-mm-Buchse: USB-C-auf-Klinke-Adapter mit DAC oder Bluetooth-Kopfhörer", "Adapter belegt einen USB-C-Port (Laden parallel nur mit 2 Ports)", "Bluetooth: Multipoint, wenn Handy parallel"],
+      ex: [{ t: "d", n: "Apple / Ugreen USB-C-auf-Klinke-Adapter", p: [8, 15] }, { t: "d", n: "Bluetooth-Kopfhörer (Budget bis Premium)", p: [30, 250] }] },
+    { id: "monitor", group: "Arbeitsplatz", name: "Monitor", q: "Monitor 27 Zoll 1440p USB-C 65W", price: [150, 400],
+      criteria: ["USB-C mit Power Delivery 65 W: ein Kabel für Bild, Strom, USB-Hub", "27 Zoll 1440p als Standard, 24 Zoll 1080p als Budget", "Höhenverstellung und Pivot bei Textarbeit"],
+      ex: [{ t: "d", n: "Dell / LG / BenQ 27 Zoll USB-C", p: [200, 400] }] },
+    { id: "staender", group: "Arbeitsplatz", name: "Ständer / Erhöhung", q: "Tablet Ständer verstellbar Aluminium", price: [15, 45],
+      criteria: ["Kickstand reicht für kurze Nutzung; Ständer bringt Augenhöhe bei langer Arbeit", "Stabil genug für 13 Zoll mit Type Cover", "Faltbar für unterwegs"],
+      ex: [{ t: "d", n: "Ugreen / Lamicall / Rain Design", p: [15, 45] }] },
+    { id: "ssd", group: "Arbeitsplatz", name: "Externe SSD (Backup / Speicher)", q: "externe SSD 1TB USB-C", price: [70, 130],
+      criteria: ["USB-C 3.2 Gen 2 (10 Gbit/s) reicht; NVMe-Gehäuse schneller, aber wärmer", "1 TB als Standard", "Mit Windows-Dateiversionsverlauf oder OneDrive kombinieren"],
+      ex: [{ t: "d", n: "Samsung T7 / T9, SanDisk Extreme Portable", p: [70, 130] }] },
+    { id: "webcam_cover", group: "Arbeitsplatz", name: "Kamera-Abdeckung", q: "Webcam Cover ultradünn", price: [3, 10],
+      criteria: ["Ultradünn (unter 1 mm), sonst schließt das Type Cover nicht", "Blockiert Windows-Hello-Gesichtserkennung, wenn geschlossen"],
+      ex: [{ t: "d", n: "Schiebeabdeckung 3er-Pack", p: [3, 8] }] }
+  ],
+  statusDefs: {
+    pflicht: { label: "Pflicht", cls: "g" },
+    empfohlen: { label: "empfohlen", cls: "y" },
+    optional: { label: "optional", cls: "i" },
+    nicht: { label: "nicht nötig", cls: "i" },
+    klaeren: { label: "Klärung", cls: "r" }
+  },
+  selStatus: [["offen", "offen"], ["ausgewaehlt", "ausgewählt"], ["gekauft", "gekauft"], ["nicht", "nicht nötig"]]
+};
+
+/* ===================== ZUSTAND ===================== */
+const DEFAULT_STATE = () => ({
+  version: EMBEDDED_DATA.meta.version,
+  savedAt: null,
+  device: "pro11", deviceOther: "", deviceStorage: "",
+  uses: [], budget: "", priceWeight: "ausgewogen", brand: "egal", used: "ja", penUse: "gelegentlich",
+  monitor: "keiner", audio: "keine", color: "",
+  shops: ["amazon", "idealo", "geizhals"],
+  have: [],
+  filter: "relevant",
+  items: {},   /* id -> {status, product, price, shop, link, note} */
+  notes: "",
+  done: []
+});
+let S = DEFAULT_STATE();
+let dirty = false;
+
+function loadState() {
+  let embedded = {};
+  try { embedded = JSON.parse(document.getElementById("EMBEDDED_STATE").textContent || "{}"); } catch (e) { embedded = {}; }
+  let stored = null;
+  try { const raw = localStorage.getItem(EMBEDDED_DATA.meta.storageKey); if (raw) stored = JSON.parse(raw); } catch (e) { stored = null; }
+  /* Priorität: localStorage (neuer) > eingebetteter Stand > Default. Eingebetteter Stand gewinnt, wenn jünger. */
+  let src = stored;
+  if (embedded && embedded.savedAt && (!stored || !stored.savedAt || embedded.savedAt > stored.savedAt)) src = embedded;
+  S = Object.assign(DEFAULT_STATE(), src || {});
+  S.items = S.items || {};
+}
+function saveNow() {
+  S.savedAt = nowIso();
+  try { localStorage.setItem(EMBEDDED_DATA.meta.storageKey, JSON.stringify(S)); setSave("ok", "Autosave: " + S.savedAt.slice(11, 19)); }
+  catch (e) { setSave("dirty", "Autosave nicht möglich (Browser blockiert Speicher)"); }
+  dirty = false;
+}
+function markDirty() { dirty = true; setSave("dirty", "Autosave: ungespeichert"); }
+setInterval(() => { if (dirty) saveNow(); }, 1000);
+function setSave(cls, txt) { const el = document.getElementById("saveState"); el.className = "save " + cls; el.textContent = txt; }
+function nowIso() { const d = new Date(); const p = n => String(n).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + "T" + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds()); }
+function stamp() { return nowIso().replace("T", "_").replace(/:/g, "").slice(0, 15); }
+
+/* ===================== HILFEN ===================== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const eur = n => (Math.round(n) + " €");
+function toast(t) { const el = $("toast"); el.textContent = t; el.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("show"), 1600); }
+function device() { return EMBEDDED_DATA.devices.find(d => d.id === S.device) || EMBEDDED_DATA.devices[0]; }
+function devShort() {
+  const d = device();
+  if (d.id === "other") return S.deviceOther || "Surface";
+  return d.name.replace(/\s*\(.*$/, "");
+}
+function item(id) { if (!S.items[id]) S.items[id] = { status: "offen", product: "", price: "", shop: "", link: "", note: "" }; return S.items[id]; }
+function has(u) { return S.uses.includes(u); }
+
+/* ===================== REGELN: Bedarf je Kategorie ===================== */
+function evalCategory(c) {
+  const d = device();
+  if (S.have.includes(c.id)) return { st: "nicht", why: "Als vorhanden markiert (Schritt 2)." };
+  const R = (st, why) => ({ st, why });
+  switch (c.id) {
+    case "tastatur":
+      if (has("texte") || has("studium") || has("homeoffice")) return R("pflicht", "Viel Tippen, Studium oder Schreibtischarbeit gewählt: ohne Tastatur ist das Tablet als Arbeitsgerät stark eingeschränkt.");
+      return R("empfohlen", "Auch für Mails und Suchanfragen deutlich schneller als die Bildschirmtastatur.");
+    case "stift":
+      if (has("notizen") || has("zeichnen") || S.penUse === "taeglich" || S.penUse === "intensiv") return R("pflicht", "Handschriftliche Notizen oder Zeichnen gewählt bzw. Stift-Intensität täglich/intensiv.");
+      if (S.penUse === "keine") return R("nicht", "Stift-Intensität = keine.");
+      return R("optional", "Gelegentliche Nutzung: günstiger Drittanbieter-Stift reicht meist aus.");
+    case "maus":
+      if (has("texte") || has("homeoffice")) return R("empfohlen", "Längeres Arbeiten mit Trackpad ermüdet; Bluetooth-Maus belegt keinen Port.");
+      return R("optional", "Für Medien und Notizen reicht Touch/Stift.");
+    case "ext_tastatur":
+      if (has("homeoffice") && (S.monitor !== "keiner")) return R("optional", "Fester Arbeitsplatz mit Monitor: externe Tastatur ergonomischer als Type Cover, aber nicht nötig.");
+      return R("nicht", "Kein fester Arbeitsplatz mit Monitor gewählt.");
+    case "netzteil":
+      if (d.id === "pro12") return R("klaeren", "Lieferumfang des 12-Zoll-Modells je Markt unterschiedlich: zuerst prüfen, ob ein Netzteil beiliegt. Fehlt es: Pflicht (USB-C PD ab 45 W).");
+      if (d.id === "other") return R("klaeren", "Modell unbekannt: Lieferumfang und Ladestandard prüfen.");
+      if (has("reisen") && has("homeoffice")) return R("empfohlen", "Zweitnetzteil: eines bleibt am Schreibtisch, eines in der Tasche. Kompaktes USB-C-GaN-Netzteil reicht.");
+      return R("optional", "Original-Netzteil liegt bei. Zweitnetzteil nur bei Bedarf.");
+    case "kabel":
+      if (d.id === "pro12" || d.sc === false) return R("empfohlen", "Gerät lädt ausschließlich über USB-C: ein zweites hochwertiges Kabel (100 W) als Reserve.");
+      if (S.monitor === "usbc") return R("empfohlen", "Monitor am USB-C: datenfähiges Kabel nötig, reines Ladekabel überträgt kein Bild.");
+      return R("optional", "Nur bei USB-C-Ladung über Drittnetzteil oder Powerbank nötig.");
+    case "powerbank":
+      if (has("reisen")) return R("empfohlen", "Viel unterwegs: Powerbank mit mindestens 45 W PD verlängert Laufzeit um etwa eine Ladung.");
+      return R("optional", "Ohne Reisen selten nötig.");
+    case "huelle":
+      if (has("reisen") || has("studium")) return R("pflicht", "Transport in Tasche/Rucksack: Schutz für Display und Kanten.");
+      return R("empfohlen", "Auch zu Hause Schutz beim Verstauen; günstig.");
+    case "displayschutz":
+      if (has("zeichnen") || S.penUse === "intensiv") return R("empfohlen", "Intensive Stiftnutzung: matte Folie verbessert Schreibgefühl, erhöht aber Spitzenverschleiß.");
+      if (has("notizen") || has("reisen")) return R("empfohlen", "Stift oder Transport: Kratzschutz sinnvoll. Glas (glatt) oder matte Folie (Papiergefühl) nach Vorliebe.");
+      return R("optional", "Ohne Stift und Reisen reine Vorsichtsmaßnahme.");
+    case "reinigung":
+      return R("optional", "Mikrofasertuch reicht; Set nur bei Bedarf.");
+    case "stiftspitzen":
+      if ((has("zeichnen") || S.penUse === "intensiv" || S.penUse === "taeglich") && !S.have.includes("stift") && S.penUse !== "keine") return R("optional", "Hohe Stiftnutzung: Spitzen nutzen sich ab, besonders mit matter Folie. Erst kaufen, wenn Stift feststeht.");
+      return R("nicht", "Geringe oder keine Stiftnutzung.");
+    case "hub":
+      if (has("praesentation")) return R("pflicht", "Präsentieren an Beamer/Fremdmonitor: HDMI-Ausgang nur per Hub oder Adapter.");
+      if (d.usbc !== null && d.usbc <= 2 && (has("foto") || has("homeoffice"))) return R("empfohlen", "Wenige Ports: Hub bündelt USB-A, SD-Kartenleser und HDMI.");
+      if (d.id === "pro12") return R("empfohlen", "Nur 2× USB-C, kein Surface Connect: Hub mit PD-Durchleitung erlaubt Laden + Zubehör gleichzeitig.");
+      return R("optional", "Nur bei Bedarf an USB-A oder Kartenleser.");
+    case "dock":
+      if (has("homeoffice") && S.monitor !== "keiner") return R("optional", "Fester Arbeitsplatz: Dock = ein Kabel für Monitor, Strom, Peripherie. Alternative: USB-C-Monitor mit Hub-Funktion oder mobiler Hub.");
+      return R("nicht", "Kein fester Arbeitsplatz mit Monitor.");
+    case "monitorkabel":
+      if (S.monitor === "hdmi") return R("empfohlen", "Monitor mit HDMI: Kabel USB-C auf HDMI 2.0 (4K60). Entfällt bei Hub/Dock.");
+      if (S.monitor === "dp") return R("empfohlen", "Monitor mit DisplayPort: Kabel USB-C auf DisplayPort 1.4. Entfällt bei Hub/Dock.");
+      if (S.monitor === "usbc") return R("optional", "Monitor mit USB-C: meist liegt ein Kabel bei; sonst siehe Kategorie USB-C-Kabel.");
+      return R("nicht", "Kein Monitor vorhanden.");
+    case "microsd":
+      if (d.sd === true && (has("foto") || has("medien"))) return R("empfohlen", "Gerät hat microSD-Slot: günstige Speichererweiterung für Medien/Fotos.");
+      if (d.sd === true) return R("optional", "Slot vorhanden; nur bei Speichermangel.");
+      if (d.sd === null) return R("klaeren", "Modell unbekannt: Slot prüfen.");
+      return R("nicht", "Gerät hat keinen microSD-Slot. Bei Fotos: Hub mit Kartenleser (Kategorie Hub).");
+    case "audio":
+      if (d.jack === false && S.audio === "kabel") return R("empfohlen", "Gerät ohne 3,5-mm-Buchse, Kabelkopfhörer vorhanden: USB-C-auf-Klinke-Adapter mit DAC (ca. 10 €).");
+      if (d.jack === false && S.audio === "keine" && (has("medien") || has("studium") || has("reisen"))) return R("empfohlen", "Gerät ohne Klinke, keine Kopfhörer: Bluetooth-Kopfhörer oder USB-C-Kopfhörer.");
+      if (S.audio === "keine" && (has("medien") || has("reisen"))) return R("optional", "Kopfhörer je nach Bedarf; Gerät hat 3,5-mm-Buchse.");
+      if (d.jack === null) return R("klaeren", "Modell unbekannt: Klinkenbuchse prüfen.");
+      return R("nicht", "Vorhandene Kopfhörer passen zum Gerät.");
+    case "monitor":
+      if (has("homeoffice") && S.monitor === "keiner") return R("optional", "Schreibtischarbeit ohne Monitor: 27 Zoll mit USB-C-PD ersetzt Dock und Netzteil am Platz. Größter Einzelposten.");
+      return R("nicht", "Monitor vorhanden oder kein Schreibtisch-Einsatz.");
+    case "staender":
+      if (has("homeoffice") && !has("praesentation")) return R("empfohlen", "Lange Sitzungen: Erhöhung auf Augenhöhe entlastet Nacken. Mit Monitor nur als Zweitbildschirm-Halter.");
+      return R("optional", "Kickstand reicht für kurze Nutzung.");
+    case "ssd":
+      if (has("foto") || has("zeichnen")) return R("empfohlen", "Große Dateien (Fotos, Zeichnungen): Backup und Auslagerung auf externe SSD.");
+      return R("optional", "Backup auch über OneDrive/Cloud möglich.");
+    case "webcam_cover":
+      return R("optional", "Reine Privatsphäre-Maßnahme; blockiert Windows Hello bei geschlossener Abdeckung.");
+  }
+  return R("optional", "");
+}
+function compatText(c) {
+  const d = device();
+  switch (c.id) {
+    case "tastatur": return EMBEDDED_DATA.kbNames[d.kb];
+    case "stift": return EMBEDDED_DATA.penNames[d.pen];
+    case "netzteil": return "Ladeleistung " + d.watt + ". Surface Connect: " + (d.sc === null ? "unbekannt" : d.sc ? "ja" : "nein") + ". Netzteil im Lieferumfang: " + d.psu + ".";
+    case "kabel": case "hub": case "dock": case "monitorkabel": return "USB-C: " + (d.usbc === null ? "unbekannt" : d.usbc + "×") + ", " + d.usbcSpec + ".";
+    case "microsd": return "microSD-Slot: " + (d.sd === null ? "unbekannt" : d.sd ? "ja" : "nein") + ".";
+    case "audio": return "3,5-mm-Klinke: " + (d.jack === null ? "unbekannt" : d.jack ? "ja" : "nein") + ".";
+    case "stiftspitzen": return "Spitzen passend zu: " + (d.pen === "slim" ? "Slim Pen 2 / Slim Pen" : d.pen === "classic" ? "Surface Pen (klassisch)" : "unbekannt") + ".";
+    case "huelle": case "displayschutz": return "Größe: " + (d.id === "pro12" ? "12 Zoll" : d.id.startsWith("go") ? "10,5 Zoll" : d.id === "pro7" ? "12,3 Zoll" : d.id === "other" ? "unbekannt" : "13 Zoll") + ".";
+    default: return "geräteunabhängig.";
+  }
+}
+function priceFor(c) {
+  /* gewichtete Punktschätzung aus Spanne, abhängig von Preisgewicht und Marke */
+  const [lo, hi] = c.price;
+  let f = S.priceWeight === "guenstig" ? 0.15 : S.priceWeight === "qualitaet" ? 0.85 : 0.5;
+  if (S.brand === "original") f = Math.max(f, 0.7);
+  if (S.brand === "dritt") f = Math.min(f, 0.35);
+  return lo + (hi - lo) * f;
+}
+function searchQuery(c) {
+  const d = device();
+  let q = c.q.replace("{dev}", devShort()).replace("{pen}", d.pen === "slim" ? "Surface Slim Pen 2" : "Surface Pen");
+  if (S.brand === "original" && c.ex.some(e => e.t === "o")) q = "Microsoft " + q;
+  return encodeURIComponent(q).replace(/%20/g, "+");
+}
+
+/* ===================== RENDER ===================== */
+function renderStatic() {
+  const m = EMBEDDED_DATA.meta;
+  $("origin").innerHTML = `<span><b>Datei</b> ${esc(m.file)}</span><span><b>Erstellt</b> ${esc(m.created)}</span><span><b>Herkunft</b> ${esc(m.source)}</span><span><b>Preise</b> ${esc(m.priceNote)}</span>`;
+  $("verPill").textContent = m.version;
+  $("device").innerHTML = EMBEDDED_DATA.devices.map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join("");
+  $("useChips").innerHTML = EMBEDDED_DATA.uses.map(u => `<label class="chip"><input type="checkbox" data-use="${u.id}" id="use_${u.id}"> ${esc(u.label)}</label>`).join("");
+  $("shopChips").innerHTML = EMBEDDED_DATA.shops.map(s => `<label class="chip"><input type="checkbox" data-shop="${s.id}" id="shop_${s.id}"> ${esc(s.name)}</label>`).join("");
+  $("haveChips").innerHTML = EMBEDDED_DATA.categories.map(c => `<label class="chip"><input type="checkbox" data-have="${c.id}" id="have_${c.id}"> ${esc(c.name)}</label>`).join("");
+  $("changelog").innerHTML = EMBEDDED_DATA.changelog.map(l => `<li>${esc(l)}</li>`).join("");
+}
+function fillForm() {
+  $("device").value = S.device; $("deviceOther").value = S.deviceOther; $("deviceStorage").value = S.deviceStorage;
+  $("deviceOtherWrap").hidden = S.device !== "other";
+  document.querySelectorAll("[data-use]").forEach(i => i.checked = S.uses.includes(i.dataset.use));
+  document.querySelectorAll("[data-shop]").forEach(i => i.checked = S.shops.includes(i.dataset.shop));
+  document.querySelectorAll("[data-have]").forEach(i => i.checked = S.have.includes(i.dataset.have));
+  ["budget", "priceWeight", "brand", "used", "penUse", "monitor", "audio", "color", "notes"].forEach(k => $(k).value = S[k] ?? "");
+  const f = document.querySelector(`input[name="flt"][value="${S.filter}"]`); if (f) f.checked = true;
+}
+function renderDeviceFacts() {
+  const d = device();
+  const yn = v => v === null ? "unbekannt" : v ? "ja" : "nein";
+  $("deviceFacts").innerHTML = `
+    <b>Tastatur</b><span>${esc(EMBEDDED_DATA.kbNames[d.kb])}</span>
+    <b>Stift</b><span>${esc(EMBEDDED_DATA.penNames[d.pen])}</span>
+    <b>Laden</b><span>${esc(d.watt)}; Surface Connect: ${yn(d.sc)}; Netzteil im Lieferumfang: ${esc(d.psu)}</span>
+    <b>USB-C</b><span>${d.usbc === null ? "unbekannt" : d.usbc + "×"}, ${esc(d.usbcSpec)}</span>
+    <b>3,5-mm-Klinke</b><span>${yn(d.jack)}</span>
+    <b>microSD-Slot</b><span>${yn(d.sd)}</span>
+    <b>Quelle</b><span>Gerätedaten aus Modellwissen [I:hoch für Pro 8 bis 11, Go 2 bis 4; I:mittel für 12-Zoll-Modell, Lieferumfang Netzteil unsicher]. Vor Kauf am Gerät oder Datenblatt prüfen.</span>`;
+}
+function renderNeeds() {
+  const list = $("needList");
+  const shops = EMBEDDED_DATA.shops.filter(s => S.shops.includes(s.id));
+  let n = 0;
+  list.innerHTML = EMBEDDED_DATA.categories.map((c, idx) => {
+    const ev = evalCategory(c);
+    const it = item(c.id);
+    const sd = EMBEDDED_DATA.statusDefs[ev.st];
+    const visible =
+      S.filter === "alle" ? true :
+      S.filter === "relevant" ? ["pflicht", "empfohlen", "klaeren"].includes(ev.st) :
+      S.filter === "offen" ? (["pflicht", "empfohlen", "klaeren"].includes(ev.st) && it.status === "offen") :
+      (it.status === "ausgewaehlt" || it.status === "gekauft");
+    if (!visible) return "";
+    n++;
+    const q = searchQuery(c);
+    const links = shops.map(s => `<a class="btn small" target="_blank" rel="noopener" href="${s.url(q)}">${esc(s.name)} ↗</a>`).join("");
+    const exs = c.ex.filter(e => !(S.brand === "dritt" && e.t === "o" && c.ex.some(x => x.t === "d")))
+      .map(e => `<li>${e.t === "o" ? '<span class="tag">Original</span>' : '<span class="tag">Drittanbieter</span>'} ${esc(e.n)} <span class="price">${e.p[0]}–${e.p[1]} €</span></li>`).join("");
+    const selCls = it.status === "gekauft" ? "g" : it.status === "ausgewaehlt" ? "b" : it.status === "nicht" ? "i" : "r";
+    return `
+    <article class="card ${sd.cls}" data-cat="${c.id}">
+      <div class="card-h">
+        <span class="num">${idx + 1}</span>
+        <h3>${esc(c.name)}</h3>
+        <span class="pill ${sd.cls}">${sd.label}</span>
+        <span class="pill p">${esc(c.group)}</span>
+        <span class="pill ${selCls}">${esc(EMBEDDED_DATA.selStatus.find(s => s[0] === it.status)[1])}</span>
+        <span class="price sub">Spanne ${c.price[0]}–${c.price[1]} €, Schätzpunkt ${eur(priceFor(c))}</span>
+      </div>
+      <div class="reason"><b>Warum:</b> ${esc(ev.why)}</div>
+      <div class="kv"><b>Kompatibilität</b><span>${esc(compatText(c))}</span></div>
+      <details><summary>Worauf achten + Beispiele</summary>
+        <ul>${c.criteria.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+        <p class="sub" style="margin-top:6px">Beispiele (Preis = Schätzung, kein Kaufvorschlag):</p>
+        <ul>${exs}</ul>
+      </details>
+      <div class="btnrow">${links || '<span class="sub">Keine Händler gewählt (Schritt 2).</span>'}</div>
+      <div class="sel">
+        <div class="field"><label for="st_${c.id}">Entscheidung</label><select id="st_${c.id}" data-f="status" data-id="${c.id}">${EMBEDDED_DATA.selStatus.map(s => `<option value="${s[0]}" ${it.status === s[0] ? "selected" : ""}>${s[1]}</option>`).join("")}</select></div>
+        <div class="field"><label for="pr_${c.id}">Produkt</label><input id="pr_${c.id}" data-f="product" data-id="${c.id}" value="${esc(it.product)}" placeholder="Hersteller + Modell"></div>
+        <div class="field"><label for="pc_${c.id}">Preis €</label><input id="pc_${c.id}" type="number" step="0.01" min="0" data-f="price" data-id="${c.id}" value="${esc(it.price)}"></div>
+        <div class="field"><label for="sh_${c.id}">Händler</label><input id="sh_${c.id}" data-f="shop" data-id="${c.id}" value="${esc(it.shop)}" placeholder="z. B. Amazon"></div>
+        <div class="field wide"><label for="ln_${c.id}">Link</label><input id="ln_${c.id}" data-f="link" data-id="${c.id}" value="${esc(it.link)}" placeholder="https://…"></div>
+        <div class="field wide"><label for="nt_${c.id}">Notiz</label><input id="nt_${c.id}" data-f="note" data-id="${c.id}" value="${esc(it.note)}" placeholder="z. B. Farbe, Alternative, offene Frage"></div>
+      </div>
+    </article>`;
+  }).join("") || `<p class="sub">Keine Karten für diesen Filter.</p>`;
+  list.dataset.count = n;
+}
+function renderShopping() {
+  const rows = [], evs = {};
+  let est = 0, sum = 0, pflichtOpen = 0, empfOpen = 0, bought = 0;
+  EMBEDDED_DATA.categories.forEach((c, idx) => {
+    const ev = evalCategory(c); evs[c.id] = ev;
+    const it = item(c.id);
+    if (["pflicht", "empfohlen", "klaeren"].includes(ev.st) && it.status !== "nicht") est += (it.price !== "" && !isNaN(+it.price)) ? +it.price : priceFor(c);
+    if (it.status === "ausgewaehlt" || it.status === "gekauft") {
+      const p = it.price !== "" && !isNaN(+it.price) ? +it.price : 0; sum += p;
+      if (it.status === "gekauft") bought++;
+      rows.push(`<tr><td>${idx + 1}</td><td>${esc(c.name)}</td><td><span class="pill ${it.status === "gekauft" ? "g" : "b"}">${it.status === "gekauft" ? "gekauft" : "ausgewählt"}</span></td><td>${esc(it.product) || '<span class="sub">(fehlt)</span>'}</td><td>${esc(it.shop)}</td><td class="num">${p ? p.toFixed(2) : '<span class="sub">offen</span>'}</td><td>${it.link ? `<a href="${esc(it.link)}" target="_blank" rel="noopener">öffnen ↗</a>` : ""}</td></tr>`);
+    }
+    if (it.status === "offen" && ev.st === "pflicht") pflichtOpen++;
+    if (it.status === "offen" && (ev.st === "empfohlen" || ev.st === "klaeren")) empfOpen++;
+  });
+  $("shopTable").querySelector("tbody").innerHTML = rows.join("") || `<tr><td colspan="7" class="sub">Noch nichts ausgewählt. In Schritt 3 Entscheidung auf „ausgewählt“ oder „gekauft“ setzen.</td></tr>`;
+  const budget = S.budget !== "" && !isNaN(+S.budget) ? +S.budget : null;
+  $("estLine").textContent = eur(est) + " (Schätzung aus Spannen, ersetzt durch eingetragene Preise)";
+  $("sumLine").textContent = eur(sum);
+  $("budgetLine").textContent = budget === null ? "nicht gesetzt (Schritt 2)" : eur(budget) + (budget ? ", Rest " + eur(budget - sum) : "");
+  const bar = $("budgetBar"); const ref = budget || est || 1; const pct = Math.min(100, (sum / ref) * 100);
+  bar.querySelector("i").style.width = pct + "%"; bar.classList.toggle("over", budget !== null && sum > budget);
+  $("kGeraet").textContent = devShort(); $("kPflicht").textContent = pflichtOpen; $("kEmpf").textContent = empfOpen; $("kGekauft").textContent = bought;
+  $("kSumme").textContent = eur(sum); $("kBudget").textContent = budget === null ? "–" : eur(budget);
+  $("kSumme").style.color = (budget !== null && sum > budget) ? "var(--r)" : "";
+  /* Schrittstatus */
+  const s1 = S.device && (S.device !== "other" || S.deviceOther);
+  const s2 = S.uses.length > 0 && S.budget !== "";
+  const s3 = pflichtOpen === 0 && empfOpen === 0;
+  const s4 = budget !== null && sum <= budget && rows.length > 0;
+  const setStep = (i, state, pillId, txt) => { const a = $("stepsNav").children[i]; a.className = state; if (pillId) $(pillId).textContent = txt; };
+  setStep(0, s1 ? "done" : "", "s1pill", s1 ? "gewählt" : "offen");
+  setStep(1, s2 ? "done" : S.uses.length ? "part" : "", "s2pill", s2 ? "vollständig" : S.uses.length ? "teilweise" : "offen");
+  setStep(2, s3 ? "done" : (rows.length ? "part" : ""), "s3pill", s3 ? "entschieden" : pflichtOpen + " Pflicht / " + empfOpen + " empfohlen offen");
+  setStep(3, s4 ? "done" : (rows.length ? "part" : ""), "s4pill", rows.length ? (budget !== null && sum > budget ? "Budget überschritten" : "im Budget") : "offen");
+  setStep(4, rows.length ? "done" : "", null);
+  setStep(5, S.notes ? "part" : "", null);
+  /* aktuelle Position: erste nicht erledigte Sektion rot umranden */
+  ["s1", "s2", "s3", "s4"].forEach(id => $(id).classList.remove("current"));
+  const cur = !s1 ? "s1" : !s2 ? "s2" : !s3 ? "s3" : !s4 ? "s4" : null; if (cur) $(cur).classList.add("current");
+  renderHandover(evs);
+}
+function renderHandover(evs) {
+  const d = device();
+  const L = [];
+  L.push("Surface Zubehör Cockpit " + EMBEDDED_DATA.meta.version + ", Stand " + nowIso().replace("T", " "));
+  L.push("Aufgabe: Preisrecherche und Produktauswahl für die unten gelisteten Kategorien. Pro Kategorie 2 bis 3 konkrete Produkte mit aktuellem Preis, Händler, Link, Quelle + Datum; Original vs. Drittanbieter getrennt; Gebraucht-Option, falls erlaubt. Ergebnis als Tabelle, je Zeile abhakbar.");
+  L.push("");
+  L.push("GERÄT: " + (d.id === "other" ? (S.deviceOther || "(fehlt)") : d.name) + (S.deviceStorage ? " | " + S.deviceStorage : ""));
+  L.push("Tastaturfamilie: " + EMBEDDED_DATA.kbNames[d.kb]);
+  L.push("Stiftfamilie: " + EMBEDDED_DATA.penNames[d.pen]);
+  L.push("Laden: " + d.watt + " | Surface Connect " + (d.sc === null ? "unbekannt" : d.sc ? "ja" : "nein") + " | USB-C " + (d.usbc === null ? "unbekannt" : d.usbc + "× " + d.usbcSpec) + " | Klinke " + (d.jack === null ? "unbekannt" : d.jack ? "ja" : "nein") + " | microSD " + (d.sd === null ? "unbekannt" : d.sd ? "ja" : "nein"));
+  L.push("");
+  L.push("PRÄFERENZEN: Nutzung = " + (S.uses.map(u => EMBEDDED_DATA.uses.find(x => x.id === u).label).join(", ") || "(fehlt)") + " | Budget = " + (S.budget || "(fehlt)") + " € | Preisgewicht = " + S.priceWeight + " | Marke = " + S.brand + " | Gebraucht = " + S.used + " | Stift = " + S.penUse + " | Monitor = " + S.monitor + " | Kopfhörer = " + S.audio + " | Farbe = " + (S.color || "egal"));
+  L.push("Händler: " + (S.shops.map(s => EMBEDDED_DATA.shops.find(x => x.id === s).name).join(", ") || "(fehlt)"));
+  L.push("Vorhanden: " + (S.have.map(h => EMBEDDED_DATA.categories.find(c => c.id === h).name).join(", ") || "nichts"));
+  L.push("");
+  L.push("BEDARF (Status aus Regeln | Entscheidung | eingetragenes Produkt):");
+  EMBEDDED_DATA.categories.forEach((c, idx) => {
+    const ev = evs[c.id], it = item(c.id);
+    if (ev.st === "nicht" && it.status === "offen") return;
+    L.push((idx + 1) + ". " + c.name + " | " + EMBEDDED_DATA.statusDefs[ev.st].label + " | " + EMBEDDED_DATA.selStatus.find(s => s[0] === it.status)[1] + (it.product ? " | " + it.product + (it.price ? " " + it.price + " €" : "") + (it.shop ? " @ " + it.shop : "") : "") + (it.note ? " | Notiz: " + it.note : "") + " | Suchbegriff: " + decodeURIComponent(searchQuery(c)).replace(/\+/g, " "));
+  });
+  if (S.notes) { L.push(""); L.push("NOTIZEN: " + S.notes); }
+  $("handover").textContent = L.join("\n");
+}
+function renderAll() { renderDeviceFacts(); renderNeeds(); renderShopping(); }
+
+/* ===================== EVENTS ===================== */
+function bind() {
+  $("device").addEventListener("change", e => { S.device = e.target.value; $("deviceOtherWrap").hidden = S.device !== "other"; markDirty(); renderAll(); });
+  $("deviceOther").addEventListener("input", e => { S.deviceOther = e.target.value; markDirty(); renderShopping(); });
+  $("deviceStorage").addEventListener("input", e => { S.deviceStorage = e.target.value; markDirty(); });
+  document.addEventListener("change", e => {
+    const t = e.target;
+    if (t.dataset.use) { S.uses = [...document.querySelectorAll("[data-use]:checked")].map(i => i.dataset.use); markDirty(); renderAll(); }
+    if (t.dataset.shop) { S.shops = [...document.querySelectorAll("[data-shop]:checked")].map(i => i.dataset.shop); markDirty(); renderAll(); }
+    if (t.dataset.have) { S.have = [...document.querySelectorAll("[data-have]:checked")].map(i => i.dataset.have); markDirty(); renderAll(); }
+    if (t.name === "flt") { S.filter = t.value; markDirty(); renderNeeds(); }
+    if (t.dataset.f === "status") { item(t.dataset.id).status = t.value; markDirty(); renderNeeds(); renderShopping(); }
+  });
+  ["priceWeight", "brand", "used", "penUse", "monitor", "audio"].forEach(k => $(k).addEventListener("change", e => { S[k] = e.target.value; markDirty(); renderAll(); }));
+  ["budget", "color"].forEach(k => $(k).addEventListener("input", e => { S[k] = e.target.value; markDirty(); renderShopping(); }));
+  $("notes").addEventListener("input", e => { S.notes = e.target.value; markDirty(); renderShopping(); });
+  document.addEventListener("input", e => {
+    const t = e.target;
+    if (t.dataset.f && t.dataset.f !== "status") { item(t.dataset.id)[t.dataset.f] = t.value; markDirty(); renderShopping(); }
+  });
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-copy]"); if (!b) return;
+    copyText($(b.dataset.copy).textContent);
+  });
+  $("btnCopyJson").addEventListener("click", () => copyText(JSON.stringify(S, null, 2)));
+  $("btnDownloadJson").addEventListener("click", () => { saveNow(); download("surface_zubehoer_stand_" + stamp() + ".json", JSON.stringify(S, null, 2), "application/json"); });
+  $("btnDownloadHtml").addEventListener("click", () => {
+    saveNow();
+    const name = "surface_zubehoer_shopping_" + stamp() + ".html";
+    const html = buildSelfHtml();
+    download(name, html, "text/html");
+  });
+  $("importJson").addEventListener("change", e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { try { const o = JSON.parse(r.result); S = Object.assign(DEFAULT_STATE(), o); S.items = S.items || {}; fillForm(); renderAll(); markDirty(); toast("JSON importiert"); } catch (err) { toast("Import fehlgeschlagen: kein gültiges JSON"); } };
+    r.readAsText(f); e.target.value = "";
+  });
+  $("btnReset").addEventListener("click", e => {
+    const b = e.currentTarget;
+    if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Wirklich zurücksetzen? Erneut klicken"; setTimeout(() => { b.dataset.armed = ""; b.textContent = "Zurücksetzen"; }, 4000); return; }
+    S = DEFAULT_STATE(); try { localStorage.removeItem(EMBEDDED_DATA.meta.storageKey); } catch (x) { }
+    b.dataset.armed = ""; b.textContent = "Zurücksetzen"; fillForm(); renderAll(); markDirty(); toast("Zurückgesetzt");
+  });
+}
+function copyText(t) {
+  const fallback = () => { const ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch (e) { } ta.remove(); toast(ok ? "Kopiert" : "Kopieren blockiert: Text markieren und manuell kopieren"); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(() => toast("Kopiert"), fallback); else fallback();
+}
+function download(name, content, type) {
+  try {
+    const blob = new Blob([content], { type }); const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000); toast("Download: " + name);
+  } catch (e) { toast("Download blockiert: JSON kopieren nutzen"); }
+}
+function buildSelfHtml() {
+  /* aktuellen Stand in den EMBEDDED_STATE-Block schreiben, Rest der Datei unverändert */
+  const stateJson = JSON.stringify(S).replace(/<\//g, "<\\/");
+  let src = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+  /* outerHTML spiegelt Formularwerte nicht; der Stand lebt im STATE-Block, Formular wird beim Laden gefüllt */
+  src = src.replace(/<script id="EMBEDDED_STATE" type="application\/json">[\s\S]*?<\/script>/, '<script id="EMBEDDED_STATE" type="application/json">' + stateJson + "<\/script>");
+  return src;
+}
+
+/* ===================== START ===================== */
+renderStatic();
+loadState();
+fillForm();
+bind();
+renderAll();
+if (S.savedAt) setSave("ok", "Stand geladen: " + S.savedAt.replace("T", " "));
+</script>
+</body>
+</html>
