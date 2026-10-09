@@ -148,6 +148,8 @@ F('d_aircraft','Flugzeugtyp','air','in',0,'','wide|Großraum|100;narrow|Schmalru
 F('e_hand','Handgepäck','bag','in',3,'','big|großes Handgepäck inklusive|100;small|nur kleines Stück unter dem Sitz|40;paid|kostenpflichtig|20');
 F('e_hold','Aufgabegepäck (1 Koffer)','bag','in',3,'Ausschluss "nicht möglich" gilt nur bei Preismodus Koffer','incl|inklusive|100;add|zubuchbar (Aufpreis im Preis Koffer)|70;none|nicht möglich|0');
 F('e_weight','Freigepäck-Gewicht','bag','in',1,'','23|23 kg oder mehr|100;20|20–22 kg|80;15|15–19 kg|50;lt15|unter 15 kg|20');
+F('c_cabin','Kabinenklasse','air','in',1,'Preise je Klasse als eigene Option erfassen (Economy und Business getrennt)','eco|Economy|60;prem|Premium Economy|80;biz|Business|100');
+F('h_avail','Verfügbarkeit im Tarif','kom','in',1,'Hinweis der Buchungsseite, z. B. "2 Sitzplätze"','ok|ausreichend|100;low|knapp (wenige Plätze)|55;wl|nur Warteliste|10');
 F('p_price','Preis (Etappe, inkl. Anreisekosten)','preis','num',10,'Min-Max-Normierung je Etappe unter den zulässigen Optionen: günstigste = 100, teuerste = 0');
 F('f_cert','Preisgewissheit','preis','in',3,'','air|Airline-Endpreis bestätigt|100;multi|2 oder mehr Portale stimmen überein|80;one|1 Portal|50;est|Schätzung oder ohne Gepäckangabe|15');
 F('p_age','Alter des Preisstands','preis','der',1,'Aus Abrufzeit','6h|unter 6 h|100;24h|unter 24 h|80;72h|unter 72 h|50;old|älter|20;?|unbekannt|50');
@@ -465,7 +467,7 @@ function optCard(t,l,o){
     fld('Preis nur Handgepäck €',inp(b('priceHand'),o.priceHand,'number','min="0" step="0.01"'))+fld('Preis mit 1 Koffer €',inp(b('priceHold'),o.priceHold,'number','min="0" step="0.01"'))+
     fld('Anreisekosten € (zum Flughafen)',inp(b('access'),o.access,'number','min="0" step="0.01"'))+fld('Buchungsgruppe (gleiche = 1 Buchung)',inp(b('group'),o.group))+
     fld('Quelle',inp(b('source'),o.source))+fld('Link zur Option',inp(b('url'),o.url))+fld('Abrufzeit',inp(b('retrieved'),o.retrieved,'datetime-local')+'<button class="btn sm" type="button" data-a="now" data-l="'+l.id+'" data-v="'+o.id+'">jetzt</button>')+
-    fld('Notiz',inp(b('note'),o.note))+'</div></details>';
+    fld('Tarifname (z. B. Eco Classic)',inp(b('fare'),o.fare))+fld('Notiz',inp(b('note'),o.note))+'</div></details>';
   h+='<details><summary>Weitere Merkmale (Auswahl)</summary>';
   GRP.forEach(function(g){var fs=cat.filter(function(f){return f.grp===g[0]&&f.kind==='in'&&f.id!=='m_mode'&&f.id!=='d_airline'});if(!fs.length)return;
     h+='<div class="sub" style="margin-top:6px;border-left:4px solid '+g[2]+';padding-left:6px">'+esc(g[1])+'</div><div class="flds">'+fs.map(function(f){return fld(f.name,sel(fb(f.id),val(o,l,f),f.vals.map(function(v){return [v.k,v.l]})))}).join('')+'</div>'});
@@ -535,7 +537,7 @@ function tabDaten(){
   H+='<h3>Verbesserungsvorschläge aus deinen Daten</h3>'+suggest(t);
   H+='<h3>Feedback an das Werkzeug</h3><div class="card"><textarea id="fbtx" rows="3" placeholder="Was fehlt, was stört, welches Merkmal soll dazu?"></textarea><div class="hrow" style="margin-top:6px"><button class="btn" data-a="fb">Eintragen</button></div>'+S.fb.map(function(x){return '<div class="todo"><span class="mono sub">'+esc(x.t)+'</span><span class="tx">'+esc(x.x)+'</span></div>'}).join('')+'</div>';
   H+='<h3>Lernprotokoll</h3><div class="card">'+(S.log.length?S.log.slice(0,40).map(function(x){return '<div class="todo"><span class="mono sub">'+esc(x.t)+'</span><span class="tx">'+esc(x.x)+'</span></div>'}).join(''):'<span class="sub">Noch keine Einträge.</span>')+'</div>';
-  H+='<h3>Version</h3><div class="note n-info">V0.1 Vorbereitungs-Dashboard, Stand 09.10.2026. Neu in V0.1: Merkmalskatalog mit '+CAT().length+' Merkmalen, 4 Profile, Optionen-Erfassung, Rangliste mit Sensitivität. Das Werkzeug lernt nicht selbstständig; Verbesserungen entstehen nur über die hier dokumentierten Regeln, Gewichte und Feedback-Einträge.</div>';
+  H+='<h3>Version</h3><div class="note n-info">V0.2 Vorbereitungs-Dashboard, Stand 09.10.2026. V0.1: Merkmalskatalog, 4 Profile, Optionen-Erfassung, Rangliste mit Sensitivität. Neu in V0.2: Merkmale Kabinenklasse und Verfügbarkeit im Tarif, Feld Tarifname (aus den Royal-Air-Maroc-Seiten). Merkmale gesamt: '+CAT().length+'. Das Werkzeug lernt nicht selbstständig; Verbesserungen entstehen nur über die hier dokumentierten Regeln, Gewichte und Feedback-Einträge.</div>';
   return H;
 }
 function suggest(t){
