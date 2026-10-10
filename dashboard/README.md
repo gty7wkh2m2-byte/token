@@ -14,6 +14,12 @@ To Do und OneNote laufen über den Zapier-Konnektor (Konto taata@hotmail.de in Z
 | `build.py` | baut die Werkzeugdatei aus Vorlage + Quelldatei, prüft den eingebetteten JSON-Block |
 | `quelle/artefakt_desktop_v2_2026-09-26_2218.html` | Quelldatei (Pläne, eingebetteter Datenblock Build 5) |
 
+## Mobil-Modus (Breite ≤ 760 px, seit v1.2.0)
+
+Untere Reiterleiste (Heute, Blöcke, To-dos, Ideen, Mehr), ein Bereich je Bildschirm, Tagesansicht statt
+Wochenraster (Blöcke, Kalender-Termine, fällige To-dos, Tag vor/zurück), „+“-Knopf mit Erfassungsbogen,
+Tipp-Flächen ≥ 44 px, Eingabefelder 16 px (kein iOS-Zoom). Desktop-Darstellung unverändert.
+
 ## Bauen
 
 ```

@@ -1,5 +1,6 @@
 <title>USINE PLAN-DASHBOARD</title>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -203,6 +204,52 @@ td.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
 .kc b{color:var(--text-dim);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.4px;display:block}
 .kc .tbar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;max-width:260px}
 .kc .tbar span{display:block;height:100%;background:var(--ok)}
+
+/* Mobil-Modus (<=760px): untere Reiterleiste, ein Bereich je Bildschirm, Tagesansicht, Erfassungsbogen */
+.mobnav{display:none}
+.fab{display:none}
+.dayview{display:none}
+.dayview .dnav{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.dayview .dnav .ttl{font-weight:800;font-family:var(--mono);font-size:13px;flex:1 1 auto;text-align:center}
+.dayview .drow{display:flex;gap:8px;align-items:center;background:var(--panel2);border:1px solid var(--border);border-left:5px solid var(--xc,var(--gray));border-radius:8px;padding:8px 10px;min-height:48px}
+.dayview .drow.ev{border-style:dashed;border-left-style:solid}
+.dayview .drow .tm{font-family:var(--mono);font-size:11.5px;color:var(--text-dim);flex:0 0 auto;min-width:78px}
+.dayview .drow .tx{flex:1 1 auto;min-width:0;font-size:13.5px;overflow-wrap:anywhere}
+.dayview .drow .tx small{display:block;color:var(--text-dim);font-size:11px;font-family:var(--mono)}
+.dayview .drow input[type=checkbox]{width:22px;height:22px;flex:0 0 auto}
+.dayview .empty{font-size:12.5px;color:var(--text-dim);padding:6px 2px}
+.mobmenu{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+:root .mobmenu a{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:9px;color:#fff;text-decoration:none;font-weight:700;min-height:48px}
+@media(max-width:760px){
+  body{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+  .head .sub,.head .qc{display:none}
+  .head{padding-block:4px 6px}
+  h1{font-size:18px}
+  .chips{margin-left:0;width:100%}
+  .chip{font-size:9.5px;padding:2px 8px}
+  .sidenav{display:none}
+  body.mob .sec:not(.mob-active){display:none}
+  .weekwrap,.weekbar,.legend{display:none}
+  .dayview{display:flex;flex-direction:column;gap:8px}
+  .kpis{grid-template-columns:1fr 1fr;gap:6px}
+  .kpi .k-v{font-size:22px}
+  .it{flex-wrap:wrap}
+  .it .acts{width:100%;justify-content:flex-start}
+  .btn.xs{min-height:36px;padding:6px 10px;font-size:12px}
+  .btn.sm{min-height:40px}
+  input,select,textarea{font-size:16px;min-height:42px}
+  textarea{min-height:90px}
+  .mobnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--panel);border-top:1px solid var(--border);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(0,0,0,.25)}
+  .mobnav button{background:transparent;border:0;color:var(--text-dim);font-size:10.5px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border-radius:8px;min-height:48px;position:relative}
+  .mobnav button .ic{font-size:18px;line-height:1}
+  .mobnav button.on{color:var(--text);background:var(--panel2)}
+  .mobnav button .cnt{position:absolute;top:2px;right:8px;font-family:var(--mono);font-size:9px;color:#1B1A17;background:var(--orange);border-radius:9px;padding:0 5px;min-width:16px;text-align:center}
+  .mobnav button .cnt:empty{display:none}
+  .fab{display:flex;position:fixed;right:14px;bottom:calc(74px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;background:var(--teal);color:#fff;border:0;font-size:30px;align-items:center;justify-content:center;box-shadow:var(--shadow);z-index:51;cursor:pointer}
+  .modal{align-items:flex-end;padding:0}
+  .modal .box{max-width:none;border-radius:16px 16px 0 0;max-height:85vh;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(86px + env(safe-area-inset-bottom,0px))}
+}
 </style>
 
 <div class="wrap">
@@ -247,6 +294,7 @@ td.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
   <div class="sec-body">
     <div class="kpis" id="kpis"></div>
     <div class="legend"><span><i class="area a-lenki"></i>LENKI</span><span><i class="area a-money"></i>MONEY</span><span><i class="area a-ideen"></i>Ideen</span><span><i class="area a-todo"></i>To-do</span><span><i class="area a-rest"></i>Rest</span><span><i class="area" style="border:1.5px dashed var(--c-outlook)"></i>Kalender-Termin (aus Google/Outlook geladen)</span></div>
+    <div class="dayview" id="dayview"></div>
     <div class="weekbar">
       <button class="btn sm" id="wkPrev" type="button">&#9664; Woche</button>
       <span class="ttl" id="wkTitle"></span>
@@ -447,6 +495,7 @@ td.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
         <li><b>Antwortformat der Zapier-Aktionen</b> (IDs der angelegten Termine/Aufgaben/Seiten) ist ohne verbundenes Konto nicht beobachtbar; die ID-Erkennung sucht mehrere übliche Felder. Bis zur ersten echten Anlage: UNSICHER.</li>
         <li><b>OneNote-Abschnitt anlegen</b> und <b>Seitenliste lesen</b> nutzen den Zapier-Rohaufruf an graph.microsoft.com. Ob Zapier die Domain für OneNote freigibt: UNSICHER, Fallback = Abschnitt in OneNote selbst anlegen und per Suche wählen.</li>
         <li><b>Zwei-Richtungs-Sync</b> ist bewusst additiv: Dashboard → neue Seite / Nachtrag; OneNote → Markierung + Übernahme als Idee. Kein Überschreiben, kein Löschen.</li>
+        <li><b>Mobil-Modus (ab v1.2.0, Breite ≤ 760 px):</b> untere Reiterleiste (Heute, Blöcke, To-dos, Ideen, Mehr), ein Bereich je Bildschirm, Tagesansicht statt Wochenraster, „+“-Knopf mit Erfassungsbogen; Diktat über das Mikrofon der Bildschirmtastatur (Spracherkennung im Artefakt-Rahmen nicht verfügbar). Desktop unverändert.</li>
         <li><b>Zeitzone</b> Europe/Berlin; Google: lokale Zeit ohne Offset (Konnektor löst die Zeitzone des Kontos auf), Outlook/Zapier: mit Offset.</li>
         <li><b>Blöcke ändern nach Kalender-Anlage:</b> Google: „im Kalender aktualisieren“ (update_event). Outlook: alten Termin löschen (Knopf fragt), neu anlegen.</li>
         <li><b>Pläne (D05)</b> wortgetreu aus der Quelldatei, inklusive Tipp-/Diktatfehlern (z. B. „Jospehine“, „Slripte“). Rest-Abschnitte mit „Ideen“/„Tools“/„AI“ im Titel sind zusätzlich als Ideen (D04, Schlagwort „aus Rest-Dump“) vorbelegt; die Zeilen bleiben in D05 erhalten.</li>
@@ -464,6 +513,14 @@ td.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
 <div class="foot"><span>Datei beim Sichern:</span><span class="filechip" id="footFile"></span><span id="footStore"></span></div>
 </div>
 
+<nav class="mobnav" id="mobnav" aria-label="Mobile Navigation">
+  <button type="button" data-tab="d01"><span class="ic">&#9728;</span>Heute<span class="cnt" id="mnCnt1"></span></button>
+  <button type="button" data-tab="d02"><span class="ic">&#9638;</span>Bl&ouml;cke<span class="cnt" id="mnCnt2"></span></button>
+  <button type="button" data-tab="d03"><span class="ic">&#9745;</span>To-dos<span class="cnt" id="mnCnt3"></span></button>
+  <button type="button" data-tab="d04"><span class="ic">&#10022;</span>Ideen<span class="cnt" id="mnCnt4"></span></button>
+  <button type="button" data-tab="more"><span class="ic">&#8801;</span>Mehr</button>
+</nav>
+<button class="fab" id="fab" type="button" aria-label="Schnell erfassen">+</button>
 <div class="toast" id="toast"><span id="toastMsg"></span><button class="btn xs" id="toastUndo" type="button" hidden>Rückgängig</button></div>
 <div class="modal" id="modal" hidden><div class="box" id="modalBox"></div></div>
 
@@ -942,6 +999,76 @@ function addTodo(o){
 }
 function planFromInput(){ var v = $('bkPlan').value.trim(); if(!v) return ''; for(var id in PLAN_INDEX){ if(PLAN_INDEX[id].text === v) return id; } return ''; }
 
+/* ============================== Mobil-Modus ============================== */
+var MQ = window.matchMedia ? window.matchMedia('(max-width:760px)') : null;
+var LS_MOBTAB = 'usine_plan_dashboard_v1_mobtab';
+var MOBTAB = lsGet(LS_MOBTAB) || 'd01';
+var DAY0 = todayKey();
+function isMob(){ return !!(MQ && MQ.matches); }
+function applyMob(){ document.body.classList.toggle('mob', isMob()); if(isMob()) setMobTab(MOBTAB, true); }
+function setMobTab(id, silent){
+  if(!$(id)) id = 'd01';
+  MOBTAB = id; lsSet(LS_MOBTAB, id);
+  document.querySelectorAll('.sec').forEach(function(s){ var on = s.id===id; s.classList.toggle('mob-active', on); if(on) s.open = true; });
+  var more = ['d05','d06','d07','d08','d09'].indexOf(id)>=0;
+  document.querySelectorAll('.mobnav button[data-tab]').forEach(function(b){ var t = b.getAttribute('data-tab'); b.classList.toggle('on', t===id || (t==='more' && more)); });
+  if(!silent) window.scrollTo(0, 0);
+}
+function mobMenu(){
+  var items = [['d05','Pläne LENKI/MONEY','var(--coral)'],['d06','OneNote','#5F3C7A'],['d07','Einrichtung','var(--orange)'],['d08','Export · Sync-Paket','var(--gray)'],['d09','Hinweise · Protokoll','var(--red)']];
+  openModal('<h3>Weitere Bereiche</h3><div class="mobmenu">'+items.map(function(x){ return '<a href="#'+x[0]+'" data-tab="'+x[0]+'" style="background:'+x[2]+'">'+esc(x[1])+' <span>&#8250;</span></a>'; }).join('')+'</div><div class="row"><button class="btn file wa" id="mSave" type="button">Als Datei sichern</button><button class="btn wa" id="mCancel" type="button">Schließen</button></div>', function(b){
+    b.querySelectorAll('a[data-tab]').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); closeModal(); setMobTab(a.getAttribute('data-tab')); }); });
+    b.querySelector('#mSave').addEventListener('click', function(){ closeModal(); saveToFile(); });
+    b.querySelector('#mCancel').addEventListener('click', closeModal);
+  });
+}
+function quickSheet(){
+  openModal('<h3>Schnell erfassen</h3><label class="f"><span>Text (Diktat über das Mikrofon der Tastatur)</span><textarea id="qsText" rows="3" placeholder="Idee, To-do oder Zeitblock"></textarea></label><div class="row"><label class="f"><span>Art</span><select id="qsKind"><option value="idee">Idee</option><option value="todo">To-do</option><option value="block">Zeitblock (nächste volle Stunde, 1 h)</option></select></label><label class="f"><span>Bereich</span><select id="qsArea">'+areaOpts('money')+'</select></label></div><div class="row"><button class="btn primary wa" id="qsOk" type="button" style="min-height:44px">Hinzufügen</button><button class="btn wa" id="mCancel" type="button" style="min-height:44px">Abbrechen</button></div>', function(b){
+    b.querySelector('#qsOk').addEventListener('click', function(){ var txt = b.querySelector('#qsText').value.trim(); if(!txt){ b.querySelector('#qsText').focus(); return; } quickAdd(txt, b.querySelector('#qsKind').value, b.querySelector('#qsArea').value); closeModal(); });
+    b.querySelector('#mCancel').addEventListener('click', closeModal);
+  });
+}
+function quickAdd(txt, kind, area){
+  if(kind==='idee'){ addIdea({title: txt.length>70? '' : txt, text: txt.length>70 ? txt : '', area: area}); toast('Idee erfasst'); }
+  else if(kind==='todo'){ snapshot('To-do anlegen'); addTodo({title: txt, area: area}); renderTodos(); renderKpis(); toast('To-do erfasst (lokal)'); }
+  else { snapshot('Block anlegen'); var h = new Date().getHours()+1; var date = isMob() ? DAY0 : todayKey(); addBlock({title: txt, area: area, date: date, start: zpad(Math.min(h,22))+':00', dur: 60}); renderBlocks(); renderWeek(); renderKpis(); toast('Zeitblock '+date+' '+zpad(Math.min(h,22))+':00 erfasst (lokal)'); }
+  renderExport();
+}
+function editBlock(b){
+  blockDialog(b, function(v){ snapshot('Block ändern'); b.title=v.title.trim()||b.title; b.area=v.area; b.date=v.date; b.start=v.start; b.end=v.end; b.note=v.note; if(b.sync==='outlook'){ b.sync='lokal'; b.err = b.target==='google' ? 'Geändert: „im Kalender aktualisieren“ überträgt die Änderung' : 'Geändert nach Outlook-Anlage: alten Termin in Outlook löschen (Knopf „löschen“ fragt), neu anlegen'; } markDirty(); dbWrite('blocks', b); renderAll(); });
+}
+function toggleTodo(t, checked){
+  snapshot('To-do Status'); t.status = checked ? 'erledigt' : 'offen'; t.doneTs = checked ? nowIso() : ''; markDirty(); dbWrite('todos', t); renderTodos(); renderKpis();
+  if(checked && t.sync==='todo') completeTodoRemote(t).then(function(err){ if(err) toast('In To Do nicht erledigt: '+err); else toast('Auch in To Do erledigt'); });
+}
+function renderDay(){
+  var host = $('dayview'); if(!host) return;
+  var k = DAY0, d = parseDT(k,'00:00'), names = ['So','Mo','Di','Mi','Do','Fr','Sa'], rows = [];
+  (OUTLOOK_EVENTS[k]||[]).forEach(function(ev){ var a = ev.s.getHours()*60+ev.s.getMinutes(), e = ev.e.getHours()*60+ev.e.getMinutes(); var allDay = ev.e.getTime()-ev.s.getTime() >= 86400000; rows.push({t: allDay?-1:a, html: '<div class="drow ev" style="--xc:var(--c-outlook)"><span class="tm">'+(allDay?'ganztägig':hhmm(a)+'–'+hhmm(e))+'</span><span class="tx">'+esc(ev.subject)+'<small>Kalender</small></span>'+(ev.url?'<a class="btn xs" href="'+esc(ev.url)+'" target="_blank" rel="noopener">öffnen</a>':'')+'</div>'}); });
+  STATE.blocks.filter(function(b){return b.date===k;}).forEach(function(b){ rows.push({t: minutes(b.start), html: '<div class="drow" style="--xc:'+AREACOL[b.area]+'" data-blk="'+esc(b.id)+'" role="button" tabindex="0"><span class="tm">'+esc(b.start)+'–'+esc(b.end)+'</span><span class="tx">'+esc(b.title)+'<small>'+esc(AREAS[b.area]||b.area)+(b.note?' · '+esc(b.note):'')+'</small></span>'+syncPill(b.sync, b.target)+'</div>'}); });
+  STATE.todos.filter(function(t){return t.status==='offen' && t.due===k;}).forEach(function(t){ rows.push({t: 1e5, html: '<div class="drow" style="--xc:'+AREACOL[t.area]+'"><input type="checkbox" data-td="'+esc(t.id)+'" aria-label="erledigt"><span class="tx">'+esc(t.title)+'<small>fällig · '+esc(AREAS[t.area]||t.area)+'</small></span>'+syncPill(t.sync)+'</div>'}); });
+  var over = STATE.todos.filter(function(t){return t.status==='offen' && t.due && t.due < k;}).length;
+  rows.sort(function(a,b){ return a.t-b.t; });
+  host.innerHTML = '<div class="dnav"><button class="btn sm" data-day="-1" type="button" aria-label="Vortag">&#9664;</button><span class="ttl">'+names[d.getDay()]+' '+zpad(d.getDate())+'.'+zpad(d.getMonth()+1)+'.'+(k===todayKey()?' · heute':'')+'</span><button class="btn sm" data-day="1" type="button" aria-label="Folgetag">&#9654;</button><button class="btn sm" data-day="0" type="button">Heute</button><button class="btn sm" id="dayLoad" type="button">Termine laden</button></div>'+
+    (rows.length ? rows.map(function(r){return r.html;}).join('') : '<div class="empty">Keine Blöcke, Termine oder fälligen To-dos. „+“ unten rechts erfasst einen Eintrag.</div>')+
+    (over?'<div class="empty"><span class="cp r">'+over+' überfällig</span> in To-dos</div>':'')+
+    '<button class="btn sm" id="dayAddBlock" type="button" style="min-height:44px">+ Zeitblock an diesem Tag</button>';
+}
+function wireMobile(){
+  $('mobnav').addEventListener('click', function(e){ var b = e.target.closest('button[data-tab]'); if(!b) return; var t = b.getAttribute('data-tab'); if(t==='more') mobMenu(); else setMobTab(t); });
+  $('fab').addEventListener('click', quickSheet);
+  $('dayview').addEventListener('click', function(e){
+    var nav = e.target.closest('button[data-day]'); if(nav){ var n = +nav.getAttribute('data-day'); if(n===0) DAY0 = todayKey(); else { var d = parseDT(DAY0,'00:00'); d.setDate(d.getDate()+n); DAY0 = dateKey(d); } WEEK0 = monday(parseDT(DAY0,'00:00')); renderWeek(); renderKpis(); return; }
+    if(e.target.closest('#dayLoad')){ WEEK0 = monday(parseDT(DAY0,'00:00')); loadOutlookWeek(); return; }
+    if(e.target.closest('#dayAddBlock')){ blockDialog({date: DAY0, start: '14:00'}, function(v, push){ snapshot('Block anlegen'); var b = addBlock({title:v.title, area:v.area, date:v.date, start:v.start, dur: Math.max(15, minutes(v.end)-minutes(v.start)), note:v.note}); renderAll(); if(push) pushBlock(b); }); return; }
+    var row = e.target.closest('.drow[data-blk]'); if(row && !e.target.closest('a')){ var b = findRec('blocks', row.getAttribute('data-blk')); if(b) editBlock(b); return; }
+  });
+  $('dayview').addEventListener('change', function(e){ var cb = e.target.closest('input[data-td]'); if(!cb) return; var t = findRec('todos', cb.getAttribute('data-td')); if(t) toggleTodo(t, cb.checked); });
+  $('dayview').addEventListener('keydown', function(e){ if(e.key==='Enter'){ var row = e.target.closest('.drow[data-blk]'); if(row){ var b = findRec('blocks', row.getAttribute('data-blk')); if(b) editBlock(b); } } });
+  applyMob();
+  if(MQ){ if(MQ.addEventListener) MQ.addEventListener('change', applyMob); else if(MQ.addListener) MQ.addListener(applyMob); }
+}
+
 /* ============================== Rendering ============================== */
 function renderAll(){ renderKpis(); renderWeek(); renderBlocks(); renderTodos(); renderIdeas(); renderPlans(); renderNotes(); renderSteps(); renderSettings(); renderOneNoteTarget(); renderExport(); renderLog(); renderVersions(); }
 function openPlans(list){ return STATE.plans.filter(function(p){ return p.list===list && !STATE.planChk[p.id]; }); }
@@ -962,6 +1089,8 @@ function renderKpis(){
     '<div class="kpi"><div class="k-l">To-dos offen</div><div class="k-v">'+tOpen+'</div><div class="k-s">in To Do '+tSync+' · überfällig '+tOver+'</div>'+bar([[tSync,AREAHEX.lenki],[tOpen-tSync,AREAHEX.todo],[tOver,'#E24B4A']])+'</div>'+
     '<div class="kpi"><div class="k-l">OneNote-Spiegel</div><div class="k-v">'+STATE.notes.length+'</div><div class="k-s">Seiten · geändert '+notesChanged+' · Abgleich '+(STATE.settings.onenoteLastPull?nice(STATE.settings.onenoteLastPull):'nie')+'</div></div>';
   $('d01n').textContent = tot+' Pläne · '+wb.length+' Blöcke';
+  var todayBlocks = STATE.blocks.filter(function(b){return b.date===todayKey();}).length, localBlocks = STATE.blocks.filter(function(b){return b.sync!=='outlook';}).length;
+  $('mnCnt1').textContent = todayBlocks || ''; $('mnCnt2').textContent = localBlocks || ''; $('mnCnt3').textContent = tOpen || ''; $('mnCnt4').textContent = ideasNew || '';
   $('d02n').textContent = STATE.blocks.length+' Blöcke'; $('d03n').textContent = tOpen+' offen'; $('d04n').textContent = STATE.ideas.length+' Ideen'; $('d05n').textContent = STATE.plans.length+' Positionen'; $('d06n').textContent = STATE.notes.length+' Seiten';
   try{ var sz = JSON.stringify(STATE).length; var pct = Math.min(100, Math.round(sz/50000)); $('kcBar').style.width = pct+'%'; $('kcBarT').textContent = Math.round(sz/1024)+' KB von ca. 5.000 KB Browser-Speicher'; }catch(e){}
 }
@@ -985,6 +1114,7 @@ function renderWeek(){
   var e = new Date(WEEK0); e.setDate(e.getDate()+6);
   $('wkTitle').textContent = 'KW '+isoWeek(WEEK0)+' · '+zpad(WEEK0.getDate())+'.'+zpad(WEEK0.getMonth()+1)+'. – '+zpad(e.getDate())+'.'+zpad(e.getMonth()+1)+'.'+e.getFullYear();
   $('dayRange').textContent = (s.dayStart||'08:00')+'–'+(s.dayEnd||'20:00');
+  renderDay();
 }
 function isoWeek(d){ var t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); var day = t.getUTCDay()||7; t.setUTCDate(t.getUTCDate()+4-day); var y0 = new Date(Date.UTC(t.getUTCFullYear(),0,1)); return Math.ceil(((t-y0)/86400000+1)/7); }
 function syncPill(s, t){ return s==='outlook'||s==='todo'||s==='ok' ? '<span class="cp g">in '+(s==='outlook'?(t==='google'?'Google Kal.':'Outlook'):s==='todo'?'To Do':'OneNote')+'</span>' : s==='fehler' ? '<span class="cp r">Fehler</span>' : s==='läuft' ? '<span class="cp b">läuft …</span>' : '<span class="cp y">lokal</span>'; }
@@ -1010,6 +1140,7 @@ function renderTodos(){
     return '<div class="it'+(t.status==='erledigt'?' done':'')+'"><input type="checkbox" data-act="chk" data-id="'+esc(t.id)+'" '+(t.status==='erledigt'?'checked':'')+' aria-label="erledigt"><i class="area" style="background:'+AREACOL[t.area]+';margin-top:5px"></i><div class="t">'+esc(t.title)+' '+syncPill(t.sync)+(over?' <span class="cp r">überfällig</span>':'')+'<small>'+(t.due?'fällig '+esc(t.due):'ohne Termin')+' · '+esc(AREAS[t.area]||t.area)+(t.note?' · '+esc(t.note):'')+(t.todoId?' · To-Do-ID '+esc(String(t.todoId).slice(0,14))+'…':'')+'</small>'+(t.err?'<div class="err">'+esc(t.err)+'</div>':'')+'</div>'+
       '<div class="acts">'+(t.sync!=='todo'&&t.status==='offen'?'<button class="btn xs primary" data-act="push" data-id="'+esc(t.id)+'">nach To Do</button>':'')+'<button class="btn xs" data-act="block" data-id="'+esc(t.id)+'">Zeitblock</button><button class="btn xs danger" data-act="del" data-id="'+esc(t.id)+'">löschen</button></div></div>';
   }).join('') : '<p class="note">Keine To-dos im Filter.</p>';
+  renderDay();
 }
 function renderIdeas(){
   var f = $('idFilter').value, af = $('idAreaF').value, q = $('idSearch').value.trim().toLowerCase();
@@ -1112,11 +1243,7 @@ function confirmDialog(text, onYes){ openModal('<h3>Bestätigen</h3><p style="ma
 function wire(){
   function qcAdd(){
     var txt = $('qcText').value.trim(); if(!txt){ $('qcText').focus(); return; }
-    var kind = $('qcKind').value, area = $('qcArea').value;
-    if(kind==='idee'){ addIdea({title: txt.length>70? '' : txt, text: txt.length>70 ? txt : '', area: area}); toast('Idee erfasst'); }
-    else if(kind==='todo'){ snapshot('To-do anlegen'); addTodo({title: txt, area: area}); renderTodos(); renderKpis(); toast('To-do erfasst (lokal)'); }
-    else { snapshot('Block anlegen'); var h = new Date().getHours()+1; addBlock({title: txt, area: area, start: zpad(Math.min(h,22))+':00', dur: 60}); renderBlocks(); renderWeek(); renderKpis(); toast('Zeitblock heute '+zpad(Math.min(h,22))+':00 erfasst (lokal)'); }
-    $('qcText').value=''; renderExport();
+    quickAdd(txt, $('qcKind').value, $('qcArea').value); $('qcText').value='';
   }
   $('qcBtn').addEventListener('click', qcAdd);
   $('qcText').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); qcAdd(); } });
@@ -1151,7 +1278,7 @@ function wire(){
   $('blockList').addEventListener('click', function(e){
     var btn = e.target.closest('button[data-act]'); if(!btn) return; var b = findRec('blocks', btn.getAttribute('data-id')); if(!b) return; var act = btn.getAttribute('data-act');
     if(act==='push') pushBlock(b);
-    else if(act==='edit') blockDialog(b, function(v){ snapshot('Block ändern'); b.title=v.title.trim()||b.title; b.area=v.area; b.date=v.date; b.start=v.start; b.end=v.end; b.note=v.note; if(b.sync==='outlook'){ b.sync='lokal'; b.err = b.target==='google' ? 'Geändert: „im Kalender aktualisieren“ überträgt die Änderung' : 'Geändert nach Outlook-Anlage: alten Termin in Outlook löschen (Knopf „löschen“ fragt), neu anlegen'; } markDirty(); dbWrite('blocks', b); renderAll(); });
+    else if(act==='edit') editBlock(b);
     else if(act==='dup'){ snapshot('Block kopieren'); var d = parseDT(b.date,'00:00'); d.setDate(d.getDate()+7); addBlock({title:b.title, area:b.area, date:dateKey(d), start:b.start, dur: minutes(b.end)-minutes(b.start), note:b.note, planId:b.planId}); renderAll(); toast('Kopie +1 Woche angelegt'); }
     else if(act==='del'){ var del = function(alsoRemote){ snapshot('Block löschen'); var p = alsoRemote ? deleteBlockOutlook(b) : Promise.resolve(true); Promise.resolve(p).then(function(){ STATE.blocks = STATE.blocks.filter(function(x){return x.id!==b.id;}); dbDelete('blocks', b.id); markDirty(); renderAll(); toast('Block gelöscht', true); }); };
       if(b.outlookId) confirmDialog('Block „'+esc(b.title)+'“ auch in '+(b.target==='google'?'Google Kalender':'Outlook')+' löschen?<br><small class="muted">„Ja“ löscht hier und im Kalender. Nur hier löschen: Abbrechen, dann erneut mit Umschalt-Taste klicken.</small>', function(){ del(true); }); else if(e.shiftKey || !b.outlookId) del(false); }
@@ -1165,7 +1292,7 @@ function wire(){
   $('tdPushAll').addEventListener('click', function(){ var arr = STATE.todos.filter(function(t){return t.sync!=='todo' && t.status==='offen';}); if(!arr.length){ toast('Keine lokalen To-dos'); return; } confirmDialog(arr.length+' To-dos jetzt nach Microsoft To Do?', function(){ arr.reduce(function(p,t){ return p.then(function(){ return pushTodo(t); }); }, Promise.resolve()); }); });
   $('todoList').addEventListener('click', function(e){
     var el = e.target.closest('[data-act]'); if(!el) return; var t = findRec('todos', el.getAttribute('data-id')); if(!t) return; var act = el.getAttribute('data-act');
-    if(act==='chk'){ snapshot('To-do Status'); t.status = el.checked ? 'erledigt' : 'offen'; t.doneTs = el.checked ? nowIso() : ''; markDirty(); dbWrite('todos', t); renderTodos(); renderKpis(); if(el.checked && t.sync==='todo') completeTodoRemote(t).then(function(err){ if(err) toast('In To Do nicht erledigt: '+err); else toast('Auch in To Do erledigt'); }); }
+    if(act==='chk') toggleTodo(t, el.checked);
     else if(act==='push') pushTodo(t);
     else if(act==='block') blockDialog({title: t.title, area: t.area, date: t.due||todayKey()}, function(v, push){ snapshot('Block anlegen'); var b = addBlock({title:v.title, area:v.area, date:v.date, start:v.start, dur: Math.max(15, minutes(v.end)-minutes(v.start)), note:v.note, planId:t.planId}); renderAll(); if(push) pushBlock(b); });
     else if(act==='del'){ snapshot('To-do löschen'); STATE.todos = STATE.todos.filter(function(x){return x.id!==t.id;}); dbDelete('todos', t.id); markDirty(); renderTodos(); renderKpis(); renderExport(); toast('To-do hier gelöscht (in To Do bleibt es)', true); }
@@ -1229,7 +1356,7 @@ function wire(){
 
   /* Navigation: aktiven Abschnitt markieren */
   var links = Array.prototype.slice.call(document.querySelectorAll('.sn'));
-  links.forEach(function(a){ a.addEventListener('click', function(){ var id = a.getAttribute('href').slice(1); var d = $(id); if(d) d.open = true; }); });
+  links.forEach(function(a){ a.addEventListener('click', function(){ var id = a.getAttribute('href').slice(1); var d = $(id); if(d) d.open = true; if(isMob()) setMobTab(id, true); }); });
   if('IntersectionObserver' in window){ var io = new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href')==='#'+en.target.id); }); } }); }, {rootMargin:'-30% 0px -60% 0px'}); document.querySelectorAll('.sec').forEach(function(s){ io.observe(s); }); }
 }
 function plainText(s){ return String(s||'').replace(/\*\*/g,''); }
@@ -1274,8 +1401,9 @@ function boot(){
   $('verLabel').textContent = STATE.meta.version; $('kcVer').textContent = 'USINE PLAN-DASHBOARD '+STATE.meta.version+' · Build '+STATE.meta.buildVersion+' · erstellt '+STATE.meta.erstellt;
   $('footFile').textContent = 'plan_dashboard_v1_'+nowStamp()+'.html';
   wire(); renderAll(); updateStoreChip();
-  window.addEventListener('hashchange', function(){ var d = $(location.hash.slice(1)); if(d && d.tagName==='DETAILS') d.open = true; });
-  if(location.hash){ var d0 = $(location.hash.slice(1)); if(d0 && d0.tagName==='DETAILS') d0.open = true; }
+  window.addEventListener('hashchange', function(){ var d = $(location.hash.slice(1)); if(d && d.tagName==='DETAILS'){ d.open = true; if(isMob()) setMobTab(d.id, true); } });
+  if(location.hash){ var d0 = $(location.hash.slice(1)); if(d0 && d0.tagName==='DETAILS'){ d0.open = true; MOBTAB = d0.id; } }
+  wireMobile();
   initCapabilities(); initDb(); initMcp();
 }
 boot();
