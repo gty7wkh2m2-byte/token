@@ -1,0 +1,373 @@
+<title>Strukturplan Abrechnung v8</title>
+<style>
+/* Layout: ein Spaltenfluss, Cockpit-Kacheln oben, nummerierte Abschnitte mit farbiger Randleiste, Karten in Rastern */
+:root{
+  --bg:#F6F7F9;--panel:#FFFFFF;--panel2:#EEF1F5;--line:#D5DBE4;--fg:#1F2733;--dim:#5B6878;
+  --acc:#3C3489;--acc-soft:#E6E3F5;
+  --green:#1D9E75;--green-soft:#DDF3EA;--yellow:#D99A00;--yellow-soft:#FBEFC9;--red:#D94A49;--red-soft:#FADBDB;
+  --lila:#6B5BD2;--lila-soft:#E9E5FB;--blue:#2F7BE0;--blue-soft:#DCE9FB;--grey-soft:#E4E8EE;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12161C;--panel:#1A2029;--panel2:#222A35;--line:#333D4B;--fg:#E7ECF2;--dim:#9AA7B8;
+  --acc:#A79CF2;--acc-soft:#2A2650;--green:#3FCF9B;--green-soft:#163D30;--yellow:#F0BB3A;--yellow-soft:#4A3A0F;--red:#F06B6A;--red-soft:#4A1E1E;
+  --lila:#A79CF2;--lila-soft:#2A2650;--blue:#6FA8F5;--blue-soft:#1C2E4A;--grey-soft:#2A3341;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161C;--panel:#1A2029;--panel2:#222A35;--line:#333D4B;--fg:#E7ECF2;--dim:#9AA7B8;
+  --acc:#A79CF2;--acc-soft:#2A2650;--green:#3FCF9B;--green-soft:#163D30;--yellow:#F0BB3A;--yellow-soft:#4A3A0F;--red:#F06B6A;--red-soft:#4A1E1E;
+  --lila:#A79CF2;--lila-soft:#2A2650;--blue:#6FA8F5;--blue-soft:#1C2E4A;--grey-soft:#2A3341;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;line-height:1.45;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding-block:18px 40px;padding-inline:16px}
+h1{font-size:22px;margin:0 0 4px;text-wrap:balance}
+h2{font-size:17px;margin:0;display:flex;align-items:center;gap:9px}
+h3{font-size:14px;margin:0 0 6px}
+.sub{color:var(--dim);font-size:12.5px;margin:0 0 14px}
+section{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--c,var(--acc));border-radius:10px;padding:12px 14px;margin:0 0 14px}
+.num{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:50%;background:var(--c,var(--acc));color:#fff;font-size:12px;font-weight:700;flex:none}
+.grid{display:grid;gap:10px;margin-top:10px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.tile{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0}
+.tile b{display:block;font-size:11.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+ul{margin:4px 0 0;padding-left:18px}
+li{margin:2px 0}
+.pill{display:inline-block;border-radius:20px;padding:1px 9px;font-size:11.5px;font-weight:600;border:1px solid transparent;white-space:nowrap;vertical-align:middle}
+.p-green{background:var(--green-soft);color:var(--green);border-color:var(--green)}
+.p-yellow{background:var(--yellow-soft);color:var(--yellow);border-color:var(--yellow)}
+.p-red{background:var(--red-soft);color:var(--red);border-color:var(--red)}
+.p-lila{background:var(--lila-soft);color:var(--lila);border-color:var(--lila)}
+.p-blue{background:var(--blue-soft);color:var(--blue);border-color:var(--blue)}
+.p-grey{background:var(--grey-soft);color:var(--dim);border-color:var(--line)}
+.file{display:inline-block;background:var(--green);color:#fff;border-radius:20px;padding:2px 11px;font-family:var(--mono);font-size:12px;font-weight:600}
+.bar{display:grid;grid-template-columns:150px 1fr 110px;gap:8px;align-items:center;font-size:12.5px;margin:3px 0}
+.bar .t{height:14px;background:var(--grey-soft);border-radius:4px;overflow:hidden}
+.bar .t i{display:block;height:100%;background:var(--c,var(--acc))}
+.bar .v{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:8px}
+th,td{border-bottom:1px solid var(--line);padding:5px 7px;text-align:left;vertical-align:top}
+th{font-size:11.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tw{overflow-x:auto}
+.card{border:1px solid var(--line);border-left:5px solid var(--c,var(--acc));border-radius:8px;padding:9px 11px;background:var(--panel2);min-width:0}
+.card .h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.card .h b{font-size:13.5px}
+.card.now{outline:2px solid var(--red);outline-offset:2px}
+.step{display:grid;grid-template-columns:32px 1fr;gap:10px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--panel2);margin-top:8px;min-width:0}
+.step .k{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--c,var(--acc));color:#fff;font-weight:700;font-size:13px;flex:none}
+.step .m{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:2px 8px;font-size:12.5px;margin-top:4px}
+.kv span:first-child{color:var(--dim)}
+.tree{list-style:none;padding-left:0;font-family:var(--mono);font-size:12px}
+.tree ul{list-style:none;padding-left:18px;border-left:1px dashed var(--line);margin-left:6px}
+.tree li{padding:1px 0}
+.tree .d{color:var(--acc);font-weight:700}
+.tree .c{font-family:var(--sans);color:var(--dim);font-size:11.5px}
+.copy{border:2px solid var(--blue);border-radius:8px;background:var(--panel);margin-top:6px}
+.copy .ch{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 9px;border-bottom:1px solid var(--line);font-size:12px;color:var(--dim);flex-wrap:wrap}
+.copy pre{margin:0;padding:9px 11px;max-height:220px;overflow:auto;white-space:pre-wrap;word-break:break-word;font-family:var(--mono);font-size:12px;line-height:1.45}
+button.cp{background:var(--blue);color:#fff;border:0;border-radius:6px;padding:4px 11px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+button.cp:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.legend{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;align-items:center}
+.ctrl{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:700px){.ctrl{grid-template-columns:1fr}.bar{grid-template-columns:110px 1fr 90px}.kv{grid-template-columns:1fr}}
+mark{padding:0 3px;border-radius:3px;color:inherit}
+.m1{background:var(--green-soft);outline:1px solid var(--green)}
+.m2{background:var(--blue-soft);outline:1px solid var(--blue)}
+.tok{height:10px;background:var(--grey-soft);border-radius:5px;overflow:hidden;margin:4px 0}
+.tok i{display:block;height:100%;width:1.2%;background:var(--green)}
+.fb{border:1px dashed var(--line);border-radius:8px;padding:9px 11px;margin-top:10px;background:var(--panel2)}
+@media (prefers-reduced-motion:no-preference){button.cp{transition:opacity .15s}}
+</style>
+
+<div class="wrap">
+<h1>Strukturplan Abrechnung v8</h1>
+<p class="sub">V1 · Stand 10.10.2026 02:17 (Europe/Berlin) · Grundlage: abrechnung_scans_v8_2026-09-30_2239.html (Master v2.41, Skill 1.9) · Alle Zahlen gemessen [T:Python, Playwright], keine Schätzungen außer gekennzeichnet</p>
+
+<div class="legend" style="margin-bottom:12px">
+  <b>Legende</b>
+  <span class="pill p-green">grün · funktioniert / empfohlen / Datei</span>
+  <span class="pill p-yellow">gelb · unter Bedingung / Option</span>
+  <span class="pill p-red">rot · Klärung / nicht möglich / dringend</span>
+  <span class="pill p-lila">lila · neutral-kategorial</span>
+  <span class="pill p-blue">blau · Kopieren / Information</span>
+  <span class="pill p-grey">grau · wartet auf Bestätigung</span>
+</div>
+
+<!-- 0 COCKPIT -->
+<section style="--c:var(--lila)">
+<h2><span class="num">0</span>Kontext-Cockpit</h2>
+<div class="grid g3">
+  <div class="tile"><b>Modell</b>Fable 5.1 + Extended Thinking für diese Analyse (Architektururteil). Folgephasen: Sonnet 5.5 (Bau), Haiku 4.5 (Doku), siehe Abschnitt 4.</div>
+  <div class="tile"><b>Kontext (Schätzung)</b><div class="tok"><i></i></div>ca. 1 bis 2 % · Herkunft: Systemkontext + Werkzeugkatalog, Analyseausgaben (gefiltert), keine Volllesung der Datei</div>
+  <div class="tile"><b>Turn · Handover</b>Turn 1 · Handover nicht fällig · neuer Chat erst zum Start von Phase P1</div>
+  <div class="tile"><b>Tool-Version</b>Einzel-Tool v8 · Master v2.41 · eingebetteter Skill 1.9 (30.09.2026) · installierter Skill 1.7 (29.09.2026)</div>
+  <div class="tile"><b>Notes-Check</b>Kein Notiz- oder Update-Feld in der Datei. Nächster Ersatz: Liste „Vorschläge“ (20 Einträge s01 bis s24) im Werkzeug, nicht ausgeführt, nur in Abschnitt 7 referenziert.</div>
+  <div class="tile"><b>Plausibilitätsbox</b>„mach artefakt daraus“ interpretiert als: Datei unverändert als private Artefakt-Kopie veröffentlichen. „workflow wie ich struktur verbessern kann“ interpretiert als: Datei-, Code- und Datenstruktur, nicht fachlicher Inhalt der Abrechnung.</div>
+  <div class="tile"><b>Quellen</b>[T:Python] Blockanalyse, JSON-Zerlegung, Gewichtsmessung, Rekompressionstest · [T:Playwright] Render-Test desktop/mobil · [P:Skill] installierte SKILL.md · [K] Präferenzen (Prüfkette, Eine-Quelle-Regel)</div>
+  <div class="tile"><b>Ergebnisse</b>Artefakt 1: v8-Kopie · Artefakt 2: dieser Plan · Datei: <span class="file">html_strukturpruefer_v1.py</span> (Repo-Branch claude/great-gates-wh5l3y, Ordner tools)</div>
+  <div class="tile"><b>Zugriff</b>Dateisystem (Upload), Chromium, Python, Repo gty7wkh2m2-byte/token. Kein Drive-, Mail- oder Dropbox-Zugriff genutzt.</div>
+</div>
+<div class="tile" style="margin-top:10px"><b>Chat-Überblick</b>Eingabe: HTML-Werkzeugdatei v8 → Ergebnis: Messung + zwei Artefakte + Prüfskript → Position: Befund abgeschlossen, Plan V1 → Ziel: Entscheidung O1/O2/O3, dann Phase P1 in neuem Chat</div>
+</section>
+
+<!-- 1 BEFUND -->
+<section style="--c:var(--blue)">
+<h2><span class="num">1</span>Befund · was die Datei ist</h2>
+<p class="sub" style="margin:6px 0 8px">5.082.421 Bytes, 3.937 Zeilen, eine Datei, keine externen Abhängigkeiten (nur 3 Drive-Links). Render-Test: 0 Fehler, 0 Warnungen auf Desktop (1366 px) und Mobil (390 px), Ladezeit lokal 3,1 bis 4,3 s, Autosave schreibt 18.745 Zeichen nach abr_scans_v8.</p>
+
+<h3>1.1 Gewicht nach Block (Bytes, Balken maßstäblich zur Gesamtdatei)</h3>
+<div class="bar" style="--c:var(--red)"><span>ABR_DATA (JSON)</span><div class="t"><i style="width:94.0%"></i></div><span class="v">4.776.916</span></div>
+<div class="bar" style="--c:var(--acc)"><span>Modul-JS (327 Funktionen)</span><div class="t"><i style="width:3.6%"></i></div><span class="v">181.633</span></div>
+<div class="bar" style="--c:var(--acc)"><span>QR + Self-Download JS</span><div class="t"><i style="width:1.1%"></i></div><span class="v">57.526</span></div>
+<div class="bar" style="--c:var(--acc)"><span>CSS (abr-css + Basis)</span><div class="t"><i style="width:1.1%"></i></div><span class="v">57.564</span></div>
+<div class="bar" style="--c:var(--acc)"><span>Body-HTML (Hülle)</span><div class="t"><i style="width:0.1%"></i></div><span class="v">4.888</span></div>
+<div class="bar" style="--c:var(--dim)"><span>ABR_STATE</span><div class="t"><i style="width:0%"></i></div><span class="v">2</span></div>
+
+<h3 style="margin-top:12px">1.2 Innerhalb ABR_DATA: 33 Schlüssel, nach Ebene gruppiert</h3>
+<div class="tw"><table>
+<tr><th>Ebene</th><th>Schlüssel</th><th>Bytes</th><th>Anteil Datei</th><th>Inhalt</th></tr>
+<tr><td><span class="pill p-red">Binär eingebettet</span></td><td>files</td><td class="n">2.830.905</td><td class="n">55,7 %</td><td>9 Quell-PDFs als 27 Seitenbilder (JPEG 1000 × 1413 px, Ø 105 KB Base64)</td></tr>
+<tr><td><span class="pill p-red">Binär eingebettet</span></td><td>rows → crops</td><td class="n">663.526</td><td class="n">13,1 %</td><td>29 Handschrift-Ausschnitte (Sachdaten der 25 Zeilen nur 9.743 Bytes)</td></tr>
+<tr><td><span class="pill p-red">Binär eingebettet</span></td><td>fac.tpl</td><td class="n">564.058</td><td class="n">11,1 %</td><td>Rechnungsvorlage als HTML-String: Schriften 184.046, Emoji-Bilder 360.584</td></tr>
+<tr><td><span class="pill p-red">Binär eingebettet</span></td><td>rkFiles</td><td class="n">505.311</td><td class="n">9,9 %</td><td>2 Hotel-PDFs (Reisekosten SEM), eine davon zusätzlich als Bild</td></tr>
+<tr><td><span class="pill p-yellow">Dokumentation</span></td><td>skill, skillVersion, changes, sugg</td><td class="n">66.070</td><td class="n">1,3 %</td><td>Skill-Text 1.9 (49.622), Änderungsprotokoll 68 Einträge, 20 Vorschläge</td></tr>
+<tr><td><span class="pill p-yellow">Auswertungs-Snapshots</span></td><td>zd, v7, akte, payHist, pay, cover, rk, eb, hwOk</td><td class="n">73.962</td><td class="n">1,5 %</td><td>Zahlungsdauer (Stand 28.09.), Chronik, Kundenakte-Vault (53 Einträge), Zahlungen</td></tr>
+<tr><td><span class="pill p-green">Stammdaten</span></td><td>rows (ohne crops), ids, banks, bankDefault, invCfg, tpl, invNext, auto, chLabel</td><td class="n">13.400</td><td class="n">0,3 %</td><td>25 Termine, 5 Auftraggeber, Bankkonten, Rechnungsempfänger, Mailvorlagen, Drive-IDs von 8 PDFs</td></tr>
+<tr><td><span class="pill p-green">Notizen · Prüfstand</span></td><td>check, checkDate, hidden, secNotes, mnotes, unwhy</td><td class="n">4.100</td><td class="n">0,1 %</td><td>Postfach-Stand, ausgeblendete Seiten mit Grund, Hinweise je Auftraggeber</td></tr>
+<tr><td><span class="pill p-lila">Migration</span></td><td>mig, v6</td><td class="n">227</td><td class="n">0,0 %</td><td>Einmal-Nachführung v2.40, Versionsflag</td></tr>
+</table></div>
+
+<h3 style="margin-top:12px">1.3 Code-Architektur (bleibt erhalten)</h3>
+<div class="grid g3">
+  <div class="tile"><b>Rendern</b>Ein render() baut alles als HTML-String, 35 innerHTML-Zuweisungen, Vollneuaufbau je Aktion</div>
+  <div class="tile"><b>Ereignisse</b>Delegation über data-a (81 Stellen), 15 addEventListener, 0 inline-onclick im Modul</div>
+  <div class="tile"><b>Stand</b>S im localStorage (Schlüssel abr_scans_v8), Rückgängig-Stapel 40 Schritte, beforeSave() schreibt S in ABR_STATE beim Self-Download</div>
+  <div class="tile"><b>Daten</b>D = JSON.parse(ABR_DATA), unveränderlich zur Laufzeit; Update-Paket und Stand-Import ergänzen S, nie D</div>
+  <div class="tile"><b>Versionskette</b>Speicherschlüssel abr_scans_v5 → v6 → v7 → v8 werden beim ersten Öffnen übernommen; migrate() und mig240() als Einmalschritte im Code</div>
+  <div class="tile"><b>Rekompression geprüft</b>Seiten in Graustufen, 1600 px, Qualität 62: 2.986.209 statt 2.830.905 Bytes (größer). Ausschnitte Qualität 70: −5 %. Bildverkleinerung ist kein Hebel.</div>
+</div>
+</section>
+
+<!-- 2 DIAGNOSE -->
+<section style="--c:var(--red)">
+<h2><span class="num">2</span>Diagnose · Strukturprobleme nach Gewicht</h2>
+<div class="grid g2">
+  <div class="card" style="--c:var(--red)"><div class="h"><b>D1 Binärdaten im Datenblock</b><span class="pill p-red">rot · 89,8 %</span></div>
+    <ul><li><b>Befund:</b> 4,56 MB von 5,08 MB sind Base64 in ABR_DATA (files, crops, fac.tpl, rkFiles).</li>
+    <li><b>Folge:</b> jede Übergabe an einen Chat kostet Volllesen (ca. 1,5 M Token) oder ein Skript; Self-Download schreibt alles jedes Mal neu; Browser hält 5 MB im DOM.</li>
+    <li><b>Beleg:</b> Abschnitt 1.2; für 8 der 9 PDFs liegen Drive-IDs vor (ids).</li></ul></div>
+  <div class="card" style="--c:var(--red)"><div class="h"><b>D2 Doppelte Quelle für den Skill</b><span class="pill p-red">rot · Drift belegt</span></div>
+    <ul><li><b>Befund:</b> Datei trägt Skill 1.9 (30.09.), installiert ist Skill 1.7 (29.09., noch für v6/v2.39).</li>
+    <li><b>Folge:</b> zwei Stände, Eine-Quelle-Regel verletzt; Abläufe (Reisekosten SEM, B11) fehlen im aktiven Skill.</li>
+    <li><b>Beleg:</b> SKILL.md Zeile 6 gegen ABR_DATA.skill Zeile 6.</li></ul></div>
+  <div class="card" style="--c:var(--yellow)"><div class="h"><b>D3 Dokumentation und Backlog im Werkzeug</b><span class="pill p-yellow">gelb</span></div>
+    <ul><li><b>Befund:</b> Änderungsprotokoll (68), Vorschläge (20) und Skill-Text leben im JSON und werden mitgerendert.</li>
+    <li><b>Folge:</b> Doku wächst mit jeder Version in der Datei; keine Historie außerhalb des Self-Downloads.</li></ul></div>
+  <div class="card" style="--c:var(--yellow)"><div class="h"><b>D4 Snapshots neben Stammdaten</b><span class="pill p-yellow">gelb</span></div>
+    <ul><li><b>Befund:</b> zd (Stand 28.09. 22:38), v7-Chronik, akte.vault, payHist liegen in derselben Ebene wie rows und banks.</li>
+    <li><b>Folge:</b> Stichtagsdaten altern unsichtbar; ein Update-Paket ergänzt nur S, D bleibt beim alten Stand.</li></ul></div>
+  <div class="card" style="--c:var(--yellow)"><div class="h"><b>D5 Migrationen akkumulieren im Code</b><span class="pill p-yellow">gelb</span></div>
+    <ul><li><b>Befund:</b> Übernahme-Kette v5 bis v8, migrate() mit D.mig, mig240(), LSK-Vorgabe abr_master_v234.</li>
+    <li><b>Folge:</b> jede Version fügt einen Zweig hinzu; Rückbau ohne Protokoll riskant.</li></ul></div>
+  <div class="card" style="--c:var(--green)"><div class="h"><b>D6 Laufzeit-Architektur</b><span class="pill p-green">grün · behalten</span></div>
+    <ul><li><b>Befund:</b> ein Render-Pfad, Delegation, Autosave 1×/s, Rückgängig, Export JSON, 0 Fehler mobil und desktop.</li>
+    <li><b>Folge:</b> kein Umbau der Logik nötig; Umbau betrifft Verpackung und Quellen.</li></ul></div>
+</div>
+</section>
+
+<!-- 3 ZIELSTRUKTUR -->
+<section style="--c:var(--green)">
+<h2><span class="num">3</span>Zielstruktur · Quellen getrennt, Ausgabe bleibt eine Datei</h2>
+<p class="sub" style="margin:6px 0 8px">Prinzip: die ausgelieferte Werkzeugdatei bleibt eine HTML-Datei mit allem inline (Präferenz). Getrennt werden nur die <b>Quellen</b>, aus denen ein Build-Skript sie erzeugt. Konflikt zur Präferenz „alles inline“ besteht nicht, weil nur die Bauseite zerlegt wird.</p>
+<div class="grid g2">
+<ul class="tree">
+  <li><span class="d">abrechnung/</span>
+  <ul>
+    <li><span class="d">src/</span> <span class="c">Code, unverändert aus der v8 extrahiert</span>
+      <ul><li>shell.html <span class="c">Body-Hülle (4,9 KB)</span></li><li>abr.css</li><li>abr.js <span class="c">Modul, 327 Funktionen</span></li><li>qr_download.js</li></ul></li>
+    <li><span class="d">data/</span> <span class="c">Text-JSON, je Ebene eine Datei</span>
+      <ul><li>master.json <span class="c">rows ohne crops, ids, banks, invCfg, tpl, invNext, auto</span></li>
+          <li>notes.json <span class="c">check, hidden, secNotes, mnotes, unwhy</span></li>
+          <li>pay.json <span class="c">pay, payHist, cover</span></li>
+          <li>snapshots/zd_2026-09-28.json, v7.json, akte.json, rk.json, eb.json, hwOk.json</li>
+          <li>mig.json</li></ul></li>
+    <li><span class="d">assets/</span> <span class="c">Binärdateien einzeln, Name = Quelle + Seite</span>
+      <ul><li>pages/Epson_25092026005705/p1.jpg … p7.jpg</li><li>crops/B1_1.png …</li><li>rk/AM_22940.pdf, 60522_4825637.pdf</li><li>fac/tpl.html, fonts/, emoji/</li></ul></li>
+    <li><span class="d">docs/</span>
+      <ul><li>SKILL.md <span class="c">einzige Skill-Quelle, 1.9</span></li><li>CHANGELOG.md <span class="c">aus changes</span></li><li>BACKLOG.md <span class="c">aus sugg</span></li></ul></li>
+    <li><span class="d">build/</span>
+      <ul><li>split.py <span class="c">v8 → Quellen (einmalig)</span></li><li>build.py <span class="c">Quellen → dist</span></li><li>check.py <span class="c">Prüfkette, Abschnitt 4 P6</span></li></ul></li>
+    <li><span class="d">dist/</span>
+      <ul><li>abrechnung_scans_v9_JJJJ-MM-TT_HHMM.html <span class="c">voll, alle Assets inline</span></li><li>abrechnung_scans_v9_lite_….html <span class="c">ohne Seitenbilder, Drive-Links</span></li></ul></li>
+  </ul></li>
+</ul>
+<div>
+  <div class="card" style="--c:var(--green)"><div class="h"><b>Was sich für die Arbeit ändert</b></div>
+    <ul><li><b>Chat-Übergabe:</b> LITE-Build statt Volldatei; Schätzung aus Messung: ca. 0,4 bis 0,5 MB (Code 300 KB + Textdaten 100 bis 150 KB).</li>
+    <li><b>Skill:</b> SKILL.md im Repo ist Quelle, Installation zieht daraus; in der HTML nur Versionsnummer und Verweis.</li>
+    <li><b>Snapshots:</b> Dateiname trägt den Stichtag; Cockpit zeigt „zd Stand 28.09.2026“ aus dem Dateinamen.</li>
+    <li><b>Versionierung:</b> Modul Semver (abr.js 9.0.0), Build-Stempel im Dateinamen, CHANGELOG je Build.</li>
+    <li><b>Entfernt wird nichts:</b> jede Information wandert, Liste der Verschiebungen im CHANGELOG (additiv-only).</li></ul></div>
+  <div class="card" style="--c:var(--lila);margin-top:10px"><div class="h"><b>Ebenen-Zuordnung (Präferenz Abschnitt 5)</b></div>
+    <div class="kv"><span>A Projektwissen</span><span>docs/SKILL.md</span><span>B Verhaltensregeln</span><span>Präferenzen, nicht in der Datei</span><span>C Status</span><span>S im Browser + ABR_STATE im Self-Download</span><span>D Einzelaufgabe</span><span>Chat</span><span>E Rohdaten</span><span>assets/, data/snapshots/</span></div></div>
+</div>
+</div>
+</section>
+
+<!-- 4 WORKFLOW -->
+<section style="--c:var(--acc)">
+<h2><span class="num">4</span>Workflow · Phasen mit Modell, Ergebnis und Prüfkriterium</h2>
+<p class="sub" style="margin:6px 0 0">Reihenfolge fest: jede Phase endet mit grünem check.py. „go“ startet die nächste Phase. Modell je Phase vor dem Start nennen, innerhalb eines Chats nicht wechseln.</p>
+
+<div class="step" style="--c:var(--green)"><div class="k">P0</div><div>
+  <b>Messen und einfrieren</b> <span class="pill p-green">erledigt · dieser Plan</span>
+  <div class="m"><span class="pill p-lila">Fable 5.1 + Thinking</span></div>
+  <div class="kv"><span>Ergebnis</span><span>Abschnitte 1 und 2, Prüfskript html_strukturpruefer_v1.py, Referenz-Screenshots desktop/mobil</span><span>Prüfkriterium</span><span>0 Konsolenfehler in der v8 (erfüllt)</span></div></div></div>
+
+<div class="step" style="--c:var(--acc)"><div class="k">P1</div><div>
+  <b>Zerlegen ohne Logikänderung</b>
+  <div class="m"><span class="pill p-lila">Sonnet 5.5, ohne Thinking</span><span class="pill p-blue">Claude Code</span><span class="pill p-grey">Kontext ca. 3 bis 6 %</span></div>
+  <div class="kv"><span>Handlung</span><span>split.py schreiben und ausführen: Blöcke nach Abschnitt 3 ablegen, Base64 als Dateien, JSON je Ebene. build.py setzt daraus wieder eine HTML zusammen.</span>
+  <span>Ergebnis</span><span>Verzeichnisbaum + dist-Datei, die mit der v8 funktional identisch ist</span>
+  <span>Prüfkriterium</span><span>DOM von #abr-app nach Laden zeichengleich mit v8, 0 Fehler, Screenshot-Diff leer, Autosave-Schlüssel identisch</span>
+  <span>Tokenfolge</span><span>Einmalig hoch (Skript + Prüflauf), danach jede Folgearbeit nur auf den kleinen Quellen</span></div></div></div>
+
+<div class="step" style="--c:var(--acc)"><div class="k">P2</div><div>
+  <b>Eine Quelle für Skill, Changelog, Backlog</b>
+  <div class="m"><span class="pill p-lila">Haiku 4.5</span><span class="pill p-grey">Kontext ca. 1 bis 2 %</span></div>
+  <div class="kv"><span>Handlung</span><span>SKILL.md 1.9 aus data in docs/ übernehmen und installieren (ersetzt 1.7), changes → CHANGELOG.md, sugg → BACKLOG.md. In der HTML bleibt skillVersion + Satz „Quelle: docs/SKILL.md“. Abschnitt „Skill“ im Werkzeug zeigt nur Version und Verweis.</span>
+  <span>Ergebnis</span><span>installierter Skill = Repo-Skill; Datei um 66 KB kleiner</span>
+  <span>Prüfkriterium</span><span>Diff Skill installiert gegen docs/SKILL.md leer; alle 68 Changelog-Einträge in CHANGELOG.md zählbar</span></div></div></div>
+
+<div class="step" style="--c:var(--acc)"><div class="k">P3</div><div>
+  <b>LITE-Build für Chats, Vollbuild für die Arbeit</b>
+  <div class="m"><span class="pill p-lila">Sonnet 5.5</span><span class="pill p-grey">Kontext ca. 2 bis 4 %</span></div>
+  <div class="kv"><span>Handlung</span><span>build.py --lite: pages und crops durch Platzhalter mit Drive-Link (ids) ersetzen, fac.tpl ohne Emoji-Bilder, rkFiles als Dateiname. Vollbuild unverändert (Originaltreue).</span>
+  <span>Ergebnis</span><span>zwei dist-Dateien je Build; LITE ist die Chat-Übergabe</span>
+  <span>Prüfkriterium</span><span>LITE unter 0,6 MB (Messung), 0 Fehler, Vorschau zeigt „Seitenbild nicht eingebettet, Drive“ statt leerem Rahmen</span>
+  <span>Bedingung</span><span>Drive-ID für „Gescanntes Dokument 24.pdf“ fehlt in ids (fehlt, bitte liefern)</span></div></div></div>
+
+<div class="step" style="--c:var(--yellow)"><div class="k">P4</div><div>
+  <b>Datenebenen im Code sichtbar machen</b> <span class="pill p-yellow">Option, nach P3</span>
+  <div class="m"><span class="pill p-lila">Sonnet 5.5</span><span class="pill p-grey">Kontext ca. 3 bis 5 %</span></div>
+  <div class="kv"><span>Handlung</span><span>D in D.master, D.notes, D.pay, D.snap aufteilen, Feld schema: 1 und stand je Snapshot; Cockpit-Zeile „Datenstand“ aus diesen Feldern rendern. Zugriffe im Modul per Suchen-Ersetzen umhängen.</span>
+  <span>Prüfkriterium</span><span>check.py grün; jede D.-Referenz im Modul aufgelöst (grep ohne Treffer auf alte Pfade)</span></div></div></div>
+
+<div class="step" style="--c:var(--yellow)"><div class="k">P5</div><div>
+  <b>Migrationen in eine Tabelle</b> <span class="pill p-yellow">Option, nach P4</span>
+  <div class="m"><span class="pill p-lila">Sonnet 5.5</span></div>
+  <div class="kv"><span>Handlung</span><span>migrate(), mig240() und die Übernahmekette v5 bis v8 in eine Liste MIGRATIONS = [{key, from, to, apply}] überführen; ausgeführte Schlüssel in S.migDone als Liste protokollieren.</span>
+  <span>Prüfkriterium</span><span>Testlauf mit drei Alt-Ständen (v5-, v7-, v8-Export) ergibt denselben S wie die v8</span>
+  <span>Bestätigungsgate</span><span>Löschen alter Speicherschlüssel abr_scans_v5 bis v7 erst nach Freigabe (unumkehrbar im Browser)</span></div></div></div>
+
+<div class="step" style="--c:var(--green)"><div class="k">P6</div><div>
+  <b>Prüfkette als Skript (Präferenz Artefakte/HTML)</b>
+  <div class="m"><span class="pill p-lila">Sonnet 5.5</span><span class="pill p-blue">Claude Code</span></div>
+  <div class="kv"><span>Handlung</span><span>check.py: JSON.parse aller data-Blöcke → Syntaxcheck beider JS-Dateien (node --check) → Playwright-Smoke desktop/mobil → Screenshots → Interaktionstest (Abschnitt auf/zu, Termin auf, Rechnung öffnen) → Autosave-Test → 0 Fehler. Läuft nach jedem build.py.</span>
+  <span>Prüfkriterium</span><span>Protokoll als JSON mit Zeitstempel in dist/, Abbruch bei erstem Fehler</span></div></div></div>
+
+<div class="step" style="--c:var(--green)"><div class="k">P7</div><div>
+  <b>Nachführen</b>
+  <div class="m"><span class="pill p-lila">Haiku 4.5</span></div>
+  <div class="kv"><span>Handlung</span><span>CHANGELOG-Eintrag je Build, Handover-Datei additiv, Skill-Abschnitt 0 „Werkzeug“ auf Build-Verfahren umstellen, Obsolet-Liste (v5 bis v8 Standalone-Dateien).</span></div></div></div>
+</section>
+
+<!-- 5 OPTIONEN -->
+<section style="--c:var(--yellow)">
+<h2><span class="num">5</span>Optionen · Umfang der Umstellung</h2>
+<div class="grid g3">
+  <div class="card" style="--c:var(--grey-soft)"><div class="h"><b>O1 Nur Build</b><span class="pill p-grey">P1 + P6</span></div>
+    <ul><li>Quellen getrennt, Ausgabe wie heute 5 MB</li><li>Aufwand: 1 Chat Sonnet</li><li>Löst D6-Erhalt, nicht D1 bis D3</li></ul></div>
+  <div class="card" style="--c:var(--green)"><div class="h"><b>O2 Build + Quelle + LITE</b><span class="pill p-green">Empfehlung</span><span class="pill p-grey">P1, P2, P3, P6, P7</span></div>
+    <ul><li>Löst D1 (Chat-Übergabe), D2, D3</li><li>Aufwand: 2 bis 3 Chats (Sonnet, Haiku)</li><li>Begründung aus Sachlage: größter Tokenhebel bei geringstem Eingriff in Logik</li><li>aus Verhalten: additiv, eine Ausgabedatei, Originaltreue im Vollbuild</li></ul></div>
+  <div class="card" style="--c:var(--yellow)"><div class="h"><b>O3 Vollumbau</b><span class="pill p-yellow">O2 + P4 + P5</span></div>
+    <ul><li>Löst zusätzlich D4, D5</li><li>Aufwand: 4 bis 5 Chats, Regressionsrisiko im Modul</li><li>Sinnvoll als zweite Stufe, sobald O2 zwei Builds stabil ist</li></ul></div>
+</div>
+<p class="sub" style="margin:10px 0 0">Kombinationen exakt benennbar, z. B. „O2 + P5 ohne P4“. Die Entscheidung liegt beim Nutzer; nach Wahl beginnt P1 mit dem Folgeprompt aus Abschnitt 7.</p>
+</section>
+
+<!-- 6 ARTEFAKT -->
+<section style="--c:var(--red)">
+<h2><span class="num">6</span>Artefakt-Kopie der v8 · was dort nicht funktioniert</h2>
+<p class="sub" style="margin:6px 0 8px">Die Artefakt-Umgebung sperrt bestimmte Browser-Funktionen für alle Betrachter. Die Kopie ist private Ansicht und Prüfstation, die Bearbeitung mit Export bleibt in der lokalen Datei.</p>
+<div class="tw"><table>
+<tr><th>Funktion im Werkzeug</th><th>Status im Artefakt</th><th>Grund</th></tr>
+<tr><td>Self-Download, ⬇ PDF, Stand als JSON, HTML-Download, ⬇ Datei (Reisekosten)</td><td><span class="pill p-red">inaktiv</span></td><td>Downloads aus der Seite (Blob-Links) sind im Artefakt gesperrt</td></tr>
+<tr><td>Drucken als PDF (Rechnungseditor)</td><td><span class="pill p-red">inaktiv</span></td><td>Druckdialog nicht verfügbar</td></tr>
+<tr><td>Stand laden (JSON-Import)</td><td><span class="pill p-red">bricht ab</span></td><td>Rückfrage über confirm() liefert immer „nein“</td></tr>
+<tr><td>Fehlermeldungen über alert()</td><td><span class="pill p-yellow">unsichtbar</span></td><td>Dialoge werden nicht angezeigt</td></tr>
+<tr><td>✉ In Outlook öffnen</td><td><span class="pill p-yellow">unsicher</span></td><td>window.open nur für angemeldete Betrachter derselben Organisation</td></tr>
+<tr><td>Autosave, Rückgängig, Auf-/Zuklappen, Rechnungsvorschau, Mail kopieren, Drive-Links</td><td><span class="pill p-green">funktioniert</span></td><td>localStorage je Browser, Zwischenablage im Klick, Links öffnen neuen Tab</td></tr>
+</table></div>
+<p class="sub" style="margin:8px 0 0">Datenschutz: Die Kopie enthält Klientennamen mit Geburtsdaten, Aktenzeichen und IBANs. Sie ist privat; ein Teilen des Links gibt diese Daten weiter.</p>
+</section>
+
+<!-- 7 COPYBOXEN -->
+<section style="--c:var(--blue)">
+<h2><span class="num">7</span>Copyboxen · Folgeprompt und Regelupdate</h2>
+
+<p class="sub" style="margin:8px 0 2px"><b>Einfügeort:</b> Claude Code, neuer Chat, Modell Sonnet 5.5 ohne Extended Thinking, Datei v8 hochladen oder Pfad nennen</p>
+<div class="copy"><div class="ch"><span>Folgeprompt P1 · Zerlegen</span><button class="cp" data-t="p1">Kopieren</button></div>
+<pre id="p1">Phase P1 des Strukturplans Abrechnung v8 (O2). Ausgangsdatei: abrechnung_scans_v8_2026-09-30_2239.html. Keine Änderung an Logik, Texten oder Daten.
+
+Schreibe build/split.py (Python, nur Standardbibliothek): extrahiert <style id='abr-css'> nach src/abr.css, den ersten <script> nach src/qr_download.js, den zweiten nach src/abr.js, den Body ohne Skripte und Styles nach src/shell.html; zerlegt ABR_DATA nach Ebenen in data/master.json (rows ohne crops, ids, banks, bankDefault, invCfg, tpl, invNext, auto, chLabel), data/notes.json (check, checkDate, hidden, secNotes, mnotes, unwhy), data/pay.json (pay, payHist, cover), data/snapshots/zd_2026-09-28.json, v7.json, akte.json, rk.json, eb.json, hwOk.json, data/mig.json (mig, v6), docs/SKILL.md (skill), docs/CHANGELOG.md (changes, nummeriert), docs/BACKLOG.md (sugg); schreibt jede Base64-Ressource als Datei nach assets/pages/<pdfname>/pN.jpg, assets/crops/<rowid>_n.<ext>, assets/rk/, assets/fac/ und ersetzt sie im JSON durch den relativen Pfad.
+
+Schreibe build/build.py: setzt aus diesen Quellen wieder eine Datei dist/abrechnung_scans_v9_<JJJJ-MM-TT_HHMM>.html zusammen (alles inline, Base64 zurückgebettet, Blockreihenfolge wie in v8).
+
+Prüfung mit Playwright (Chromium unter /opt/pw-browsers): v8 und dist-Datei laden, 0 Konsolenfehler, innerHTML von #abr-app nach 2,5 s zeichengleich, Screenshots 1366 px und 390 px, localStorage-Schlüssel abr_scans_v8 nach 1,5 s vorhanden. Ergebnis: Verzeichnisbaum mit Dateigrößen und Prüfprotokoll als Tabelle, keine Rohausgaben.</pre></div>
+
+<p class="sub" style="margin:12px 0 2px"><b>Einfügeort:</b> Präferenzen → Abschnitt 5 Token-Ökonomie → „Dateien und Vorverarbeitung“, als letzter Bullet</p>
+<div class="copy"><div class="ch"><span>Regelupdate · Werkzeugdateien über 1 MB</span><button class="cp" data-t="r1">Kopieren</button></div>
+<pre id="r1">* Werkzeugdateien über 1 MB nie direkt lesen: zuerst Strukturprüfer (Blöcke, Base64-Anteil, JSON-Schlüssel mit Größe) laufen lassen, Ergebnis als Tabelle in den Chat, Rohausgabe in Datei; Übergabe an Chats über den LITE-Build ohne eingebettete Bilder.</pre></div>
+
+<div class="card" style="--c:var(--lila);margin-top:12px"><div class="h"><b>Backlog-Referenz</b><span class="pill p-blue">Info</span></div>
+  <ul><li>Die 20 Vorschläge im Werkzeug (s01 bis s24, Abschnitt „Vorschläge“) sind fachlicher Backlog und bleiben unberührt; sie wandern in P2 nach docs/BACKLOG.md.</li>
+  <li>Berührungspunkt mit diesem Plan: s21 (FACTURES-Vorlage mit Bank-Platzhalter) betrifft fac.tpl und wird in P3 beim Auslagern der Vorlage mit erledigt, wenn gewünscht.</li></ul></div>
+</section>
+
+<!-- 8 DATEIEN -->
+<section style="--c:var(--green)">
+<h2><span class="num">8</span>Dateien und Ablage</h2>
+<div class="grid g2">
+  <div class="tile"><b>Artefakt 1</b><span class="file">abrechnung_scans_v8.html</span><br>Private Artefakt-Kopie, Link im Chat dieser Antwort. Inhalt byte-gleich mit dem Upload vom 30.09.2026 22:39.</div>
+  <div class="tile"><b>Artefakt 2</b><span class="file">strukturplan_abrechnung_v8_2026-10-10_0217.html</span><br>Dieser Plan, zusätzlich im Repo unter docs/.</div>
+  <div class="tile"><b>Prüfskript</b><span class="file">html_strukturpruefer_v1.py</span><br>Repo gty7wkh2m2-byte/token, Branch claude/great-gates-wh5l3y, Ordner tools/. Aufruf: python3 -I tools/html_strukturpruefer_v1.py &lt;datei.html&gt;. Gibt Blöcke, Base64-Anteil und JSON-Schlüssel mit Größe als Tabelle aus (Grundlage von Abschnitt 1).</div>
+  <div class="tile"><b>Nicht im Repo</b>Die v8-Datei selbst (personenbezogene Daten, 5 MB) wurde nicht eingecheckt. Ablage bleibt Drive „factures dol“ und lokaler Download.</div>
+</div>
+<p class="sub" style="margin:8px 0 0">Obsolet-Liste: keine. Chatname-Vorschlag: <b>/Abrechnung Struktur 1 AKTUELL</b></p>
+</section>
+
+<!-- 9 KONTROLLBLOCK -->
+<section style="--c:var(--lila)">
+<h2><span class="num">9</span>Kontrollblock und Vollständigkeitsprüfung</h2>
+<div class="ctrl" style="margin-top:8px">
+  <div class="tile"><b>Prompt mit Markierung</b>„<mark class="m1">mach artefakt daraus</mark> <sup>1</sup> und <mark class="m2">workflow wie ich struktur verbessern kann</mark> <sup>2</sup>“</div>
+  <div class="tile"><b>Anforderungen</b>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+      <span class="pill p-green">1 Artefakt der v8 · erfüllt</span>
+      <span class="pill p-green">2 Workflow Struktur · erfüllt (Abschnitte 1 bis 5, 7)</span>
+      <span class="pill p-green">Prüfkette Render 0 Fehler · erfüllt</span>
+      <span class="pill p-grey">Entscheidung O1/O2/O3 · wartet</span>
+    </div></div>
+</div>
+<div class="fb"><b>Hinweise</b>
+  <ul><li><b>Bezug Abschnitt 3, P3:</b> Drive-ID für „Gescanntes Dokument 24.pdf“ fehlt in ids (fehlt, bitte liefern).</li>
+  <li><b>Bezug Abschnitt 1:</b> Ladezeiten gemessen headless lokal; im Browser des Nutzers abweichend.</li>
+  <li><b>Bezug Abschnitt 6:</b> Verhalten von „In Outlook öffnen“ im Artefakt nicht getestet (Anmeldung nötig).</li>
+  <li><b>Bezug Abschnitt 2, D2:</b> Diff Skill 1.7 gegen 1.9 nur an der Kopfzeile geprüft, nicht Abschnitt für Abschnitt.</li></ul></div>
+<div class="fb"><b>Feedback erbeten</b>
+  <ul><li>Option O1, O2 oder O3, oder Kombination mit Phasen-Nummern</li><li>Soll die v8-Datei doch ins Repo (privat), damit split.py dort gegen sie läuft?</li><li>Zielort der Quellen: dieses Repo „token“ oder eigenes Repo „abrechnung“?</li></ul></div>
+</section>
+</div>
+
+<script>
+document.querySelectorAll('button.cp').forEach(function(b){
+  b.addEventListener('click',function(){
+    var el=document.getElementById(b.getAttribute('data-t'));var txt=el.textContent;
+    function done(ok){var o=b.textContent;b.textContent=ok?'Kopiert':'Text markiert';setTimeout(function(){b.textContent=o;},1500);}
+    function fallback(){try{var r=document.createRange();r.selectNodeContents(el);var s=window.getSelection();s.removeAllRanges();s.addRange(r);done(false);}catch(e){done(false);}}
+    try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){done(true);},fallback);}else fallback();}catch(e){fallback();}
+  });
+});
+</script>
