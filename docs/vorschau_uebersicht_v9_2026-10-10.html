@@ -1,0 +1,333 @@
+<title>Vorschau Übersicht v9</title>
+<style>
+/* Layout: Seite in Plan-Tokens, Vorschauen in den Werkzeug-Farben (teal/cream), je Option eine Karte mit echtem Inhalt */
+:root{
+  --bg:#F6F7F9;--panel:#FFFFFF;--panel2:#EEF1F5;--line:#D5DBE4;--fg:#1F2733;--dim:#5B6878;--acc:#3C3489;
+  --green:#1D9E75;--green-soft:#DDF3EA;--yellow:#D99A00;--yellow-soft:#FBEFC9;--red:#D94A49;--red-soft:#FADBDB;
+  --lila:#6B5BD2;--lila-soft:#E9E5FB;--blue:#2F7BE0;--blue-soft:#DCE9FB;--grey-soft:#E4E8EE;
+  /* Werkzeug-Farben für die Vorschauen */
+  --t-bg:#FBF3E4;--t-panel:#FBF8F0;--t-panel2:#F3EDDF;--t-line:#E2D8C3;--t-fg:#3A332A;--t-dim:#6B6356;--t-teal:#0E8878;
+  --k-berlet:#0E8878;--k-berhanu:#EF9F27;--k-lonski:#3C3489;--k-giessen:#1D9E75;--k-param:#E86850;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12161C;--panel:#1A2029;--panel2:#222A35;--line:#333D4B;--fg:#E7ECF2;--dim:#9AA7B8;--acc:#A79CF2;
+  --green:#3FCF9B;--green-soft:#163D30;--yellow:#F0BB3A;--yellow-soft:#4A3A0F;--red:#F06B6A;--red-soft:#4A1E1E;
+  --lila:#A79CF2;--lila-soft:#2A2650;--blue:#6FA8F5;--blue-soft:#1C2E4A;--grey-soft:#2A3341;
+  --t-bg:#0B2E2C;--t-panel:#0F3A37;--t-panel2:#124542;--t-line:#1C5450;--t-fg:#EAF3F1;--t-dim:#9FC4BE;--t-teal:#8FE8C8;
+  --k-berhanu:#F5B64A;--k-lonski:#A79CF2;--k-giessen:#3FCF9B;--k-param:#F08A75;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161C;--panel:#1A2029;--panel2:#222A35;--line:#333D4B;--fg:#E7ECF2;--dim:#9AA7B8;--acc:#A79CF2;
+  --green:#3FCF9B;--green-soft:#163D30;--yellow:#F0BB3A;--yellow-soft:#4A3A0F;--red:#F06B6A;--red-soft:#4A1E1E;
+  --lila:#A79CF2;--lila-soft:#2A2650;--blue:#6FA8F5;--blue-soft:#1C2E4A;--grey-soft:#2A3341;
+  --t-bg:#0B2E2C;--t-panel:#0F3A37;--t-panel2:#124542;--t-line:#1C5450;--t-fg:#EAF3F1;--t-dim:#9FC4BE;--t-teal:#8FE8C8;
+  --k-berhanu:#F5B64A;--k-lonski:#A79CF2;--k-giessen:#3FCF9B;--k-param:#F08A75;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;line-height:1.45;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding-block:18px 40px;padding-inline:16px}
+h1{font-size:22px;margin:0 0 4px;text-wrap:balance}
+h2{font-size:17px;margin:0;display:flex;align-items:center;gap:9px}
+h3{font-size:13.5px;margin:0}
+.sub{color:var(--dim);font-size:12.5px;margin:0 0 14px}
+section{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--c,var(--acc));border-radius:10px;padding:12px 14px;margin:0 0 14px}
+.num{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:50%;background:var(--c,var(--acc));color:#fff;font-size:12px;font-weight:700;flex:none}
+.pill{display:inline-block;border-radius:20px;padding:1px 9px;font-size:11.5px;font-weight:600;border:1px solid transparent;white-space:nowrap;vertical-align:middle}
+.p-green{background:var(--green-soft);color:var(--green);border-color:var(--green)}
+.p-yellow{background:var(--yellow-soft);color:var(--yellow);border-color:var(--yellow)}
+.p-red{background:var(--red-soft);color:var(--red);border-color:var(--red)}
+.p-lila{background:var(--lila-soft);color:var(--lila);border-color:var(--lila)}
+.p-blue{background:var(--blue-soft);color:var(--blue);border-color:var(--blue)}
+.p-grey{background:var(--grey-soft);color:var(--dim);border-color:var(--line)}
+.legend{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;align-items:center;margin-bottom:12px}
+.opt{border:1px solid var(--line);border-radius:10px;margin-top:12px;overflow:hidden;background:var(--panel)}
+.opt.rec{outline:2px solid var(--green);outline-offset:1px}
+.oh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.oh b{font-size:14px}
+.oh .id{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:24px;border-radius:6px;background:var(--acc);color:#fff;font-weight:700;font-size:12.5px;padding:0 6px}
+.ob{padding:10px 12px}
+.ob ul{margin:6px 0 0;padding-left:18px;font-size:12.5px}
+.ob li{margin:2px 0}
+/* Vorschau-Rahmen in Werkzeugfarben */
+.pv{background:var(--t-bg);color:var(--t-fg);border:1px solid var(--t-line);border-radius:8px;padding:10px;font-size:13px;min-width:0;overflow-x:auto}
+.pv .lbl{font-size:11px;color:var(--t-dim);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.tb{background:var(--t-panel2);border:1px solid var(--t-line);color:var(--t-fg);border-radius:8px;padding:5px 10px;font:inherit;font-size:12.5px;cursor:pointer;line-height:1.3}
+.tb.pri{background:var(--t-teal);border-color:var(--t-teal);color:#fff;font-weight:700}
+.tb.go{background:#2F7BE0;border-color:#2F7BE0;color:#fff;font-weight:700}
+.tb:focus-visible{outline:2px solid var(--t-fg);outline-offset:2px}
+.prog{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;align-items:center;gap:6px;border-radius:6px;padding:3px 9px;font-size:12px;border:1px solid var(--t-line);background:var(--t-panel);color:var(--t-dim);min-width:0}
+.seg b{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--t-line);color:var(--t-fg);font-size:11px}
+.seg.done{border-color:var(--green);color:var(--green)}.seg.done b{background:var(--green);color:#fff}
+.seg.now{border-color:var(--yellow);background:var(--yellow-soft);color:var(--t-fg);font-weight:600}.seg.now b{background:var(--yellow);color:#fff}
+.seg.late{border-color:var(--red);background:var(--red-soft)}
+.seg .act{background:var(--t-teal);color:#fff;border:0;border-radius:5px;padding:2px 8px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.arrow{color:var(--t-dim)}
+.row{display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--t-line);min-width:0}
+.row .d{font-family:var(--mono);font-size:12px}
+.hlp{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1px solid var(--t-line);background:var(--t-panel);color:var(--t-dim);font-size:11.5px;font-weight:700;cursor:pointer}
+.drawer{border:1px dashed var(--t-line);border-radius:6px;padding:6px 9px;font-size:12px;color:var(--t-dim);margin-top:6px}
+/* To-do-Karten */
+.kc{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:8px}
+.kcard{background:var(--t-panel);border:1px solid var(--t-line);border-top:5px solid var(--k);border-radius:9px;padding:8px 10px;min-width:0;display:flex;flex-direction:column;gap:5px}
+.kcard .kh{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.kcard .kh b{font-size:14px}
+.kcard .cnt{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--red)}
+.kcard .cnt.ok{color:var(--green)}
+.kcard .why{font-size:12px;color:var(--t-dim)}
+.kcard .why b{color:var(--t-fg)}
+.kcard .act{margin-top:auto;display:flex;gap:6px;flex-wrap:wrap}
+.kcard.flash{animation:fl 1.4s ease-out}
+@keyframes fl{0%{box-shadow:0 0 0 3px #2F7BE0}100%{box-shadow:0 0 0 0 transparent}}
+/* To-do-Liste */
+.tl{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:12.5px}
+.tl .k{display:inline-block;border-left:4px solid var(--k);padding-left:6px;font-weight:700;white-space:nowrap}
+.tl .t{min-width:0}
+.tl .t i{display:block;font-style:normal;color:var(--t-dim);font-size:11.5px}
+.tl .t b.act{color:var(--t-teal)}
+.tl > *{padding:5px 0;border-bottom:1px dashed var(--t-line)}
+.filt{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.fc{border:1px solid var(--t-line);border-radius:20px;padding:1px 9px;font-size:11.5px;background:var(--t-panel);cursor:pointer}
+.fc.on{background:var(--t-teal);border-color:var(--t-teal);color:#fff}
+/* Matrix */
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border-bottom:1px solid var(--t-line);padding:5px 7px;text-align:left;vertical-align:top}
+th{font-size:11px;color:var(--t-dim);text-transform:uppercase;letter-spacing:.04em}
+td.n{font-family:var(--mono);text-align:center;font-variant-numeric:tabular-nums}
+td.n.z{color:var(--t-dim)}
+td.n.c{background:var(--red-soft);color:var(--red);font-weight:700;cursor:pointer;border-radius:4px}
+/* Phone-Rahmen */
+.phone{width:300px;max-width:100%;margin:0 auto;border:8px solid #2A2F38;border-radius:26px;background:var(--t-bg);overflow:hidden;position:relative}
+.phone .scr{height:520px;overflow-y:auto;padding:10px 10px 64px}
+.phone .top{position:sticky;top:0;background:var(--t-teal);color:#fff;padding:7px 10px;font-weight:700;font-size:13px;display:flex;justify-content:space-between;align-items:center;z-index:2;margin:-10px -10px 10px}
+.phone .bot{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--t-panel);border-top:1px solid var(--t-line);padding:6px 4px 10px}
+.phone .bot button{background:none;border:0;font:inherit;font-size:10.5px;color:var(--t-dim);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:2px 0}
+.phone .bot button span{font-size:17px}
+.phone .bot button.on{color:var(--t-teal);font-weight:700}
+.mcard{background:var(--t-panel);border:1px solid var(--t-line);border-left:5px solid var(--k);border-radius:9px;padding:9px 10px;margin-bottom:8px}
+.mcard .mh{display:flex;justify-content:space-between;gap:6px;align-items:baseline}
+.mcard .mh b{font-size:14px}
+.mcard .cnt{font-family:var(--mono);font-weight:700;color:var(--red)}
+.mcard .cnt.ok{color:var(--green)}
+.mcard p{margin:4px 0;font-size:12.5px;color:var(--t-dim)}
+.mcard .big{display:block;width:100%;min-height:44px;margin-top:6px;background:var(--t-teal);color:#fff;border:0;border-radius:9px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
+.mcard .big.sec{background:var(--t-panel2);color:var(--t-fg);border:1px solid var(--t-line)}
+.tri{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.tile{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0}
+.tile b{display:block;font-size:11.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.copy{border:2px solid var(--blue);border-radius:8px;background:var(--panel);margin-top:6px}
+.copy .ch{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 9px;border-bottom:1px solid var(--line);font-size:12px;color:var(--dim);flex-wrap:wrap}
+.copy pre{margin:0;padding:9px 11px;max-height:200px;overflow:auto;white-space:pre-wrap;word-break:break-word;font-family:var(--mono);font-size:12px;line-height:1.45}
+button.cp{background:var(--blue);color:#fff;border:0;border-radius:6px;padding:4px 11px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.ctrl{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ctrl .pill,.tile .pill{white-space:normal}
+@media (max-width:700px){.ctrl{grid-template-columns:1fr}.tl{grid-template-columns:1fr}.tl .k{white-space:normal}.row{grid-template-columns:1fr}}
+mark{padding:0 3px;border-radius:3px;color:inherit}
+.m1{background:var(--green-soft);outline:1px solid var(--green)}.m2{background:var(--blue-soft);outline:1px solid var(--blue)}.m3{background:var(--lila-soft);outline:1px solid var(--lila)}.m4{background:var(--yellow-soft);outline:1px solid var(--yellow)}
+.fb{border:1px dashed var(--line);border-radius:8px;padding:9px 11px;margin-top:10px;background:var(--panel2)}
+.fb ul{margin:4px 0 0;padding-left:18px}
+@media (prefers-reduced-motion:reduce){.kcard.flash{animation:none;box-shadow:0 0 0 3px #2F7BE0}}
+</style>
+
+<div class="wrap">
+<h1>Vorschau Übersicht v9</h1>
+<p class="sub">V1 · 10.10.2026 · Vorschauoptionen für drei Änderungen am Werkzeug abrechnung_scans (v8 → v9): A Hinweistexte abschaffen, B To-do-Übersicht, C Mobilmodus · Inhalte sind die echten 29 offenen Prüfpunkte aus der v8-Datei [T:Python, Prüflogik nachgebaut]</p>
+
+<div class="legend"><b>Legende</b>
+  <span class="pill p-green">grün · erledigt / empfohlen</span>
+  <span class="pill p-yellow">gelb · aktuelle Etappe / Option</span>
+  <span class="pill p-red">rot · offen / blockiert</span>
+  <span class="pill p-lila">lila · neutral</span>
+  <span class="pill p-blue">blau · springen / kopieren</span>
+  <span class="pill p-grey">grau · wartet auf Bestätigung</span>
+  <span style="color:var(--dim)">Kundenfarben wie im Werkzeug: Berlet teal, Berhanu orange, Lonski lila, VG Gießen grün, Param koralle</span>
+</div>
+
+<!-- 0 Prinzip -->
+<section style="--c:var(--lila)">
+<h2><span class="num">0</span>Designprinzip · Erklärung gehört an das Element, nicht in einen Text</h2>
+<div class="tri" style="margin-top:8px">
+  <div class="tile"><b>Ebene 1 · Beschriftung</b>Jeder Knopf nennt das Ergebnis: „✉ Als gesendet markieren → eingereicht“. Niemand muss lesen, was danach passiert.</div>
+  <div class="tile"><b>Ebene 2 · Ort</b>Die Aktion sitzt dort, wo ihr Ergebnis sichtbar wird: im Etappenbalken der Zeile, nicht in einer Legende oben.</div>
+  <div class="tile"><b>Ebene 3 · Hilfe auf Abruf</b>Alles, was danach noch erklärt werden muss, liegt hinter einem „?“ am Abschnittskopf. Standard: zu. Erklärender Fließtext auf der Seite: null.</div>
+</div>
+<p class="sub" style="margin:8px 0 0">Prüfregel für v9: Jeder Satz, der im Werkzeug ein Verhalten erklärt, wird in eine der drei Ebenen überführt oder gestrichen. Betroffen in v8: Legende „Etappen bis zur Auszahlung“ mit Nachführungssatz, Fußtext unter der Abrechnung (9 Sätze), Hinweis unter der Doc-Vorschau, Fußtext der Kundenakte, „Klick auf einen Punkt stellt um, manuell gewinnt“ in jeder Prüfpunktzeile.</p>
+</section>
+
+<!-- A -->
+<section style="--c:var(--red)">
+<h2><span class="num">A</span>Hinweistexte abschaffen · der Etappenbalken erklärt sich selbst</h2>
+
+<div class="opt rec"><div class="oh"><span class="id">A1</span><b>Aktion im Balken</b><span class="pill p-green">Empfehlung</span><span class="pill p-lila">ersetzt Legende + Nachführungssatz</span></div>
+<div class="ob"><div class="pv"><div class="lbl">Terminzeile · Lonski 09.06.2026 · Etappe 2 von 4</div>
+  <div class="row"><span class="d">09.06.2026</span><div class="prog">
+    <span class="seg done"><b>✓</b>offen</span><span class="arrow">→</span>
+    <span class="seg now"><b>2</b>Rechnung 016 erstellt <button class="act" type="button">✉ versenden → eingereicht</button></span><span class="arrow">→</span>
+    <span class="seg"><b>3</b>eingereicht</span><span class="arrow">→</span>
+    <span class="seg"><b>4</b>bezahlt</span></div></div>
+  <div class="row"><span class="d">11.05.2026</span><div class="prog">
+    <span class="seg done"><b>✓</b>offen</span><span class="arrow">→</span>
+    <span class="seg now late"><b>2</b>Rechnung erstellt · <span style="color:var(--red)">5 Prüfpunkte blockieren</span> <button class="act" type="button">■ Prüfpunkte öffnen</button></span><span class="arrow">→</span>
+    <span class="seg"><b>3</b>eingereicht</span><span class="arrow">→</span><span class="seg"><b>4</b>bezahlt</span></div></div>
+  <div class="row"><span class="d">24.09.2026</span><div class="prog">
+    <span class="seg done"><b>✓</b>offen</span><span class="arrow">→</span>
+    <span class="seg done"><b>✓</b>eingereicht 29.09.</span><span class="arrow">→</span>
+    <span class="seg now"><b>3</b>Zahlung erwartet um 09.10. (Median 10 T) <button class="act" type="button">✓ als bezahlt setzen</button></span></div></div>
+</div>
+<ul><li><b>Regel:</b> Der einzige Knopf im Balken ist immer der nächste Schritt. Steht ein Prüfpunkt im Weg, zeigt der Knopf den Prüfpunkt statt der Aktion.</li>
+<li><b>Rückwärts:</b> Klick auf eine erledigte Etappe öffnet ein Menü „zurück auf …“ (ersetzt „Rechnung löschen → vorherige Etappe“).</li>
+<li><b>Entfällt:</b> Legende, Nachführungssatz, Tooltip-Erklärung „nach dem Versand … markieren“.</li></ul></div></div>
+
+<div class="opt"><div class="oh"><span class="id">A2</span><b>Nächster-Schritt-Spalte</b><span class="pill p-yellow">Option</span></div>
+<div class="ob"><div class="pv"><div class="lbl">Terminzeile mit fester Spalte „Jetzt“</div>
+  <div class="row"><span class="d">09.06.2026</span><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="seg done"><b>✓</b></span><span class="seg now"><b>2</b></span><span class="seg"><b>3</b></span><span class="seg"><b>4</b></span><span style="font-weight:700">Jetzt:</span><button class="tb pri" type="button">✉ Rechnung 016 versenden</button><span class="hlp" title="Erklärung auf Abruf">?</span></div></div>
+</div>
+<ul><li>Balken nur als Zähler, Handlung in eigener Spalte „Jetzt“. Gut lesbar, braucht Platz: auf Mobil zwei Zeilen.</li><li>Kombinierbar mit A1 (A1 für Desktop, A2-Form im Mobilmodus).</li></ul></div></div>
+
+<div class="opt"><div class="oh"><span class="id">A3</span><b>Hilfe auf Abruf „?“</b><span class="pill p-green">Ergänzung zu A1 oder A2</span></div>
+<div class="ob"><div class="pv"><div class="lbl">Abschnittskopf</div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="font-size:15px">Σ ÜBERSICHT</b><button class="hlp" type="button" data-t="d1">?</button><span style="color:var(--t-dim);font-size:12px">Klick auf „?“ öffnet die Erklärung, sonst nichts auf der Seite</span></div>
+  <div class="drawer" id="d1" hidden>Etappen: offen → Rechnung erstellt → eingereicht → bezahlt (Berlet ohne Rechnung: offen → eingereicht → bezahlt). Der Balken führt die Etappe bei jeder Aktion nach; jede Änderung steht im Protokoll. Rot: eingereicht und seit mehr als 30 Tagen ohne Zahlung.</div>
+</div>
+<ul><li>Sammelt alle Resttexte je Abschnitt an einer Stelle. Inhalt bleibt erhalten (additiv), nur unsichtbar bis zum Klick.</li></ul></div></div>
+</section>
+
+<!-- B -->
+<section style="--c:var(--yellow)">
+<h2><span class="num">B</span>To-do-Übersicht · was bei welchem Kunden offen ist und warum</h2>
+<p class="sub" style="margin:6px 0 0">Alle Zahlen und Gründe aus der v8-Datei. „Warum keine Rechnung“ = offene Prüfpunkte, die laut Werkzeuglogik vor dem Versand stehen. Klick auf einen Grund springt im echten Werkzeug zur Terminzeile (goRow) und öffnet den Prüfpunkt.</p>
+
+<div class="opt rec"><div class="oh"><span class="id">B1</span><b>Kundenkarten mit Blocker-Grund</b><span class="pill p-green">Empfehlung · oben in der Übersicht</span></div>
+<div class="ob"><div class="pv"><div class="lbl">Zu tun · 29 Punkte in 10 Terminen · Klick auf eine Karte springt (hier: Karte blinkt)</div>
+<div class="kc" id="kc">
+  <div class="kcard" style="--k:var(--k-berhanu)" tabindex="0"><div class="kh"><b>Berhanu</b><span class="cnt">19</span></div>
+    <div class="why"><b>7 Entwürfe, nicht versendet, weil:</b><br>▸ EB-Felder leer in 5 Terminen (Fahrtzeit, Fahrtstrecke, Auslagen) · 10<br>▸ Sprache nicht belegt in 6 Terminen · 6<br>▸ Aktenzeichen: H4 U410861 gegen U 852626, H6 leer · 2<br>▸ H1 nur Sprache offen · 1</div>
+    <div class="act"><button class="tb go" type="button">→ H2 EB Fahrtzeit</button><button class="tb" type="button">alle 19</button></div></div>
+  <div class="kcard" style="--k:var(--k-giessen)" tabindex="0"><div class="kh"><b>VG Gießen</b><span class="cnt">6</span></div>
+    <div class="why"><b>G3 Entwurf blockiert, weil:</b><br>▸ Weggang, Rückkehr, km fehlen im Formular (bitte liefern) · 5<br><b>G1 Entscheidung:</b> Rückkehr 13:06 (724,00 €) oder 14:16 (834,00 €) · 1<br><b>G2:</b> nichts offen, Rechnung anlegen</div>
+    <div class="act"><button class="tb go" type="button">→ G1 entscheiden</button><button class="tb pri" type="button">🧾 G2 Rechnung</button></div></div>
+  <div class="kcard" style="--k:var(--k-berlet)" tabindex="0"><div class="kh"><b>Berlet</b><span class="cnt">3</span></div>
+    <div class="why"><b>Abrechnung per Mail wartet, weil:</b><br>▸ B11 30.09.: Handschrift Datum, Beginn, Ende ungeprüft · 3<br><b>Entscheidung offen:</b> Vorschuss 700,00 € vom 14.08. zuordnen</div>
+    <div class="act"><button class="tb go" type="button">→ B11 Ausschnitt prüfen</button><button class="tb" type="button">Vorschuss</button></div></div>
+  <div class="kcard" style="--k:var(--k-lonski)" tabindex="0"><div class="kh"><b>Lonski</b><span class="cnt">1</span></div>
+    <div class="why"><b>Re 016 Entwurf, nicht versendet, weil:</b><br>▸ km-Regel: 26 km (369,99 €) oder 25 km wie Re 002/003 (369,50 €) · 1</div>
+    <div class="act"><button class="tb go" type="button">→ L1 entscheiden</button></div></div>
+  <div class="kcard" style="--k:var(--k-param)" tabindex="0"><div class="kh"><b>Param</b><span class="cnt ok">✓ 0</span></div>
+    <div class="why">Nichts offen. Re 017 bezahlt (Angabe 30.09.), Zahlungsdatum fehlt.</div>
+    <div class="act"><button class="tb" type="button">Zahlungsdatum eintragen</button></div></div>
+</div></div>
+<ul><li><b>Sortierung:</b> meiste offene Punkte zuerst, erledigte Kunden grün am Ende. Zahl rot = blockiert, grün = frei.</li>
+<li><b>Gründe gruppiert</b> nach Art (EB-Feld, Handschrift, Pflichtfeld, Entscheidung, Rechnung) mit Anzahl; der erste Knopf springt zum ersten offenen Punkt dieser Art.</li>
+<li><b>Ersetzt:</b> Kachel „Zu tun · Prüfpunkte 29“ mit Textliste und „nächster offener Punkt“.</li></ul></div></div>
+
+<div class="opt rec"><div class="oh"><span class="id">B2</span><b>Aufgabenliste mit Handlung</b><span class="pill p-green">Empfehlung · unter B1, aufklappbar</span></div>
+<div class="ob"><div class="pv"><div class="lbl">Alle offenen Punkte · Filter nach Kunde und Art · Handlung beginnt mit Verb</div>
+<div class="filt"><span class="fc on">alle 29</span><span class="fc">Berhanu 19</span><span class="fc">VG Gießen 6</span><span class="fc">Berlet 3</span><span class="fc">Lonski 1</span><span class="fc" style="margin-left:8px">EB-Feld 10</span><span class="fc">Sprache 6</span><span class="fc">Pflichtfeld 3</span><span class="fc">Entscheidung 3</span><span class="fc">Handschrift 3</span></div>
+<div class="tl">
+  <span class="k" style="--k:var(--k-berhanu)">Berhanu · H2 20.02.</span><span class="t"><b class="act">EB nachtragen:</b> Fahrtzeit (von, bis) leer<i>Quelle: Sichtprüfung 28.09.2026 · Vorschlag: 5,3 km aus Entfernungstabelle, Fahrtzeit aus Termin ableiten</i></span><button class="tb go" type="button">springen</button>
+  <span class="k" style="--k:var(--k-berhanu)">Berhanu · H2 20.02.</span><span class="t"><b class="act">Sprache belegen:</b> aus Mail vom 24.06.2026 abgeleitet, für diesen Termin nicht belegt<i>Quelle: Ladung oder Bescheinigung anhängen</i></span><button class="tb go" type="button">springen</button>
+  <span class="k" style="--k:var(--k-berhanu)">Berhanu · H4 09.04.</span><span class="t"><b class="act">Aktenzeichen klären:</b> iaf-Bescheinigung U410861, übrige Termine U 852626<i>Entscheidung: welches das Amt erwartet</i></span><button class="tb go" type="button">springen</button>
+  <span class="k" style="--k:var(--k-giessen)">VG Gießen · G3 11.05.</span><span class="t"><b class="act">Liefern lassen:</b> Weggang, Rückkehr, km fehlen im Formular<i>Bis dahin rechnet der Entwurf mit der Terminszeit</i></span><button class="tb go" type="button">springen</button>
+  <span class="k" style="--k:var(--k-giessen)">VG Gießen · G1 01.04.</span><span class="t"><b class="act">Entscheiden:</b> Rückkehr 13:06 (724,00 €) oder 14:16 (834,00 €)<i>Zwei Angaben im Formular</i></span><button class="tb go" type="button">springen</button>
+  <span class="k" style="--k:var(--k-berlet)">Berlet · B11 30.09.</span><span class="t"><b class="act">Prüfen:</b> Handschrift Datum, Beginn, Ende<i>Ausschnitt ansehen, „stimmt“ klicken</i></span><button class="tb go" type="button">springen</button>
+  <span class="k" style="--k:var(--k-lonski)">Lonski · L1 09.06.</span><span class="t"><b class="act">Entscheiden:</b> 25 km (369,50 €) wie Re 002/003 oder 26 km (369,99 €)<i>danach Re 016 versenden</i></span><button class="tb go" type="button">springen</button>
+</div>
+<div style="font-size:12px;color:var(--t-dim);margin-top:6px">… 22 weitere, gleiche Form</div>
+</div>
+<ul><li><b>Jede Zeile:</b> Kunde + Termin, Handlung mit Verb, Grund, Quelle, Knopf „springen“ (öffnet Abschnitt, klappt Termin auf, markiert das Feld blau).</li>
+<li><b>Erledigt</b> wird ein Punkt dort, wo er entsteht (Feld ausfüllen, „stimmt“, Entscheidung wählen); die Liste aktualisiert sich beim Rendern. Kein zweites Abhaken.</li></ul></div></div>
+
+<div class="opt"><div class="oh"><span class="id">B3</span><b>Blocker-Matrix Kunde × Art</b><span class="pill p-yellow">Option · kompakt, weniger Text</span></div>
+<div class="ob"><div class="pv"><div class="lbl">Zahl = offene Punkte · Klick auf eine Zahl springt zum ersten Punkt dieser Zelle</div>
+<div style="overflow-x:auto"><table>
+<tr><th>Kunde</th><th>EB-Feld</th><th>Sprache</th><th>Pflichtfeld</th><th>Handschrift</th><th>Entscheidung</th><th>Summe</th><th>Warum keine Rechnung</th></tr>
+<tr><td><b>Berhanu</b></td><td class="n c">10</td><td class="n c">6</td><td class="n z">·</td><td class="n z">·</td><td class="n c">2</td><td class="n"><b>19</b></td><td>EB unvollständig, Sprache unbelegt</td></tr>
+<tr><td><b>VG Gießen</b></td><td class="n z">·</td><td class="n z">·</td><td class="n c">3</td><td class="n z">·</td><td class="n c">3</td><td class="n"><b>6</b></td><td>G3 Formular unvollständig, G1 Rückkehr doppelt</td></tr>
+<tr><td><b>Berlet</b></td><td class="n z">·</td><td class="n z">·</td><td class="n z">·</td><td class="n c">3</td><td class="n z">·</td><td class="n"><b>3</b></td><td>B11 Handschrift ungeprüft</td></tr>
+<tr><td><b>Lonski</b></td><td class="n z">·</td><td class="n z">·</td><td class="n z">·</td><td class="n z">·</td><td class="n c">1</td><td class="n"><b>1</b></td><td>km-Regel offen</td></tr>
+<tr><td><b>Param</b></td><td class="n z">·</td><td class="n z">·</td><td class="n z">·</td><td class="n z">·</td><td class="n z">·</td><td class="n" style="color:var(--green)"><b>✓</b></td><td>nichts</td></tr>
+</table></div></div>
+<ul><li>Stärke: ein Blick, Muster sichtbar (Berhanu = EB-Problem). Schwäche: Grund nur als Kategorie, Handlung erst nach dem Sprung.</li><li>Kombinierbar als dritte Ansicht hinter einem Reiter „Matrix“.</li></ul></div></div>
+</section>
+
+<!-- C -->
+<section style="--c:var(--blue)">
+<h2><span class="num">C</span>Mobilmodus · anklickbar, nicht nur nach Bildschirmbreite</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:10px;align-items:start">
+<div class="opt rec" style="margin:0"><div class="oh"><span class="id">C1</span><b>Knopf „📱 Mobil“ · To-do zuerst</b><span class="pill p-green">Empfehlung</span></div>
+<div class="ob">
+<div class="phone"><div class="scr" id="scr">
+  <div class="top"><span>Abrechnung</span><button class="tb" type="button" style="padding:2px 8px;font-size:11px;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.5);color:#fff">🖥 Desktop</button></div>
+  <div class="mcard" style="--k:var(--k-berhanu)"><div class="mh"><b>Berhanu</b><span class="cnt">19 offen</span></div><p>7 Entwürfe warten: EB-Felder leer (10), Sprache nicht belegt (6), Aktenzeichen (2)</p><button class="big" type="button">→ H2 Fahrtzeit nachtragen</button></div>
+  <div class="mcard" style="--k:var(--k-giessen)"><div class="mh"><b>VG Gießen</b><span class="cnt">6 offen</span></div><p>G3: Weggang, Rückkehr, km fehlen · G1: Rückkehr wählen · G2: frei</p><button class="big" type="button">→ G1 entscheiden</button><button class="big sec" type="button">🧾 G2 Rechnung anlegen</button></div>
+  <div class="mcard" style="--k:var(--k-berlet)"><div class="mh"><b>Berlet</b><span class="cnt">3 offen</span></div><p>B11: Handschrift Datum, Beginn, Ende prüfen · Vorschuss 700,00 € zuordnen</p><button class="big" type="button">→ B11 Ausschnitt prüfen</button></div>
+  <div class="mcard" style="--k:var(--k-lonski)"><div class="mh"><b>Lonski</b><span class="cnt">1 offen</span></div><p>Re 016: 25 oder 26 km entscheiden, dann versenden</p><button class="big" type="button">→ L1 entscheiden</button></div>
+  <div class="mcard" style="--k:var(--k-param)"><div class="mh"><b>Param</b><span class="cnt ok">✓ frei</span></div><p>Re 017 bezahlt, Zahlungsdatum fehlt</p></div>
+</div>
+<div class="bot"><button class="on" type="button"><span>■</span>To-do</button><button type="button"><span>👤</span>Kunden</button><button type="button"><span>🧾</span>Rechnungen</button><button type="button"><span>…</span>Mehr</button></div></div>
+<ul><li><b>Schalter</b> in der Werkzeugleiste und oben im Kopf, Zustand im Autosave (S.mobile), gilt unabhängig von der Bildschirmbreite (auch am Desktop als „Fokusmodus“).</li>
+<li><b>Mobil heißt:</b> eine Spalte, Tabellen werden Karten, Knöpfe 44 px hoch, Leiste unten mit vier Zielen, Startansicht ist die To-do-Liste.</li>
+<li><b>Eingabe am Termin:</b> Felder groß, Handschrift-Ausschnitt direkt über dem Feld, Knopf „stimmt“ daneben.</li></ul></div></div>
+
+<div style="display:grid;gap:12px">
+<div class="opt" style="margin:0"><div class="oh"><span class="id">C2</span><b>Dreistufig · Auto / Mobil / Desktop</b><span class="pill p-yellow">Ergänzung zu C1</span></div>
+<div class="ob"><div class="pv"><div class="lbl">Werkzeugleiste</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="tb" type="button">Design: Lagoon</button><button class="tb" type="button">Ansicht: Auto ▾</button><span class="seg now" style="font-size:11.5px">Auto = unter 700 px mobil</span></div></div>
+<ul><li>Auto folgt der Breite, Mobil und Desktop erzwingen. Deckt den Fall „am iPhone trotzdem Tabelle sehen“ ab.</li></ul></div></div>
+<div class="opt" style="margin:0"><div class="oh"><span class="id">C3</span><b>Nur Breite (Status quo verbessert)</b><span class="pill p-grey">nicht empfohlen</span></div>
+<div class="ob"><ul style="margin-top:0"><li>v8 hat bereits 8 Media-Queries, aber Tabellen bleiben Tabellen und Knöpfe klein. Ohne Schalter kein Fokusmodus am Desktop.</li><li>Aufwand niedriger, löst den Wunsch „anklicken“ nicht.</li></ul></div></div>
+</div>
+</div>
+</section>
+
+<!-- D Umsetzung -->
+<section style="--c:var(--green)">
+<h2><span class="num">D</span>Umsetzung · Empfehlung und Einordnung in den Strukturplan</h2>
+<div class="tri" style="margin-top:8px">
+  <div class="tile"><b>Empfehlung</b><span class="pill p-green">A1 + A3 · B1 + B2 · C1 + C2</span><br>aus Sachlage: jede Erklärung wandert an ihr Element, To-do oben mit Grund, Liste darunter mit Verb, Mobil als Schalter mit Auto-Stufe. aus Verhalten: mehr Sichtbarkeit, additiv (Texte bleiben hinter „?“), Neubau statt Status quo.</div>
+  <div class="tile"><b>Reihenfolge</b>F1 (empfohlen): Feature zuerst als v9 direkt auf der v8-Datei, ein Chat Sonnet 5.5, danach Strukturplan P1 zerlegt v9. F2: erst P1, dann Feature in den Quellen. Beides gleich teuer, F1 liefert früher.</div>
+  <div class="tile"><b>Betroffener Code</b>overview(): tdKpi und stLegend ersetzen durch tdCards + tdListe · stBar(): Aktion im Balken · neue Funktion tdReason() gruppiert tdItems nach grp · applyMobile(): Klasse ab-mobile auf #abrechnung, CSS-Block · Fußtexte und Legende in „?“-Drawer je Abschnitt.</div>
+  <div class="tile"><b>Prüfkriterium</b>Seite ohne erklärenden Fließtext (grep auf die 5 Textstellen leer) · 29 Punkte in B1 = Summe der Zeilen in B2 = Kachel bisher · jeder „springen“-Knopf landet auf einem blau markierten Feld · Mobilmodus: kein horizontales Scrollen bei 390 px, alle Knöpfe ≥ 44 px.</div>
+</div>
+
+<p class="sub" style="margin:12px 0 2px"><b>Einfügeort:</b> Claude Code, neuer Chat, Sonnet 5.5 ohne Extended Thinking, v8-Datei hochladen · nach Wahl der Optionen Kürzel anpassen</p>
+<div class="copy"><div class="ch"><span>Folgeprompt v9 · Bau nach Auswahl</span><button class="cp" type="button" data-t="pv9">Kopieren</button></div>
+<pre id="pv9">Baue abrechnung_scans_v9 aus abrechnung_scans_v8_2026-09-30_2239.html nach der Vorschau „Übersicht v9“, gewählte Optionen: A1 + A3, B1 + B2, C1 + C2. Keine Änderung an Daten, Rechenlogik oder Rechnungsvorlage.
+
+A: stLegend() und den Nachführungssatz entfernen; stBar() bekommt im aktuellen Segment genau einen Knopf mit dem nächsten Schritt (Rechnung anlegen, versenden → eingereicht, als bezahlt setzen); steht ein offener Prüfpunkt davor, zeigt der Knopf „■ n Prüfpunkte öffnen“ und klappt den Termin auf. Klick auf eine erledigte Etappe öffnet ein kleines Menü „zurück auf …“. Alle erklärenden Texte (Fußtext Abrechnung, Fußtext Kundenakte, Hinweis Doc-Vorschau, „Klick auf einen Punkt stellt um“) wandern unverändert in einen „?“-Drawer am jeweiligen Abschnittskopf, Standard zu.
+
+B: In overview() die Kachel „Zu tun“ durch tdCards() ersetzen: je Auftraggeber eine Karte in Kundenfarbe, Zahl der offenen Punkte (rot, grün bei 0), Gründe gruppiert nach grp (eb, hw, feld, hinweis, rechnung) mit Anzahl und einem Satz „… nicht versendet, weil:“, erster Knopf springt per goRow auf den ersten offenen Punkt der häufigsten Gruppe und markiert das Feld blau. Darunter tdListe(): alle offenen Punkte als Zeilen Kunde + Termin, Handlung mit Verb (nachtragen, belegen, klären, entscheiden, prüfen, liefern lassen), Grund, Quelle (why), Knopf „springen“; Filterchips je Auftraggeber und je Gruppe; aufklappbar, Zustand in S.ovo.todo.
+
+C: Schalter „Ansicht: Auto / Mobil / Desktop“ in der Werkzeugleiste und im Kopf, Zustand in S.view; Auto = mobil unter 700 px. Klasse ab-mobile auf #abrechnung und #kundenakte: eine Spalte, Tabellen der Termine als Karten (Datum, Ort, Etappenbalken mit Knopf, Betrag), Knöpfe mindestens 44 px, feste Leiste unten mit To-do, Kunden, Rechnungen, Mehr; Startansicht im Mobilmodus ist tdCards + tdListe.
+
+Prüfung mit Playwright: 0 Konsolenfehler bei 1366 px und 390 px, kein horizontales Scrollen bei 390 px im Mobilmodus, Summe der Karten = Summe der Listenzeilen = 29 beim Stand der v8, grep auf die fünf alten Hinweistexte im gerenderten DOM leer, Screenshots beider Breiten. Ergebnis: Datei abrechnung_scans_v9_<Zeitstempel>.html und Prüfprotokoll als Tabelle.</pre></div>
+</section>
+
+<!-- E Kontrollblock -->
+<section style="--c:var(--lila)">
+<h2><span class="num">E</span>Kontrollblock</h2>
+<div class="ctrl" style="margin-top:8px">
+  <div class="tile"><b>Prompt mit Markierung</b>„<mark class="m1">Ich möchte solche Hinweise nicht im Dokument sehen … so gut designt, dass so etwas selbstverständlich intuitiv zu verstehen ist. Wie können wir das Problem lösen?</mark> <sup>1</sup> <mark class="m3">Mach Vorschläge im Chat. Unter Verwendung von Widgets … Farben und alle ADHS-Maßnahmen.</mark> <sup>2</sup> <mark class="m2">Zudem möchte ich in der Übersicht eine To-Do-Übersicht … was bei welchem Kunden noch offen ist und warum die Rechnung noch nicht erstellt ist und was ich noch tun muss … anklicken … auf die Stelle springen.</mark> <sup>3</sup> <mark class="m4">Und ich möchte einen mobilen Modus im Tool anklicken.</mark> <sup>4</sup>“</div>
+  <div class="tile"><b>Anforderungen</b><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+    <span class="pill p-green">1 Hinweise abschaffen · Abschnitt 0 + A</span>
+    <span class="pill p-green">2 Vorschläge als Widgets, Farben, ADHS-Format · diese Seite</span>
+    <span class="pill p-green">3 To-do mit Kunde, Grund, Handlung, Sprung · Abschnitt B</span>
+    <span class="pill p-green">4 Mobilmodus anklickbar · Abschnitt C</span>
+    <span class="pill p-grey">Auswahl A/B/C · wartet</span></div></div>
+</div>
+<div class="fb"><b>Hinweise</b><ul>
+  <li><b>Bezug B:</b> Gründe stammen aus den Prüfpunkten der v8 ohne Browserstand (ABR_STATE leer). Manuell umgestellte Punkte im lokalen Speicher sind nicht enthalten.</li>
+  <li><b>Bezug B1 Berhanu:</b> „7 Entwürfe“ entstehen beim Laden automatisch (invAll); der Blocker ist nicht die Rechnung, sondern der Versand.</li>
+  <li><b>Bezug C:</b> Knöpfe in dieser Vorschau sind Attrappen; Karten in B1 blinken beim Klick, um den Sprung anzudeuten.</li>
+  <li><b>Bezug Chat:</b> Widgets lassen sich im Claude-Code-Chat nicht rendern; diese Seite ist die Widget-Stufe der Fallback-Kette.</li></ul></div>
+<div class="fb"><b>Feedback erbeten</b><ul><li>Kürzel wählen, z. B. „A1 + A3, B1 + B2, C1 + C2“ oder Abweichung</li><li>Reihenfolge F1 (Feature zuerst) oder F2 (erst Zerlegung)</li><li>Begriffe in der To-do-Liste: „Blocker“, „Grund“ oder „weil“?</li></ul></div>
+</section>
+</div>
+
+<script>
+document.querySelectorAll('.hlp[data-t]').forEach(function(b){b.addEventListener('click',function(){var d=document.getElementById(b.getAttribute('data-t'));d.hidden=!d.hidden;});});
+document.querySelectorAll('#kc .kcard').forEach(function(c){c.addEventListener('click',function(){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash');});});
+document.querySelectorAll('.fc').forEach(function(f){f.addEventListener('click',function(){f.parentNode.querySelectorAll('.fc').forEach(function(x){x.classList.remove('on');});f.classList.add('on');});});
+document.querySelectorAll('button.cp').forEach(function(b){b.addEventListener('click',function(){var el=document.getElementById(b.getAttribute('data-t')),txt=el.textContent;
+  function done(ok){var o=b.textContent;b.textContent=ok?'Kopiert':'Text markiert';setTimeout(function(){b.textContent=o;},1500);}
+  function fb(){try{var r=document.createRange();r.selectNodeContents(el);var s=window.getSelection();s.removeAllRanges();s.addRange(r);}catch(e){}done(false);}
+  try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(function(){done(true);},fb);else fb();}catch(e){fb();}});});
+</script>
