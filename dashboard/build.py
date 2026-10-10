@@ -9,8 +9,8 @@ import json, re, sys, os, datetime, zoneinfo
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, 'quelle', 'artefakt_desktop_v2_2026-09-26_2218.html')
 TPL = os.path.join(HERE, 'src', 'plan_dashboard.template.html')
-VERSION = 'v1.0.0'
-BUILD = 1
+VERSION = 'v1.1.0'
+BUILD = 2
 AUTH = {
     'outlook': 'https://mcp.zapier.com/api/v1/connect-auth/MicrosoftOutlookCLIAPI?accountId=28195533',
     'todo': 'https://mcp.zapier.com/api/v1/connect-auth/MSTodoCLIAPI?accountId=28195533',
@@ -74,11 +74,13 @@ def main():
                  'quelle': os.path.basename(SRC), 'quelleBuild': src['meta'].get('buildVersion'),
                  'quelleStand': src['meta'].get('aktualisiert')},
         'plans': plans, 'planChk': plan_chk, 'ideas': ideas, 'blocks': [], 'todos': [], 'notes': [],
-        'settings': {'dayStart': '08:00', 'dayEnd': '20:00', 'calendarId': '', 'todoListId': '',
+        'settings': {'dayStart': '08:00', 'dayEnd': '20:00', 'calendarTarget': 'google', 'googleCalendarId': '', 'calendarId': '', 'todoListId': '',
                      'onenoteNotebookId': '', 'onenoteNotebookName': '', 'onenoteSectionId': '',
                      'onenoteSectionName': 'USINE Dashboard', 'onenoteContentType': 'text', 'onenoteLastPull': ''},
         'auth': AUTH,
         'versions': [{'v': VERSION, 'd': stamp,
+                      't': 'Kalenderziel Google Kalender (claude.ai-Konnektor, taata.diawara@gmail.com) als Standard: Zeitblöcke anlegen/aktualisieren/löschen, Wochentermine lesen, Google-Web-Link, Kalenderauswahl in D07. Outlook über Zapier bleibt wählbar.'},
+                     {'v': 'v1.0.0', 'd': '2026-10-09_2358',
                       't': 'Erstbau: Überblick/Wochenplaner, Zeitblöcke→Outlook, To-dos→To Do, Ideen, Pläne (Lesefassung, %d Positionen), OneNote-Abschnitt (additiver Sync), Einrichtung, Export/Import. %d Ideen aus Rest-Dump vorbelegt.' % (len(plans), len(ideas))}],
     }
     tpl = open(TPL, encoding='utf-8').read()

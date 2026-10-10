@@ -1,8 +1,9 @@
 # USINE PLAN-DASHBOARD
 
-Dashboard für die Pläne aus `ARTEFAKT - DESKTOP v2` (LENKI, MONEY, Rest) mit Zeitblöcken → Outlook-Kalender,
-To-dos → Microsoft To Do (Outlook-Aufgaben), Ideensammlung und OneNote-Abschnitt (additiver Sync). Alle
-Microsoft-Verbindungen laufen über den Zapier-Konnektor (Konto taata@hotmail.de in Zapier verbinden).
+Dashboard für die Pläne aus `ARTEFAKT - DESKTOP v2` (LENKI, MONEY, Rest) mit Zeitblöcken → **Google Kalender**
+(claude.ai-Konnektor, taata.diawara@gmail.com; seit v1.1.0 Standard, Outlook über Zapier wählbar),
+To-dos → Microsoft To Do (Outlook-Aufgaben), Ideensammlung und OneNote-Abschnitt (additiver Sync).
+To Do und OneNote laufen über den Zapier-Konnektor (Konto taata@hotmail.de in Zapier verbinden).
 
 ## Dateien
 
